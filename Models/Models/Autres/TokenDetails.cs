@@ -9,5 +9,7 @@ namespace Models
         public string Token { get; set; }
         public DateTime IssueAt { get; set; }
         public DateTime DateOfExpiry { get; set; }
+        public string Prenom { get; set; }
+        public string Nom { get; set; }
     }
 }

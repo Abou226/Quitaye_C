@@ -43,7 +43,7 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.ItemA.GetAll();
+                    var result = await repositoryWrapper.Item.GetBy(x => x.Id == identity.First().Id);
 
                     return Ok(result);
                 }
@@ -122,7 +122,8 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     value.EntrepriseId = value.EntrepriseId;
-                    value.Id = identity.First().Id;
+                    value.UserId = identity.First().Id;
+                    value.Id = Guid.NewGuid();
                     await repositoryWrapper.ItemA.AddAsync(value);
                     await repositoryWrapper.SaveAsync();
                     return Ok(value);

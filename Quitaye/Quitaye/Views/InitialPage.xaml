@@ -1,6 +1,80 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Quitaye.Views.InitialPage">
-    
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+             xmlns:local="clr-namespace:Quitaye.ViewModels"
+             x:Class="Quitaye.Views.InitialPage" 
+             xmlns:pancake="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+             NavigationPage.HasNavigationBar="False">
+
+    <ContentPage.BindingContext>
+        <local:InitialViewModel/>
+    </ContentPage.BindingContext>
+
+    <ContentPage.Content>
+        <ScrollView Orientation="Vertical">
+            <Grid>
+                <Image Source="PhoneBackground.png" HeightRequest="600" Aspect="Fill"/>
+                <Grid RowDefinitions="Auto, *" BackgroundColor="Transparent">
+                    <Label Text="{Binding Title}" TextColor="{DynamicResource Secondary}" 
+                   FontSize="30" FontAttributes="Bold" 
+                   HorizontalTextAlignment="Center" Margin="0,50,0,0">
+                        
+                    </Label>
+                    <pancake:PancakeView Grid.Row="1" CornerRadius="20" 
+                                         BackgroundColor="{DynamicResource VeryLight}" Margin="25,35,25,65">
+                        <pancake:PancakeView.Border>
+                            <pancake:Border Color="Transparent" Thickness="2"/>
+                        </pancake:PancakeView.Border>
+                        <pancake:PancakeView.Shadow>
+                            <pancake:DropShadow Color="{DynamicResource FourthColor}" 
+                                                Offset="10,10"/>
+                        </pancake:PancakeView.Shadow>
+                        <StackLayout HorizontalOptions="Center" VerticalOptions="Center" Margin="30">
+                            <!--<Label  HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    TextColor="{DynamicResource FourthColor}" 
+                                     FontAttributes="Bold" 
+                                     >
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding Prenom}"/>
+                                        <Span Text=" "/>
+                                        <Span Text="{Binding Nom_Famille}"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>-->
+                            
+                            <Label  HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    TextColor="{DynamicResource Secondary}" 
+                                    FontSize="40" FontAttributes="Bold" 
+                                    Text="Créer votre première entreprise" >
+                            </Label>
+
+                            <pancake:PancakeView CornerRadius="30" Margin="20,60,20,30"
+                                                         Padding="5,5,10,5" Grid.Row="1" BackgroundColor="{DynamicResource ThirdColor}" >
+                                <pancake:PancakeView.Border>
+                                    <pancake:Border Color="{DynamicResource Secondary}" Thickness="3"/>
+                                </pancake:PancakeView.Border>
+                                <StackLayout  
+                                                 Margin="8,0,8,0" Grid.Row="0" 
+                                                 Orientation="Horizontal">
+                                    <Image  Source="facebook.png" BackgroundColor="Transparent" WidthRequest="30"/>
+                                    <Label Text="Créer une entreprise" TextColor="{DynamicResource Secondary}" 
+                                               HorizontalOptions="Center" VerticalOptions="Center" FontSize="14" />
+                                    <StackLayout.GestureRecognizers>
+                                        <TapGestureRecognizer 
+                                                        NumberOfTapsRequired="1"
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:LoginViewModel}}, Path=FacebookCommand}"		
+                                                        CommandParameter="{Binding .}">
+                                        </TapGestureRecognizer>
+                                    </StackLayout.GestureRecognizers>
+                                </StackLayout>
+                            </pancake:PancakeView>
+                        </StackLayout>
+                    </pancake:PancakeView>
+                </Grid>
+            </Grid>
+        </ScrollView>
+    </ContentPage.Content>
 </ContentPage>

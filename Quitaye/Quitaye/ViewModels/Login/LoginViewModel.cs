@@ -10,9 +10,13 @@ using Services.Auth;
 using Quitaye.Views.Login;
 using Services;
 using Models;
+using Xamarin.Essentials;
+using System.Linq;
 
 [assembly: Dependency(typeof(BaseViewModel))]
 [assembly: Dependency(typeof(DataService<Entreprise>))]
+[assembly: Dependency(typeof(DataService<RefreshToken>))]
+[assembly: Dependency(typeof(InitialService))]
 
 namespace Quitaye.ViewModels
 {
@@ -24,12 +28,16 @@ namespace Quitaye.ViewModels
         private ICommand _eyeCommand;
         private ICommand _forgotPasswordCommand;
 
+
+        public IDataService<Entreprise> EntrepriseData { get; }
+        public IDataService<RefreshToken> Token { get; }
         public INavigation Navigation { get; }
+
+        public IInitialService Initial { get; }
 
         private string _username;
         private string _password;
 
-        private IUserDialogs _userDialogService;
 
         private IAuthService _authService;
 
@@ -62,15 +70,17 @@ namespace Quitaye.ViewModels
         }
         public Command ForgotPasswordTapped { get; }
 
-        public LoginViewModel(IUserDialogs userDialogsService)
+        public LoginViewModel(INavigation navigation) : this()
         {
-            _userDialogService = userDialogsService;
-
+            Navigation = navigation;
         }
 
         public LoginViewModel()
         {
             _authService = DependencyService.Get<IAuthService>();
+            Token = DependencyService.Get<IDataService<RefreshToken>>();
+            Initial = DependencyService.Get<IInitialService>();
+            EntrepriseData = DependencyService.Get<IDataService<Entreprise>>();
             BaseVM = DependencyService.Get<IBaseViewModel>();
             MessagingCenter.Subscribe<string, string>(this, _authService.getAuthKey(), (sender, args) =>
             {
@@ -113,7 +123,9 @@ namespace Quitaye.ViewModels
 
         private void LoginGoogleCommandExecute(object obj)
         {
+            UserDialogs.Instance.ShowLoading("Chargement....");
             _authService.SignInWithGoogle();
+            UserDialogs.Instance.HideLoading();
         }
 
         public ICommand ForgotPasswordCommand
@@ -133,14 +145,26 @@ namespace Quitaye.ViewModels
 
         private async void LoginCommandExecute(object obj)
         {
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
+                return;
+
             if (await _authService.SignIn(Username, Password))
             {
-                Application.Current.MainPage = new NavigationPage(new HomePage());
+                var last = await SecureStorage.GetAsync("LastEntreprise");
+                if (!string.IsNullOrWhiteSpace(last))
+                {
+                    Application.Current.MainPage = new NavigationPage(new HomePage());
+                }
+                else
+                {
+                    Application.Current.MainPage = new NavigationPage(new InitialPage());
+                }
             }
             else
             {
-                _userDialogService.Toast("Nom d'utilisateur ou mot de passe incorrect !");
+                DependencyService.Get<IMessage>().ShortAlert("Nom d'utilisateur où mot de passe incorrecte !");
             }
+            UserDialogs.Instance.HideLoading();
         }
 
         public string Username
@@ -169,13 +193,21 @@ namespace Quitaye.ViewModels
             }
         }
 
-
+        private string _confirme_password;
 
         private async Task LoginGoogle(string token)
         {
             if (await _authService.SignInWithGoogle(token))
             {
-                Application.Current.MainPage = new NavigationPage(new HomePage());
+                var last = await SecureStorage.GetAsync("LastEntreprise");
+                if (!string.IsNullOrWhiteSpace(last))
+                {
+                    Application.Current.MainPage = new NavigationPage( new HomePage());
+                }
+                else
+                {
+                    Application.Current.MainPage = new NavigationPage(new InitialPage());
+                }
             }
         }
     }

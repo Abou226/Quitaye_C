@@ -56,6 +56,16 @@ namespace Services
             }
         }
 
+        public async Task<Secrets> Get(string token, string url)
+        {
+            var authHeader = new AuthenticationHeaderValue("bearer", token);
+            Client.DefaultRequestHeaders.Authorization = authHeader;
+            Client.DefaultRequestHeaders.Accept.Clear();
+            Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var response = await Client.GetStringAsync(url);
+            return ConvertSingle<Secrets>.FromJson(response);
+        }
+
         private async Task<LogInModel> RefreshToken(LogInModel logIn)
         {
             if (!string.IsNullOrWhiteSpace(logIn.Token))

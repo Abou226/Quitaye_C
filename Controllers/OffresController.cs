@@ -78,7 +78,7 @@ namespace Controllers
             }
         }
 
-        [HttpGet("id:Guid")]
+        [HttpGet("{id:Guid}")]
         public async Task<ActionResult<IEnumerable<Offre>>> GetBy([FromRoute] Guid id)
         {
             try
@@ -118,6 +118,8 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
+                    value.UserId = identity.First().Id;
+                    value.Id = Guid.NewGuid();
                     value.EntrepriseId = value.EntrepriseId;
                     await repositoryWrapper.ItemA.AddAsync(value);
                     await repositoryWrapper.SaveAsync();
@@ -141,7 +143,8 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId.ToString() == search) && (x.Gamme.Marque.Name.Contains(search)), x => x.Gamme, x => x.Gamme.Marque);
+                    var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId.ToString() == search) 
+                    && (x.Gamme.Marque.Name.Contains(search)), x => x.Gamme, x => x.Gamme.Marque);
 
                     return Ok(result);
                 }

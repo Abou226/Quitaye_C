@@ -79,7 +79,7 @@ namespace Controllers
             }
         }
 
-        [HttpGet("id:Guid")]
+        [HttpGet("{id:Guid}")]
         public async Task<ActionResult<IEnumerable<Produit_Fini>>> GetBy([FromRoute] Guid id)
         {
             try
@@ -121,6 +121,8 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
+                    value.Id = Guid.NewGuid();
+                    value.UserId = identity.First().Id;
                     value.EntrepriseId = value.EntrepriseId;
                     await repositoryWrapper.ItemA.AddAsync(value);
                     await repositoryWrapper.SaveAsync();

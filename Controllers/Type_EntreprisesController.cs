@@ -17,44 +17,21 @@ namespace Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class Achat_MatieresController : GenericController<Achat_Matiere, User, Matière_Premiere>
+    public class Type_EntreprisesController : GenericController<Type_Entreprise, User>
     {
-        private readonly IGenericRepositoryWrapper<Achat_Matiere, User, Matière_Premiere> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<Type_Entreprise, User> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
-
-        public Achat_MatieresController(IGenericRepositoryWrapper<Achat_Matiere, User, Matière_Premiere> wrapper,
-            IConfigSettings settings, IMapper mapper) : base(wrapper)
+        public Type_EntreprisesController(IGenericRepositoryWrapper<Type_Entreprise, User> wrapper,
+            IConfigSettings settings,
+            IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
             _settings = settings;
             _mapper = mapper;
         }
 
-        public override async Task<ActionResult<IEnumerable<Achat_Matiere>>> GetAll()
-        {
-            try
-            {
-                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemA.GetBy(x => x.Id.ToString().
-                Equals(claim));
-                if (identity.Count() != 0)
-                {
-                    var result = await repositoryWrapper.Item.GetAll();
-
-                    return Ok(result);
-                }
-                else return NotFound("User not indentified");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-        }
-
-        [HttpGet("{search}/{entrepriseId:Guid}")]
-        [Authorize]
-        public async Task<ActionResult<IEnumerable<Achat_Matiere>>> GetBy(string search, Guid entrepriseId)
+        public override async Task<ActionResult<IEnumerable<Type_Entreprise>>> GetAll()
         {
             try
             {
@@ -63,9 +40,7 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetByInclude(x =>
-                    (x.EntrepriseId == entrepriseId)
-                    && (x.Matière.Name.Contains(search) || x.Unité.Equals(search)) , x => x.Matière);
+                    var result = await repositoryWrapper.ItemA.GetAll();
 
                     return Ok(result);
                 }
@@ -77,7 +52,50 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Achat_Matiere>> AddAsync([FromBody] Achat_Matiere value)
+        public override async Task<ActionResult<IEnumerable<Type_Entreprise>>> GetBy(string search)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    var result = await repositoryWrapper.Item.GetBy(x => (x.Description.Contains(search)
+                    || x.Type.Contains(search)));
+
+                    return Ok(result);
+                }
+                else return NotFound("User not indentified");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet("{id:Guid}")]
+        public async Task<ActionResult<IEnumerable<Type_Entreprise>>> GetBy([FromRoute] Guid id)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    var result = await repositoryWrapper.Item.GetBy(x => (x.Id == id));
+                    return Ok(result);
+                }
+                else return NotFound("User not indentified");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        public override async Task<ActionResult<Type_Entreprise>> AddAsync([FromBody] Type_Entreprise value)
         {
             try
             {
@@ -90,14 +108,10 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    if (value.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
-                        value.Date = DateTime.Now;
-                    //value.ServerTime = DateTime.Now;
-                    value.UserId = identity.First().Id;
                     value.Id = Guid.NewGuid();
+                    value.UserId = identity.First().Id;
                     await repositoryWrapper.ItemA.AddAsync(value);
                     await repositoryWrapper.SaveAsync();
-
                     return Ok(value);
                 }
                 else return NotFound("User not identified");
@@ -108,48 +122,20 @@ namespace Controllers
             }
         }
 
-        [HttpGet("{search}/{entreprise:Guid}/{start:DateTime}/{end:DateTime}")]
+        [HttpGet("{entrepriseId:Guid}/{search}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<Achat_Matiere>>> GetBy([FromRoute] string search, Guid entrepriseId, DateTime start, DateTime end)
+        public async Task<ActionResult<IEnumerable<Type_Entreprise>>> GetBy([FromRoute] Guid entrepriseId, string search)
         {
             try
             {
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemA.GetBy(x => x.Id.ToString().
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
                 Equals(claim));
 
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetByInclude(x =>
-                    (x.EntrepriseId == entrepriseId)
-                    && x.Date.Date >= start && x.Date <= end 
-                    && (x.Matière.Name.Contains(search) || x.Matière.Unité.Equals(search)), x => x.Matière);
-
-                    return Ok(result);
-                }
-                else return NotFound("User not indentified");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-        }
-
-        [HttpGet("{start:DateTime}/{end:DateTime}")]
-        [Authorize]
-        public async Task<ActionResult<IEnumerable<Vente>>> GetBy([FromRoute] Guid entrepriseId, DateTime start, DateTime end)
-        {
-            try
-            {
-                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemA.GetBy(x => x.Id.ToString().
-                Equals(claim));
-
-                if (identity.Count() != 0)
-                {
-                    var result = await repositoryWrapper.Item.GetByInclude(x =>
-                    (x.EntrepriseId == entrepriseId)
-                    && x.Date.Date >= start && x.Date <= end, x => x.Matière);
+                    var result = await repositoryWrapper.Item.GetBy(x =>
+                    (x.Description.Contains(search) || x.Type.Contains(search)));
 
                     return Ok(result);
                 }

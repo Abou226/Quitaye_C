@@ -9,5 +9,6 @@ namespace Quitaye
     public interface IInitialService
     {
         Task<Secrets> Get(LogInModel token);
+        Task<Secrets> Get(string token, string url);
     }
 }

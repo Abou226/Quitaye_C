@@ -40,9 +40,20 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetBy(x => (x.OwnerId == identity.FirstOrDefault().Id));
+                    var entrepriseUser = await repositoryWrapper.ItemC.GetBy(x => x.UserId == identity.First().Id);
+                    if (entrepriseUser.Count() != 0)
+                    {
+                        List<Guid> list = new List<Guid>();
+                        foreach (var item in entrepriseUser)
+                        {
+                            list.Add((Guid)(item.EntrepriseId));
+                        }
+                        var gro = from l in list group l by new { EntrepriseId = l } into gr select gr.Key.EntrepriseId;
 
-                    return Ok(result);
+                        var result = await repositoryWrapper.Item.GetBy(x => gro.Contains(x.Id));
+                        return Ok(result);
+                    }
+                    else return null;
                 }
                 else return NotFound("User not indentified");
             }
@@ -61,15 +72,19 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.ItemC.GetBy(x => x.Id == identity.First().Id);
-                    List<string> list = new List<string>();
-                    foreach (var item in result)
+                    var result = await repositoryWrapper.ItemC.GetBy(x => x.UserId == identity.First().Id);
+                    if (result.Count() != 0)
                     {
-                        list.Add(item.EntrepriseId.ToString());
-                    }
-                    var entreprise = await repositoryWrapper.Item.GetBy(x => list.Contains(x.Id.ToString()));
+                        List<string> list = new List<string>();
+                        foreach (var item in result)
+                        {
+                            list.Add(item.EntrepriseId.ToString());
+                        }
+                        var entreprise = await repositoryWrapper.Item.GetBy(x => list.Contains(x.Id.ToString()));
 
-                    return Ok(entreprise);
+                        return Ok(entreprise);
+                    }
+                    else return null;
                 }
                 else return NotFound("User not indentified");
             }
@@ -79,6 +94,34 @@ namespace Controllers
             }
         }
 
+        [HttpGet("{id:Guid}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<Entreprise>>> GetBy([FromRoute] Guid id)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    var result = await repositoryWrapper.ItemC.GetBy(x => x.UserId == identity.First().Id);
+                    if (result.Count() != 0)
+                    {
+                        var entreprise = await repositoryWrapper.Item.GetBy(x => x.Id == id);
+                        return Ok(entreprise);
+                    } else return null;
+                }
+                else return NotFound("User not indentified");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet("All/{search}/{start:DateTime}/{end:DateTime}")]
+        [Authorize]
         public override async Task<ActionResult<Entreprise>> AddAsync([FromBody] Entreprise value)
         {
             try
@@ -94,6 +137,7 @@ namespace Controllers
                     if (value.DateOfCreation == Convert.ToDateTime("0001-01-01T00:00:00"))
                         value.DateOfCreation = DateTime.Now;
                     //value.ServerTime = DateTime.Now;
+                    value.Id = Guid.NewGuid();
                     value.OwnerId = identity.First().Id;
                     await repositoryWrapper.ItemA.AddAsync(value);
                     await repositoryWrapper.SaveAsync();

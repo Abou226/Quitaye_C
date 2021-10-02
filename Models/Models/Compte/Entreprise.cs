@@ -24,7 +24,10 @@ namespace Models
         
         public DateTime DateOfCreation { get; set; }
 
-        public Type_Entreprise Type { get; set; } = Type_Entreprise.Education;
+        [ForeignKey(nameof(Type))]
+        public Guid Type_Id { get; set; }
+        public Type_Entreprise Type { get; set; } 
+        public int Nb_Employés { get; set; }
 
         [ForeignKey(nameof(Owner))]
         public Guid? OwnerId { get; set; }

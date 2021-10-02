@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Quitaye.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,7 @@ namespace Quitaye.Views
         public HomePage()
         {
             InitializeComponent();
+            BindingContext = new HomeViewModel(this.Navigation);
         }
     }
 }

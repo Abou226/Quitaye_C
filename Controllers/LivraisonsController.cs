@@ -22,15 +22,17 @@ namespace Controllers
     {
         private readonly IGenericRepositoryWrapper<Livraison, User, Vente, Offre,
             Gamme, Marque, Taille, Model, Categorie> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUserRepository;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
 
         public LivraisonsController(IGenericRepositoryWrapper<Livraison, User, Vente, Offre,
-            Gamme, Marque, Taille, Model, Categorie> wrapper,
+            Gamme, Marque, Taille, Model, Categorie> wrapper, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUserRepository,
             IConfigSettings settings, IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
             _settings = settings;
+            _entrepriseUserRepository = entrepriseUserRepository;
             _mapper = mapper;
         }
 
@@ -64,7 +66,10 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetByInclude(x =>
+                    var entrepriseUser = await _entrepriseUserRepository.Item.GetBy(x => x.UserId == identity.First().Id);
+                    if (entrepriseUser.Count() != 0)
+                    {
+                        var result = await repositoryWrapper.Item.GetByInclude(x =>
                     (x.Vente.Client.Prenom.Contains(search)
                     || x.Vente.Client.Nom.Contains(search)
                     || x.Vente.Details_Adresse.Contains(search)), x => x.Vente,
@@ -72,7 +77,9 @@ namespace Controllers
                     x => x.Vente.Offre.Gamme.Marque, x => x.Vente.Offre.Taille,
                     x => x.Vente.Offre.Model, x => x.Vente.Offre.Gamme.Categorie);
 
-                    return Ok(result);
+                        return Ok(result);
+                    }
+                    else return null;
                 }
                 else return NotFound("User not indentified");
             }
@@ -98,7 +105,8 @@ namespace Controllers
                     if (value.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
                         value.Date = DateTime.Now;
                     //value.ServerTime = DateTime.Now;
-                    //value.Id = identity.First().Id;
+                    value.Id = Guid.NewGuid();
+                    
                     await repositoryWrapper.ItemA.AddAsync(value);
                     await repositoryWrapper.SaveAsync();
 

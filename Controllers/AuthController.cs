@@ -63,6 +63,9 @@ namespace Quitaye.Server.Controllers
                             user.BucketName = _settings.BucketName;
                             user.AwsSecretKey = _settings.SecretKey;
                             user.AwsAccessKey = _settings.AccessKey;
+                            user.ProfilePic = result.First().PhotoUrl;
+                            user.Prenom = result.First().Prenom;
+                            user.Nom = result.First().Nom;
                             user.Token = token.Token;
                             user.Success = true;
                             return Ok(user);
@@ -87,6 +90,9 @@ namespace Quitaye.Server.Controllers
                             user.BucketName = _settings.BucketName;
                             user.AwsSecretKey = _settings.SecretKey;
                             user.AwsAccessKey = _settings.AccessKey;
+                            user.ProfilePic = result.First().PhotoUrl;
+                            user.Prenom = result.First().Prenom;
+                            user.Nom = result.First().Nom;
                             user.Token = token.Token;
 
                             return Ok(user);
@@ -116,6 +122,9 @@ namespace Quitaye.Server.Controllers
                 userWithToken.AwsAccessKey = _settings.AccessKey;
                 userWithToken.AwsSecretKey = _settings.SecretKey;
                 userWithToken.BucketName = _settings.BucketName;
+                userWithToken.Prenom = result.Prenom;
+                userWithToken.Nom = result.Nom;
+                userWithToken.ProfilePic = user.PhotoUrl;
                 userWithToken.Success = true;
                 return userWithToken;
             }
@@ -322,7 +331,10 @@ namespace Quitaye.Server.Controllers
                         Token = token.Token,
                         AwsAccessKey = _settings.AccessKey,
                         AwsSecretKey = _settings.SecretKey,
-                        BucketName = _settings.BucketName
+                        BucketName = _settings.BucketName,
+                        Prenom = token.Prenom,
+                        Nom = token.Nom,
+                        ProfilePic = user.First().PhotoUrl,
                     };
                 }
                 return null;
@@ -431,12 +443,15 @@ namespace Quitaye.Server.Controllers
                 RefreshTokenId = Guid.NewGuid(),
             });
 
+            var user = await _userRepository.Item.GetBy(x => x.Id == Id);
             await _refreshTokenRepository.SaveAsync();
             return new TokenDetails()
             {
                 DateOfExpiry = Convert.ToDateTime(tokenDescriptor.Expires),
                 IssueAt = Convert.ToDateTime(tokenDescriptor.IssuedAt),
                 Token = result,
+                Prenom = user.First().Prenom,
+                Nom = user.First().Nom,
             };
         }
     }

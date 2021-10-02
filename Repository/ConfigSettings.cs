@@ -36,7 +36,7 @@ namespace Repository
 
         public ConfigSettings()
         {
-                
+            
         }
 
         public string StringSha256Hash(string text) =>

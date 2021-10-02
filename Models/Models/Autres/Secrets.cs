@@ -11,6 +11,9 @@ namespace Models
         public string AwsSecretKey { get; set; }
         public string Username { get; set; }
         public string BucketName { get; set; }
+        public string ProfilePic { get; set; }
+        public string Prenom { get; set; }
+        public string Nom { get; set; }
         public bool Success { get; set; }
     }
 }

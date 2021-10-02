@@ -11,6 +11,8 @@ using Android.Gms.Auth.Api.SignIn;
 using Xamarin.Forms;
 using Firebase.Auth;
 using Xamarin.Facebook;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Quitaye.Droid
 {
@@ -29,7 +31,12 @@ namespace Quitaye.Droid
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
-            LoadApplication(new App());
+            var host = App.BuildHost()
+        .UseContentRoot(System.Environment.GetFolderPath(
+            System.Environment.SpecialFolder.Personal)).Build();
+
+            var application = host.Services.GetRequiredService<App>();
+            LoadApplication(application);
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {

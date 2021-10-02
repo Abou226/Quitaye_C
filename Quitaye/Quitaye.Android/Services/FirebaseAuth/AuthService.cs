@@ -50,6 +50,9 @@ namespace Quitaye.Droid.Services
                         await SecureStorage.SetAsync("AwsAccessKey", result.AwsAccessKey);
                         await SecureStorage.SetAsync("AwsSecretKey", result.AwsSecretKey);
                         await SecureStorage.SetAsync("BucketName", result.BucketName);
+                        await SecureStorage.SetAsync("ProfilePic", result.ProfilePic);
+                        await SecureStorage.SetAsync("Prenom", result.Prenom);
+                        await SecureStorage.SetAsync("Nom", result.Nom);
                         return true;
                     }
                     else return false;
@@ -95,6 +98,9 @@ namespace Quitaye.Droid.Services
                     await SecureStorage.SetAsync("AwsAccessKey", result.AwsAccessKey);
                     await SecureStorage.SetAsync("AwsSecretKey", result.AwsSecretKey);
                     await SecureStorage.SetAsync("BucketName", result.BucketName);
+                    await SecureStorage.SetAsync("ProfilePic", result.ProfilePic);
+                    await SecureStorage.SetAsync("Prenom", result.Prenom);
+                    await SecureStorage.SetAsync("Nom", result.Nom);
                 }
                 //await Firebase.Auth.FirebaseAuth.GetInstance(MainActivity.app).SignInWithEmailAndPasswordAsync(email, password);
                 return true;
@@ -141,7 +147,5 @@ namespace Quitaye.Droid.Services
         {
             return KEY_AUTH;
         }
-
-        
     }
 }

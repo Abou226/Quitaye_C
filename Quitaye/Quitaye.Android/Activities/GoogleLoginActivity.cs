@@ -17,7 +17,16 @@ using Android.Gms.Auth.Api.SignIn;
 using Android.Gms.Auth.Api;
 using Firebase.Auth;
 using AndroidX.AppCompat.App;
+using Xamarin.Forms;
+using Services;
+using Models;
+using Xamarin.Essentials;
+using BaseVM;
 
+[assembly: Dependency(typeof(DataService<User>))]
+[assembly: Dependency(typeof(BaseViewModel))]
+[assembly: Dependency(typeof(DataService<object, Secrets>))]
+[assembly: Dependency(typeof(DataService<RefreshToken>))]
 namespace Quitaye.Droid.Activities
 {
     [Activity(Label = "Google Login", Theme = "@style/Theme.AppCompat.Light.DarkActionBar")]
@@ -30,6 +39,21 @@ namespace Quitaye.Droid.Activities
         const string KEY_IS_RESOLVING = "is_resolving";
         const string KEY_SHOULD_RESOLVE = "should_resolve";
 
+        public IDataService<User> User { get; }
+        public IDataService<RefreshToken> Token { get; }
+        public IInitialService Initial { get; }
+        public IDataService<object, Secrets> Secret { get; }
+
+        public IBaseViewModel BaseVM { get; }
+
+        public GoogleLoginActivity()
+        {
+            User = DependencyService.Get<IDataService<User>>();
+            Token = DependencyService.Get<IDataService<RefreshToken>>();
+            BaseVM = DependencyService.Get<IBaseViewModel>();
+            Initial = DependencyService.Get<IInitialService>();
+            Secret = DependencyService.Get<IDataService<object, Secrets>>();
+        }
 
         static GoogleApiClient mGoogleApiClient;
 
@@ -37,7 +61,6 @@ namespace Quitaye.Droid.Activities
 
         bool mShouldResolve = false;
 
-       
         private static GoogleSignInAccount mAuth;
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -108,19 +131,85 @@ namespace Quitaye.Droid.Activities
             outState.PutBoolean(KEY_SHOULD_RESOLVE, mIsResolving);
         }
 
-        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+        protected override async void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
             base.OnActivityResult(requestCode, resultCode, data);
 
             // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
             if (requestCode == RC_SIGN_IN)
             {
+
                 var result = Android.Gms.Auth.Api.Auth.GoogleSignInApi.GetSignInResultFromIntent(data);
                 if (result.IsSuccess)
                 {
                     // Google Sign In was successful, authenticate with Firebase
-                    HandleResult(result.SignInAccount);
 
+                    if (BaseVM.IsInternetOn)
+                    {
+                        try
+                        {
+                            var u = await User.GetItemAsync(await SecureStorage.GetAsync("Token"), "users/email/" + result.SignInAccount.Email);
+                            if (u == null)
+                            {
+                                User user = new User();
+                                user.Email = result.SignInAccount.Email;
+                                user.Prenom = result.SignInAccount.GivenName;
+                                user.Nom = result.SignInAccount.FamilyName;
+                                user.PhotoUrl = result.SignInAccount.PhotoUrl.Scheme.ToString() + "" + result.SignInAccount.PhotoUrl.EncodedSchemeSpecificPart.ToString();
+
+                                var users = await User.AddAsync(user, null);
+                                if (users != null)
+                                {
+                                    var token = await Secret.GetAsync(null, "auth/useremail/" + result.SignInAccount.Email);
+                                    if (token != null)
+                                    {
+                                        await SecureStorage.SetAsync("Token", token.First().Token);
+                                        await SecureStorage.SetAsync("AwsAccessKey", token.First().AwsAccessKey);
+                                        await SecureStorage.SetAsync("AwsSecretKey", token.First().AwsSecretKey);
+                                        await SecureStorage.SetAsync("BucketName", token.First().BucketName);
+                                        await SecureStorage.SetAsync("Prenom", token.First().Prenom);
+                                        await SecureStorage.SetAsync("Nom", token.First().Nom);
+                                        await SecureStorage.SetAsync("ProfilePic", token.First().ProfilePic);
+                                    }
+                                }
+                                else
+                                {
+                                    var token = await Secret.GetAsync(null, "auth/useremail/" + result.SignInAccount.Email);
+                                    if (token != null)
+                                    {
+                                        await SecureStorage.SetAsync("Token", token.First().Token);
+                                        await SecureStorage.SetAsync("AwsAccessKey", token.First().AwsAccessKey);
+                                        await SecureStorage.SetAsync("AwsSecretKey", token.First().AwsSecretKey);
+                                        await SecureStorage.SetAsync("BucketName", token.First().BucketName);
+                                        await SecureStorage.SetAsync("ProfilePic", token.First().ProfilePic);
+                                        await SecureStorage.SetAsync("Prenom", token.First().Prenom);
+                                        await SecureStorage.SetAsync("Nom", token.First().Nom);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                var token = await Initial.Get(null, "api/auth/useremail/" + result.SignInAccount.Email);
+                                if (token != null)
+                                {
+                                    await SecureStorage.SetAsync("Token", token.Token);
+                                    await SecureStorage.SetAsync("AwsAccessKey", token.AwsAccessKey);
+                                    await SecureStorage.SetAsync("AwsSecretKey", token.AwsSecretKey);
+                                    await SecureStorage.SetAsync("BucketName", token.BucketName);
+                                    await SecureStorage.SetAsync("ProfilePic", token.ProfilePic);
+                                    await SecureStorage.SetAsync("Prenom", token.Prenom);
+                                    await SecureStorage.SetAsync("Nom", token.Nom);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            var us = await User.GetItemAsync(await SecureStorage.GetAsync("Token"), "users/email/" + result.SignInAccount.Email);
+
+                        }
+                    }
+                    
+                    HandleResult(result.SignInAccount);
                 }
                 else
                 {

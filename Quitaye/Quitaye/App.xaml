@@ -3,6 +3,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Quitaye.App">
     <Application.Resources>
+        <Color x:Key="Primary">#e1edf3</Color>
+        <Color x:Key="Secondary">#920CFF</Color>
+        <Color x:Key="ThirdColor">#01F9FF</Color>
+        <Color x:Key="FourthColor">#191616</Color>
+        <Color x:Key="VeryLight">#ffffff</Color>
 
+        <Style x:Key="ButtonOutline" TargetType="Button">
+            <Setter Property="BackgroundColor" Value="Transparent"/>
+            <Setter Property="TextColor" Value="{StaticResource Primary}"/>
+            <Setter Property="BorderColor" Value="{StaticResource Primary}"/>
+            <Setter Property="BorderWidth" Value="1"/>
+        </Style>
     </Application.Resources>
 </Application>

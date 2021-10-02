@@ -116,6 +116,8 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
+                    value.Id = Guid.NewGuid();
+                    value.UserId = identity.First().Id;
                     value.EntrepriseId = value.EntrepriseId;
                     await repositoryWrapper.ItemA.AddAsync(value);
                     await repositoryWrapper.SaveAsync();

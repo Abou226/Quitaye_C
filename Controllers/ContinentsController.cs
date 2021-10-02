@@ -39,11 +39,11 @@ namespace Controllers
             try
             {
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemA.GetBy(x => x.Id.ToString().
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.ItemA.GetBy(x => (x.EntrepriseId == identity.FirstOrDefault().EntrepriseId));
+                    var result = await repositoryWrapper.ItemA.GetAll();
 
                     return Ok(result);
                 }
@@ -77,7 +77,7 @@ namespace Controllers
             }
         }
 
-        [HttpGet("id:Guid")]
+        [HttpGet("{id:Guid}")]
         public async Task<ActionResult<IEnumerable<Continent>>> GetBy([FromRoute] Guid id)
         {
             try
@@ -117,6 +117,7 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     value.EntrepriseId = value.EntrepriseId;
+                    value.Id = Guid.NewGuid();
                     await repositoryWrapper.ItemA.AddAsync(value);
                     await repositoryWrapper.SaveAsync();
                     return Ok(value);
@@ -159,13 +160,12 @@ namespace Controllers
             try
             {
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemA.GetBy(x => x.Id.ToString().
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
                 Equals(claim));
 
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetBy(x =>
-                    (x.EntrepriseId == identity.FirstOrDefault().EntrepriseId));
+                    var result = await repositoryWrapper.Item.GetAll();
 
                     return Ok(result);
                 }

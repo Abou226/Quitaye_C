@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Quitaye.Controllers.Extensions;
+using Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,44 +34,15 @@ namespace Quitaye.Web
             services.ConfigureSqlContext(Configuration);
             services.ConfigureRepositoryWrapper(Configuration);
             services.AddAuthentication();
-            //.AddCookie("Cook")
-            //.AddGoogle(config =>
-            //{
-            //    config.SignInScheme = "Cook";
-            //    config.ClientId = GoogleClient_Id;
-            //    config.ClientSecret = GoogleClient_Secret;
-            //    config.SaveTokens = true;
-
-            //    config.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "UserId");
-            //    config.ClaimActions.MapJsonKey(ClaimTypes.Email, "EmailAddress", ClaimValueTypes.Email);
-            //    config.ClaimActions.MapJsonKey(ClaimTypes.Surname, "Surname");
-            //    config.ClaimActions.MapJsonKey(ClaimTypes.GivenName, "GivenName");
-            //    config.Scope.Add("profile");
-            //    config.Events.OnCreatingTicket = (context) =>
-            //    {
-            //        var picture = context.User.GetProperty("picture").GetString();
-            //        context.Identity.AddClaim(new Claim("picture", picture));
-
-            //        return Task.CompletedTask;
-            //    };
-            //})
-            //.AddFacebook(config =>
-            //{
-            //    config.SignInScheme = "Cook";
-            //    config.ClientId = FacebookClient_Id;
-            //    config.ClientSecret = FacebookClient_Secret;
-            //    config.SaveTokens = true;
-            //    config.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "UserId");
-            //    config.ClaimActions.MapJsonKey(ClaimTypes.Email, "EmailAddress", ClaimValueTypes.Email);
-            //    config.ClaimActions.MapJsonKey(ClaimTypes.Surname, "Surname");
-            //    config.ClaimActions.MapJsonKey(ClaimTypes.GivenName, "GivenName");
-            //});
             services.AddControllers();
             services.AddControllers().AddNewtonsoftJson();
             services.AddRazorPages();
             services.AddRazorPages()
             .AddNewtonsoftJson();
             services.AddRazorPages();
+
+            var jwtsection = Configuration.GetSection("MySettings");
+            services.Configure<ConfigSettings>(jwtsection);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -95,6 +67,7 @@ namespace Quitaye.Web
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+                endpoints.MapControllers();
             });
         }
     }

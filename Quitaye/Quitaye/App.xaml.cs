@@ -11,20 +11,28 @@ using Quitaye.Views;
 using BaseVM;
 using Services;
 using Quitaye.Views.Login;
+using System.Linq;
 
 [assembly: Dependency(typeof(BaseViewModel))]
 [assembly: Dependency(typeof(DataService<Test>))]
+[assembly: Dependency(typeof(DataService<Entreprise>))]
+[assembly: Dependency(typeof(DataService<RefreshToken>))]
 namespace Quitaye
 {
     public partial class App : Application
     {
         public IBaseViewModel BaseVM { get; }
+        public IDataService<Entreprise> EntrepriseData { get; }
+        public IDataService<RefreshToken> Token { get; }
+        public IInitialService Initial { get; }
         public IDataService<Test> Test { get; }
         public App()
         {
             InitializeComponent();
             BaseVM = DependencyService.Get<IBaseViewModel>();
             Test = DependencyService.Get<IDataService<Test>>();
+            EntrepriseData = DependencyService.Get<IDataService<Entreprise>>();
+            Token = DependencyService.Get<IDataService<RefreshToken>>();
             Device.StartTimer(TimeSpan.FromSeconds(BaseVM.InternetCheckTime), () =>
             {
                 // Do something
@@ -75,9 +83,11 @@ namespace Quitaye
                 services.AddScoped<HomePage>();
                 services.AddScoped<LoginView>();
                 services.AddScoped<SignUpView>();
+                services.AddScoped<InitialPage>();
                 services.AddScoped(typeof(IDataService<>), typeof(DataService<>));
                 services.AddScoped<IBaseViewModel, BaseViewModel>();
                 services.AddScoped<IInitialService, InitialService>();
+                
                 services.AddScoped<IFileUploadService, FileUploadService>();
                 services.AddScoped<ILogInService, LogInService>();
                 services.AddScoped<ISignUpService, SignUpService>();
@@ -95,7 +105,12 @@ namespace Quitaye
             }
             else
             {
-                MainPage = new NavigationPage(Host.Services.GetRequiredService<HomePage>());
+                var last = await SecureStorage.GetAsync("LastEntreprise");
+                if (!string.IsNullOrWhiteSpace(last))
+                {
+                    MainPage = new NavigationPage(Host.Services.GetRequiredService<HomePage>());
+                }
+                else MainPage = new NavigationPage(Host.Services.GetRequiredService<InitialPage>());
             }
         }
 

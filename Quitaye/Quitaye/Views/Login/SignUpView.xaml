@@ -25,9 +25,9 @@
                             <pancake:Border Color="Transparent" Thickness="2"/>
                         </pancake:PancakeView.Border>
                         <pancake:PancakeView.Shadow>
-                            <pancake:DropShadow Color="{DynamicResource LightDark}" Offset="10,10"/>
+                            <pancake:DropShadow Color="{DynamicResource FourthColor}" Offset="10,10"/>
                         </pancake:PancakeView.Shadow>
-                        <Grid >
+                        <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
@@ -53,7 +53,7 @@
                                 <Button CornerRadius="20" Padding="0,-5,0,-5"
                             Text="Sign Up" TextColor="{DynamicResource Secondary}" 
                             BackgroundColor="{DynamicResource Primary}"/>
-                                <Button Grid.Column="1" Command="{Binding LogInCommand}" 
+                                <Button Grid.Column="1" Command="{Binding LoginCommand}" 
                                         BackgroundColor="Transparent" 
                                 Padding="0,-5,0,-5" 
                                 TextColor="{DynamicResource Secondary}" 
@@ -64,7 +64,7 @@
                             <Entry Grid.Row="1" Margin="40,0,40,0" Text="{Binding Username, Mode=TwoWay}" 
                                    BackgroundColor="{DynamicResource VeryLight}"
                                    TextColor="{DynamicResource ThirdColor}" 
-                                   PlaceholderColor="{DynamicResource LightDark}"
+                                   PlaceholderColor="{DynamicResource FourthColor}"
                            Placeholder="Username" x:Name="txtUsername" Keyboard="Text" />
                             <Grid  Grid.Row="2" Margin="0,0,35,0" >
                                 <Grid>
@@ -75,7 +75,7 @@
                                     <Entry  Margin="40,0,0,0" Text="{Binding Password, Mode=TwoWay}" 
                                    BackgroundColor="{DynamicResource VeryLight}" 
                                    TextColor="{DynamicResource ThirdColor}" 
-                                   PlaceholderColor="{DynamicResource LightDark}"
+                                   PlaceholderColor="{DynamicResource FourthColor}"
                                    Placeholder="Password" 
                                             x:Name="txtPassword"
                                             IsPassword="{Binding IsPassword, Mode=TwoWay}"  />
@@ -98,7 +98,7 @@
                                     <Entry  Margin="40,0,0,0" Text="{Binding PasswordConfirm, Mode=TwoWay}" 
                                    BackgroundColor="{DynamicResource VeryLight}" 
                                    TextColor="{DynamicResource ThirdColor}" 
-                                   PlaceholderColor="{DynamicResource LightDark}"
+                                   PlaceholderColor="{DynamicResource FourthColor}"
                                    Placeholder="Password Confirm"
                                             x:Name="txtPasswordConfirm"
                                             IsPassword="{Binding IsPasswordConfirm, Mode=TwoWay}"  />

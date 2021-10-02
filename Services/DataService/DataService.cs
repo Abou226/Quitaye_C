@@ -12,7 +12,6 @@ namespace Services
 {
     public class DataService<T, D> : BaseViewModel, IDataService<T, D> where T : class
     {
-        
         public virtual async Task<T> AddAsync(T value, string token, string url = null)
         {
             try
@@ -21,7 +20,7 @@ namespace Services
                 Client.DefaultRequestHeaders.Authorization = authHeader;
                 Client.DefaultRequestHeaders.Accept.Clear();
                 Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                
+
                 string jsons = JsonConvert.SerializeObject(value);
 
                 HttpContent httpContent = new StringContent(jsons);
@@ -34,7 +33,7 @@ namespace Services
                 }
                 var response = new HttpResponseMessage();
                 if (url == null)
-                    response = await Client.PostAsync("api/"+type + "s", httpContent);
+                    response = await Client.PostAsync("api/" + type + "s", httpContent);
                 else response = await Client.PostAsync("api/" + type + "s/" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return value;
@@ -66,7 +65,7 @@ namespace Services
 
                 HttpContent httpContent = new StringContent(jsons);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var response = await Client.PostAsync(baseurl + values.FirstOrDefault().GetType().ToString()+"s"+ url, httpContent);
+                var response = await Client.PostAsync(baseurl + values.FirstOrDefault().GetType().ToString() + "s" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return values;
                 else
@@ -94,7 +93,7 @@ namespace Services
 
                 HttpContent httpContent = new StringContent(jsons);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var response = await Client.PatchAsync("api/"+url, httpContent);
+                var response = await Client.PatchAsync("api/" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return values;
                 else
@@ -116,7 +115,7 @@ namespace Services
                 Client.DefaultRequestHeaders.Authorization = authHeader;
                 Client.DefaultRequestHeaders.Accept.Clear();
                 Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                var response = await Client.DeleteAsync("api/"+url);
+                var response = await Client.DeleteAsync("api/" + url);
                 if (response.IsSuccessStatusCode)
                     return value;
                 else
@@ -134,7 +133,7 @@ namespace Services
         {
             var authHeader = new AuthenticationHeaderValue("bearer", token);
             Client.DefaultRequestHeaders.Authorization = authHeader;
-            var json = await Client.GetStringAsync("api/"+url);
+            var json = await Client.GetStringAsync("api/" + url);
             var all = Convert<T>.FromJson(json);
             return all;
         }
@@ -187,7 +186,7 @@ namespace Services
 
                 HttpContent httpContent = new StringContent(jsons);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var response = await Client.PatchAsync("api/"+values.FirstOrDefault().GetType().ToString() + "s" + url, httpContent);
+                var response = await Client.PatchAsync("api/" + values.FirstOrDefault().GetType().ToString() + "s" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return values;
                 else
@@ -199,6 +198,48 @@ namespace Services
                 var phrase = ex.InnerException;
                 return null;
             }
+        }
+
+        public async Task<object> PostAsync(object value, string token, string url = null)
+        {
+            try
+            {
+                var authHeader = new AuthenticationHeaderValue("bearer", token);
+                Client.DefaultRequestHeaders.Authorization = authHeader;
+                Client.DefaultRequestHeaders.Accept.Clear();
+                Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                string jsons = JsonConvert.SerializeObject(value);
+
+                HttpContent httpContent = new StringContent(jsons);
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                var response = new HttpResponseMessage();
+                response = await Client.PostAsync("api/" + url, httpContent);
+                if (response.IsSuccessStatusCode)
+                    return value;
+                else
+                {
+                    var message = await response.Content.ReadAsStringAsync();
+                    var mes = response.ReasonPhrase.ToString();
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                var message = ex.Message;
+                var phrase = ex.InnerException;
+                return null;
+            }
+        }
+
+        public async Task<IEnumerable<D>> GetAsync(string token, string url = null)
+        {
+            var authHeader = new AuthenticationHeaderValue("bearer", token);
+            Client.DefaultRequestHeaders.Authorization = authHeader;
+            var json = await Client.GetStringAsync("api/" + url);
+            var all = Convert<D>.FromJson(json);
+            return all;
         }
     }
 
@@ -272,8 +313,6 @@ namespace Services
             }
         }
 
-        
-
         public virtual async Task<T> DeleteAsync(string token, T value = null, string url = null)
         {
             try
@@ -283,7 +322,7 @@ namespace Services
                 Client.DefaultRequestHeaders.Accept.Clear();
                 Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                var response = await Client.DeleteAsync("api/"+url);
+                var response = await Client.DeleteAsync("api/" + url);
                 if (response.IsSuccessStatusCode)
                     return value;
                 else
@@ -355,7 +394,7 @@ namespace Services
 
                 HttpContent httpContent = new StringContent(jsons);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var response = await Client.PatchAsync("api/"+values.FirstOrDefault().GetType().ToString() + "s" + url, httpContent);
+                var response = await Client.PatchAsync("api/" + values.FirstOrDefault().GetType().ToString() + "s" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return values;
                 else
@@ -367,6 +406,49 @@ namespace Services
                 var phrase = ex.InnerException;
                 return null;
             }
+        }
+
+        public async Task<object> PostAsync(object value, string token, string url = null)
+        {
+            try
+            {
+                var authHeader = new AuthenticationHeaderValue("bearer", token);
+                Client.DefaultRequestHeaders.Authorization = authHeader;
+                Client.DefaultRequestHeaders.Accept.Clear();
+                Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                string jsons = JsonConvert.SerializeObject(value);
+
+                HttpContent httpContent = new StringContent(jsons);
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                var response = new HttpResponseMessage();
+
+                response = await Client.PostAsync("api/" + url, httpContent);
+                if (response.IsSuccessStatusCode)
+                    return value;
+                else
+                {
+                    var message = await response.Content.ReadAsStringAsync();
+                    var mes = response.ReasonPhrase.ToString();
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                var message = ex.Message;
+                var phrase = ex.InnerException;
+                return null;
+            }
+        }
+
+        public async Task<IEnumerable<object>> GetAsync(string token, string url = null)
+        {
+            var authHeader = new AuthenticationHeaderValue("bearer", token);
+            Client.DefaultRequestHeaders.Authorization = authHeader;
+            var json = await Client.GetStringAsync("api/" + url);
+            var all = Convert<object>.FromJson(json);
+            return all;
         }
     }
 }

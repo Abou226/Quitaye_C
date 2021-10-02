@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entities.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    [Migration("20210921174026_EditClientTable")]
-    partial class EditClientTable
+    [Migration("20210930124054_EditEntrepriseTable")]
+    partial class EditEntrepriseTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -60,15 +60,28 @@ namespace Entities.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("OffreId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Quantité")
                         .HasColumnType("decimal (18,2)");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("EntrepriseId");
+
                     b.HasIndex("OffreId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Avarier");
                 });
@@ -79,12 +92,22 @@ namespace Entities.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EntrepriseId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Categories");
                 });
@@ -93,6 +116,9 @@ namespace Entities.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("EntrepriseId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Genre")
@@ -108,7 +134,14 @@ namespace Entities.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EntrepriseId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Client");
                 });
@@ -204,10 +237,20 @@ namespace Entities.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EntrepriseId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Email");
                 });
@@ -218,6 +261,10 @@ namespace Entities.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Adresse")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
                     b.Property<DateTime>("DateOfCreation")
                         .HasColumnType("datetime2");
 
@@ -226,9 +273,78 @@ namespace Entities.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<int>("Nb_Employés")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("VilleId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("OwnerId");
+
+                    b.HasIndex("VilleId");
+
                     b.ToTable("Entreprise");
+                });
+
+            modelBuilder.Entity("Models.EntrepriseUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateOfAdd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntrepriseId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("EntrepriseUser");
+                });
+
+            modelBuilder.Entity("Models.ExternalLogin", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateOfExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateOfLogin")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExternalLogin");
                 });
 
             modelBuilder.Entity("Models.Fournisseur", b =>
@@ -242,6 +358,9 @@ namespace Entities.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Genre")
                         .HasColumnType("int");
 
@@ -250,7 +369,14 @@ namespace Entities.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EntrepriseId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Fournisseurs");
                 });
@@ -264,6 +390,9 @@ namespace Entities.Migrations
                     b.Property<Guid?>("CategorieId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("MarqueId")
                         .HasColumnType("uniqueidentifier");
 
@@ -273,13 +402,20 @@ namespace Entities.Migrations
                     b.Property<Guid?>("StyleId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategorieId");
 
+                    b.HasIndex("EntrepriseId");
+
                     b.HasIndex("MarqueId");
 
                     b.HasIndex("StyleId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Gamme");
                 });
@@ -316,12 +452,22 @@ namespace Entities.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EntrepriseId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Marques");
                 });
@@ -332,6 +478,9 @@ namespace Entities.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(60)
@@ -340,7 +489,14 @@ namespace Entities.Migrations
                     b.Property<int>("Unité")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EntrepriseId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Matiere_Premiere");
                 });
@@ -351,12 +507,22 @@ namespace Entities.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EntrepriseId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Models");
                 });
@@ -415,6 +581,9 @@ namespace Entities.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("GammeId")
                         .HasColumnType("uniqueidentifier");
 
@@ -424,13 +593,20 @@ namespace Entities.Migrations
                     b.Property<Guid?>("TailleId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EntrepriseId");
 
                     b.HasIndex("GammeId");
 
                     b.HasIndex("ModelId");
 
                     b.HasIndex("TailleId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Offre");
                 });
@@ -505,6 +681,9 @@ namespace Entities.Migrations
                     b.Property<DateTime>("Date_Payement")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<decimal>("Montant")
                         .HasColumnType("decimal (18,2)");
 
@@ -524,9 +703,16 @@ namespace Entities.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("EntrepriseId");
+
                     b.HasIndex("Num_PayementId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Payement");
                 });
@@ -618,10 +804,47 @@ namespace Entities.Migrations
                     b.ToTable("Quartier");
                 });
 
+            modelBuilder.Entity("Models.RefreshToken", b =>
+                {
+                    b.Property<Guid>("RefreshTokenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateOfExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateOfIssue")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Refreshable")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<DateTime>("ServerTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("RefreshTokenId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshToken");
+                });
+
             modelBuilder.Entity("Models.Stock_Produit", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("EntrepriseId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("OffreId")
@@ -630,9 +853,16 @@ namespace Entities.Migrations
                     b.Property<decimal>("Quantité")
                         .HasColumnType("decimal (18,2)");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("EntrepriseId");
+
                     b.HasIndex("OffreId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Stock_Produit");
                 });
@@ -643,12 +873,22 @@ namespace Entities.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EntrepriseId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Styles");
                 });
@@ -659,12 +899,22 @@ namespace Entities.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EntrepriseId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Tailles");
                 });
@@ -675,6 +925,9 @@ namespace Entities.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Number")
                         .IsRequired()
                         .HasMaxLength(15)
@@ -683,7 +936,14 @@ namespace Entities.Migrations
                     b.Property<Guid?>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EntrepriseId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Telephones");
                 });
@@ -694,15 +954,38 @@ namespace Entities.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Active")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
                     b.Property<DateTime>("DateOfCreation")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid?>("EntrperiseId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Nom")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
                     b.Property<string>("Password")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PhotoUrl")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
+
+                    b.Property<string>("Prenom")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<DateTime>("ServerTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Username")
                         .HasMaxLength(60)
@@ -760,6 +1043,9 @@ namespace Entities.Migrations
                     b.Property<Guid?>("QuartierId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("ServerTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<Guid?>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -810,12 +1096,22 @@ namespace Entities.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("EntrepriseId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Zone");
                 });
@@ -837,11 +1133,53 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Models.Avarier", b =>
                 {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
                     b.HasOne("Models.Offre", "Offre")
                         .WithMany()
                         .HasForeignKey("OffreId");
 
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
+
                     b.Navigation("Offre");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Models.Categorie", b =>
+                {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Models.Client", b =>
+                {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Models.Commune", b =>
@@ -883,11 +1221,75 @@ namespace Entities.Migrations
                     b.Navigation("Entreprise");
                 });
 
+            modelBuilder.Entity("Models.Email", b =>
+                {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
+                    b.HasOne("Models.User", null)
+                        .WithMany("Emails")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
+                });
+
+            modelBuilder.Entity("Models.Entreprise", b =>
+                {
+                    b.HasOne("Models.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId");
+
+                    b.HasOne("Models.Ville", "Ville")
+                        .WithMany()
+                        .HasForeignKey("VilleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+
+                    b.Navigation("Ville");
+                });
+
+            modelBuilder.Entity("Models.EntrepriseUser", b =>
+                {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Models.Fournisseur", b =>
+                {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Models.Gamme", b =>
                 {
                     b.HasOne("Models.Categorie", "Categorie")
                         .WithMany()
                         .HasForeignKey("CategorieId");
+
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
 
                     b.HasOne("Models.Marque", "Marque")
                         .WithMany()
@@ -897,11 +1299,19 @@ namespace Entities.Migrations
                         .WithMany()
                         .HasForeignKey("StyleId");
 
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
                     b.Navigation("Categorie");
+
+                    b.Navigation("Entreprise");
 
                     b.Navigation("Marque");
 
                     b.Navigation("Style");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Models.Livraison", b =>
@@ -911,6 +1321,51 @@ namespace Entities.Migrations
                         .HasForeignKey("VenteId");
 
                     b.Navigation("Vente");
+                });
+
+            modelBuilder.Entity("Models.Marque", b =>
+                {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Models.Matière_Premiere", b =>
+                {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Models.Model", b =>
+                {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Models.Num_Payement", b =>
@@ -933,6 +1388,10 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Models.Offre", b =>
                 {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
                     b.HasOne("Models.Gamme", "Gamme")
                         .WithMany()
                         .HasForeignKey("GammeId");
@@ -945,11 +1404,19 @@ namespace Entities.Migrations
                         .WithMany()
                         .HasForeignKey("TailleId");
 
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
+
                     b.Navigation("Gamme");
 
                     b.Navigation("Model");
 
                     b.Navigation("Taille");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Models.Panier", b =>
@@ -981,11 +1448,23 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Models.Payement", b =>
                 {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
                     b.HasOne("Models.Num_Payement", "Num_Payement")
                         .WithMany()
                         .HasForeignKey("Num_PayementId");
 
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
+
                     b.Navigation("Num_Payement");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Models.Pays", b =>
@@ -1039,13 +1518,77 @@ namespace Entities.Migrations
                     b.Navigation("Zone");
                 });
 
+            modelBuilder.Entity("Models.RefreshToken", b =>
+                {
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Models.Stock_Produit", b =>
                 {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
                     b.HasOne("Models.Offre", "Offre")
                         .WithMany()
                         .HasForeignKey("OffreId");
 
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
+
                     b.Navigation("Offre");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Models.Style", b =>
+                {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Models.Taille", b =>
+                {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Models.Telephone", b =>
+                {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
+                    b.HasOne("Models.User", null)
+                        .WithMany("Telephones")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
                 });
 
             modelBuilder.Entity("Models.User", b =>
@@ -1103,6 +1646,28 @@ namespace Entities.Migrations
                     b.Navigation("Entreprise");
 
                     b.Navigation("Pays");
+                });
+
+            modelBuilder.Entity("Models.Zone", b =>
+                {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Models.User", b =>
+                {
+                    b.Navigation("Emails");
+
+                    b.Navigation("Telephones");
                 });
 #pragma warning restore 612, 618
         }

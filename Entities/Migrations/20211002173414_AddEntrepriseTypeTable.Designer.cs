@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entities.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    [Migration("20210929165044_LastEdit")]
-    partial class LastEdit
+    [Migration("20211002173414_AddEntrepriseTypeTable")]
+    partial class AddEntrepriseTypeTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -273,11 +273,14 @@ namespace Entities.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<int>("Nb_Employés")
+                        .HasColumnType("int");
+
                     b.Property<Guid?>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                    b.Property<Guid>("Type_Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("VilleId")
                         .HasColumnType("uniqueidentifier");
@@ -285,6 +288,8 @@ namespace Entities.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OwnerId");
+
+                    b.HasIndex("Type_Id");
 
                     b.HasIndex("VilleId");
 
@@ -313,6 +318,35 @@ namespace Entities.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("EntrepriseUser");
+                });
+
+            modelBuilder.Entity("Models.ExternalLogin", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateOfExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateOfLogin")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExternalLogin");
                 });
 
             modelBuilder.Entity("Models.Fournisseur", b =>
@@ -772,6 +806,40 @@ namespace Entities.Migrations
                     b.ToTable("Quartier");
                 });
 
+            modelBuilder.Entity("Models.RefreshToken", b =>
+                {
+                    b.Property<Guid>("RefreshTokenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateOfExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateOfIssue")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Refreshable")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<DateTime>("ServerTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("RefreshTokenId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshToken");
+                });
+
             modelBuilder.Entity("Models.Stock_Produit", b =>
                 {
                     b.Property<Guid>("Id")
@@ -880,6 +948,39 @@ namespace Entities.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Telephones");
+                });
+
+            modelBuilder.Entity("Models.Type_Entreprise", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateOfCreation")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<string>("Url")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Type_Entreprise");
                 });
 
             modelBuilder.Entity("Models.User", b =>
@@ -1174,6 +1275,12 @@ namespace Entities.Migrations
                         .WithMany()
                         .HasForeignKey("OwnerId");
 
+                    b.HasOne("Models.Type_Entreprise", "Type")
+                        .WithMany()
+                        .HasForeignKey("Type_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Models.Ville", "Ville")
                         .WithMany()
                         .HasForeignKey("VilleId")
@@ -1181,6 +1288,8 @@ namespace Entities.Migrations
                         .IsRequired();
 
                     b.Navigation("Owner");
+
+                    b.Navigation("Type");
 
                     b.Navigation("Ville");
                 });
@@ -1452,6 +1561,15 @@ namespace Entities.Migrations
                     b.Navigation("Zone");
                 });
 
+            modelBuilder.Entity("Models.RefreshToken", b =>
+                {
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Models.Stock_Produit", b =>
                 {
                     b.HasOne("Models.Entreprise", "Entreprise")
@@ -1514,6 +1632,15 @@ namespace Entities.Migrations
                         .HasForeignKey("UserId");
 
                     b.Navigation("Entreprise");
+                });
+
+            modelBuilder.Entity("Models.Type_Entreprise", b =>
+                {
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Models.User", b =>

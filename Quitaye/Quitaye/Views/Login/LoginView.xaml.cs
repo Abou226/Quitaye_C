@@ -15,6 +15,7 @@ namespace Quitaye.Views.Login
         public LoginView()
         {
             InitializeComponent();
+            BindingContext = new LoginViewModel(this.Navigation);
         }
 
     }

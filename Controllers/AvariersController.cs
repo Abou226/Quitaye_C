@@ -98,7 +98,8 @@ namespace Controllers
                     if (value.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
                         value.Date = DateTime.Now;
                     //value.ServerTime = DateTime.Now;
-                    value.Id = identity.First().Id;
+                    value.UserId = identity.First().Id;
+                    value.Id = Guid.NewGuid();
                     await repositoryWrapper.ItemA.AddAsync(value);
                     await repositoryWrapper.SaveAsync();
 

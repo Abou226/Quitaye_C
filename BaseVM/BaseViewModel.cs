@@ -17,7 +17,8 @@ namespace BaseVM
             Client.BaseAddress = new Uri(baseurl);
         }
 
-
+        public string Prenom { get; set; }
+        public string Nom_Famille { get; set; }
 
         string title = "Quitaye";
         public string Title

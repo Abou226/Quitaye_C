@@ -271,11 +271,14 @@ namespace Entities.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<int>("Nb_Employés")
+                        .HasColumnType("int");
+
                     b.Property<Guid?>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                    b.Property<Guid>("Type_Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("VilleId")
                         .HasColumnType("uniqueidentifier");
@@ -283,6 +286,8 @@ namespace Entities.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OwnerId");
+
+                    b.HasIndex("Type_Id");
 
                     b.HasIndex("VilleId");
 
@@ -943,6 +948,39 @@ namespace Entities.Migrations
                     b.ToTable("Telephones");
                 });
 
+            modelBuilder.Entity("Models.Type_Entreprise", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DateOfCreation")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<string>("Url")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Type_Entreprise");
+                });
+
             modelBuilder.Entity("Models.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1235,6 +1273,12 @@ namespace Entities.Migrations
                         .WithMany()
                         .HasForeignKey("OwnerId");
 
+                    b.HasOne("Models.Type_Entreprise", "Type")
+                        .WithMany()
+                        .HasForeignKey("Type_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Models.Ville", "Ville")
                         .WithMany()
                         .HasForeignKey("VilleId")
@@ -1242,6 +1286,8 @@ namespace Entities.Migrations
                         .IsRequired();
 
                     b.Navigation("Owner");
+
+                    b.Navigation("Type");
 
                     b.Navigation("Ville");
                 });
@@ -1584,6 +1630,15 @@ namespace Entities.Migrations
                         .HasForeignKey("UserId");
 
                     b.Navigation("Entreprise");
+                });
+
+            modelBuilder.Entity("Models.Type_Entreprise", b =>
+                {
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Models.User", b =>

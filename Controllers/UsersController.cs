@@ -64,10 +64,10 @@ namespace Quitaye.Server.Controllers
         {
             try
             {
-                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
-                Equals(claim));
-                if (identity.Count() != 0)
+                //var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                //var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                //Equals(claim));
+                //if (identity.Count() != 0)
                 {
                     var values = await _refreshToken.Item.GetBy(x => x.UserId == id);
                     if (values.Count() != 0)
@@ -84,7 +84,7 @@ namespace Quitaye.Server.Controllers
                     await repositoryWrapper.SaveAsync();
                     return Ok(u);
                 }
-                else return NotFound("Utilisateur non identifier");
+                //else return NotFound("Utilisateur non identifier");
             }
             catch (Exception ex)
             {
@@ -96,16 +96,16 @@ namespace Quitaye.Server.Controllers
         {
             try
             {
-                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
-                Equals(claim));
-                if (identity.Count() != 0)
+                //var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                //var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                //Equals(claim));
+                //if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.ItemA.GetAll();
                     
                     return Ok(result);
                 }
-                else return NotFound("User not indentified");
+                //else return NotFound("User not indentified");
             }
             catch (Exception ex)
             {
@@ -119,10 +119,10 @@ namespace Quitaye.Server.Controllers
         {
             try
             {
-                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
-                Equals(claim));
-                if (identity.Count() != 0)
+                //var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                //var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                //Equals(claim));
+                //if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.ItemA.GetBy(x => (x.Email == email));
                     if (result.Count() != 0)
@@ -131,7 +131,7 @@ namespace Quitaye.Server.Controllers
                     }
                     else return null;
                 }
-                else return NotFound("User not indentified");
+                //else return NotFound("User not indentified");
             }
             catch (Exception ex)
             {
@@ -143,16 +143,16 @@ namespace Quitaye.Server.Controllers
         {
             try
             {
-                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
-                Equals(claim));
-                if (identity.Count() != 0)
+                //var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                //var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                //Equals(claim));
+                //if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.ItemA.GetBy(x => x.Nom.Contains(search) || x.Prenom.Contains(search));
                     
                     return Ok(result);
                 }
-                else return NotFound("User not indentified");
+                //else return NotFound("User not indentified");
             }
             catch (Exception ex)
             {
@@ -172,33 +172,26 @@ namespace Quitaye.Server.Controllers
                 //Equals(((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value));
 
                 //if (identity.Count() != 0)
-                var u = await repositoryWrapper.ItemA.GetBy(x => x.Username == value.Username || x.Email == value.Email);
-                if (u.Count() != 0)
-                    return BadRequest("Nom d'utilisateur deja existant, veiller choisir un nom d'utilisateur unique");
+
+                if (!string.IsNullOrWhiteSpace(value.Username))
                 {
-                    if (value.Entreprise != null)
+                    var u = await repositoryWrapper.ItemA.GetBy(x => x.Username == value.Username);
+                    if (u.Count() != 0)
+                        return BadRequest("Nom d'utilisateur deja existant, veiller choisir un nom d'utilisateur unique");
                     {
-                        if (!string.IsNullOrWhiteSpace(value.Entreprise.Name))
-                        {
-                            var entreprise = await repositoryWrapper.ItemB.GetBy(x => x.Name == value.Entreprise.Name);
-                            if (entreprise.Count() == 0)
-                            {
-                                value.Entreprise.Id = Guid.NewGuid();
-                                await repositoryWrapper.ItemB.AddAsync(value.Entreprise);
-                                await repositoryWrapper.SaveAsync();
-                            }
-                            else value.Entreprise = entreprise.First();
-                        }
+                        await Add(value);
                     }
-                    //value.Id = Guid.NewGuid();
-                    if (value.DateOfCreation == Convert.ToDateTime("0001-01-01T00:00:00"))
-                        value.DateOfCreation = DateTime.Now;
-                    value.ServerTime = DateTime.Now;
-                    if (!string.IsNullOrWhiteSpace(value.Password))
-                    value.Password = _settings.PaswordEncryption(value.Password + _settings.Key);
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
                 }
+                else
+                {
+                    var u = await repositoryWrapper.ItemA.GetBy(x => x.Email == value.Email);
+                    if (u.Count() != 0)
+                        return BadRequest("Nom d'utilisateur deja existant, veiller choisir un nom d'utilisateur unique");
+                    {
+                        await Add(value);
+                    }
+                }
+                
                 //else return NotFound();
 
                 return Ok(value);
@@ -209,15 +202,41 @@ namespace Quitaye.Server.Controllers
             }
         }
 
+        async Task Add(User value)
+        {
+            if (value.Entreprise != null)
+            {
+                if (!string.IsNullOrWhiteSpace(value.Entreprise.Name))
+                {
+                    var entreprise = await repositoryWrapper.ItemB.GetBy(x => x.Name == value.Entreprise.Name);
+                    if (entreprise.Count() == 0)
+                    {
+                        value.Entreprise.Id = Guid.NewGuid();
+                        await repositoryWrapper.ItemB.AddAsync(value.Entreprise);
+                        await repositoryWrapper.SaveAsync();
+                    }
+                    else value.Entreprise = entreprise.First();
+                }
+            }
+            value.Id = Guid.NewGuid();
+            if (value.DateOfCreation == Convert.ToDateTime("0001-01-01T00:00:00"))
+                value.DateOfCreation = DateTime.Now;
+            value.ServerTime = DateTime.Now;
+            if (!string.IsNullOrWhiteSpace(value.Password))
+                value.Password = _settings.PaswordEncryption(value.Password + _settings.Key);
+            await repositoryWrapper.ItemA.AddAsync(value);
+            await repositoryWrapper.SaveAsync();
+        }
+
         public override async Task<ActionResult<IEnumerable<User>>> GetBy(string search, DateTime start, DateTime end)
         {
             try
             {
-                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
-                Equals(claim));
+                //var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                //var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                //Equals(claim));
 
-                if (identity.Count() != 0)
+                //if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.ItemA.GetBy(x => x.Nom.Contains(search) 
                     || x.Prenom.Contains(search) || x.Username.Contains(search) && 
@@ -225,7 +244,7 @@ namespace Quitaye.Server.Controllers
                     
                     return Ok(result);
                 }
-                else return NotFound("User not indentified");
+                //else return NotFound("User not indentified");
             }
             catch (Exception ex)
             {

@@ -118,7 +118,8 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     value.EntrepriseId = value.EntrepriseId;
-                    value.Id = identity.First().Id;
+                    value.UserId = identity.First().Id;
+                    value.Id = Guid.NewGuid();
                     await repositoryWrapper.ItemA.AddAsync(value);
                     await repositoryWrapper.SaveAsync();
                     return Ok(value);
@@ -144,11 +145,15 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetByInclude(x =>
-                    (x.EntrepriseId == entrepriseId) 
-                    && (x.Nature.Contains(search) || x.Type.Contains(search)), x => x.Num_Payement);
+                    var entrepriseUser = await _entrepriseUser.Item.GetBy(x => x.UserId == identity.First().Id);
+                    if (entrepriseUser.Count() != 0)
+                    {
+                        var result = await repositoryWrapper.Item.GetByInclude(x =>
+                        (x.EntrepriseId == entrepriseId)
+                        && (x.Nature.Contains(search) || x.Type.Contains(search)) && (x.Date.Date >= start && x.Date.Date <= end), x => x.Num_Payement);
 
-                    return Ok(result);
+                        return Ok(result);
+                    }else return null;
                 }
                 else return NotFound("User not indentified");
             }
