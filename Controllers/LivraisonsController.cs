@@ -2,6 +2,7 @@
 using Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Repository;
@@ -34,6 +35,51 @@ namespace Controllers
             _settings = settings;
             _entrepriseUserRepository = entrepriseUserRepository;
             _mapper = mapper;
+        }
+
+        [HttpDelete("{id}")]
+        public override async Task<ActionResult<Livraison>> Delete([FromRoute] Guid id)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    Livraison u = new Livraison();
+                    u.Id = id;
+                    repositoryWrapper.Item.Delete(u);
+                    await repositoryWrapper.SaveAsync();
+                    return Ok(u);
+                }
+                else return NotFound("Utilisateur non identifier");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        public override async Task<ActionResult<Livraison>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        {
+            try
+            {
+                var item = await repositoryWrapper.Item.GetBy(x => x.Id == id);
+                if (item.Count() != 0)
+                {
+                    var single = item.First();
+                    value.ApplyTo(single);
+                    await repositoryWrapper.SaveAsync();
+                }
+                else return NotFound("User not indentified");
+
+                return Ok(value);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
 
         public override async Task<ActionResult<IEnumerable<Livraison>>> GetAll()

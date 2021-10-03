@@ -2,6 +2,7 @@
 using Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Repository;
@@ -32,6 +33,51 @@ namespace Controllers
             _entrepriseUser = entrepriseUser;
             _settings = settings;
             _mapper = mapper;
+        }
+
+        [HttpDelete("{id}")]
+        public override async Task<ActionResult<Panier>> Delete([FromRoute] Guid id)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    Panier u = new Panier();
+                    u.Id = id;
+                    repositoryWrapper.Item.Delete(u);
+                    await repositoryWrapper.SaveAsync();
+                    return Ok(u);
+                }
+                else return NotFound("Utilisateur non identifier");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        public override async Task<ActionResult<Panier>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        {
+            try
+            {
+                var item = await repositoryWrapper.Item.GetBy(x => x.Id == id);
+                if (item.Count() != 0)
+                {
+                    var single = item.First();
+                    value.ApplyTo(single);
+                    await repositoryWrapper.SaveAsync();
+                }
+                else return NotFound("User not indentified");
+
+                return Ok(value);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
 
         public override async Task<ActionResult<IEnumerable<Panier>>> GetAll()
@@ -124,6 +170,8 @@ namespace Controllers
                     value.EntrepriseId = value.EntrepriseId;
                     value.UserId = identity.First().Id;
                     value.Id = Guid.NewGuid();
+                    if (value.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
+                        value.Date = DateTime.Now;
                     await repositoryWrapper.ItemA.AddAsync(value);
                     await repositoryWrapper.SaveAsync();
                     return Ok(value);

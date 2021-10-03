@@ -27,10 +27,10 @@ namespace Quitaye.Server
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var GoogleClient_Id = Configuration.GetSection("ConfigSettings")["GoogleClient_Id"].ToString();
-            var GoogleClient_Secret = Configuration.GetSection("ConfigSettings")["GoogleClient_Secret"].ToString();
-            var FacebookClient_Id = Configuration.GetSection("ConfigSettings")["FacebookClient_Id"].ToString();
-            var FacebookClient_Secret = Configuration.GetSection("ConfigSettings")["FacebookClient_Secret"].ToString();
+            //var GoogleClient_Id = Configuration.GetSection("ConfigSettings")["GoogleClient_Id"].ToString();
+            //var GoogleClient_Secret = Configuration.GetSection("ConfigSettings")["GoogleClient_Secret"].ToString();
+            //var FacebookClient_Id = Configuration.GetSection("ConfigSettings")["FacebookClient_Id"].ToString();
+            //var FacebookClient_Secret = Configuration.GetSection("ConfigSettings")["FacebookClient_Secret"].ToString();
             services.AddAutoMapper(typeof(Startup));
             services.ConfigureSqlContext(Configuration);
             services.ConfigureRepositoryWrapper(Configuration);
@@ -65,5 +65,8 @@ namespace Quitaye.Server
                 endpoints.MapControllers();
             });
         }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        
     }
 }

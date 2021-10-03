@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using AutoMapper;
+using Amazon.S3;
 
 namespace Quitaye.Controllers.Extensions
 {
@@ -52,6 +53,7 @@ namespace Quitaye.Controllers.Extensions
             services.Configure<ConfigSettings>(config.GetSection("ConfigSettings"));
             services.AddScoped<IConfigSettings, ConfigSettings>();
             services.AddScoped<IFacebook, FacebookService>();
+            services.AddAWSService<IAmazonS3>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
             services.AddScoped(typeof(IGenericRepository<,,>), typeof(GenericRepository<,,>));

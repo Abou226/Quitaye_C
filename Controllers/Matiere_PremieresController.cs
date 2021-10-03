@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-
+using Microsoft.AspNetCore.JsonPatch;
 namespace Controllers
 {
     [Route("api/[controller]")]
@@ -28,6 +28,51 @@ namespace Controllers
             repositoryWrapper = wrapper;
             _settings = settings;
             _mapper = mapper;
+        }
+
+        [HttpDelete("{id}")]
+        public override async Task<ActionResult<Matière_Premiere>> Delete([FromRoute] Guid id)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    Matière_Premiere u = new Matière_Premiere();
+                    u.Id = id;
+                    repositoryWrapper.Item.Delete(u);
+                    await repositoryWrapper.SaveAsync();
+                    return Ok(u);
+                }
+                else return NotFound("Utilisateur non identifier");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        public override async Task<ActionResult<Matière_Premiere>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        {
+            try
+            {
+                var item = await repositoryWrapper.Item.GetBy(x => x.Id == id);
+                if (item.Count() != 0)
+                {
+                    var single = item.First();
+                    value.ApplyTo(single);
+                    await repositoryWrapper.SaveAsync();
+                }
+                else return NotFound("User not indentified");
+
+                return Ok(value);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
 
         public override async Task<ActionResult<IEnumerable<Matière_Premiere>>> GetAll()

@@ -2,6 +2,7 @@
 using Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Repository;
@@ -32,6 +33,51 @@ namespace Controllers
             _settings = settings;
             _entrepriseUserRepository = entrepriseUserRepository;
             _mapper = mapper;
+        }
+
+        [HttpDelete("{id}")]
+        public override async Task<ActionResult<Vente>> Delete([FromRoute] Guid id)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    Vente u = new Vente();
+                    u.Id = id;
+                    repositoryWrapper.Item.Delete(u);
+                    await repositoryWrapper.SaveAsync();
+                    return Ok(u);
+                }
+                else return NotFound("Utilisateur non identifier");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        public override async Task<ActionResult<Vente>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        {
+            try
+            {
+                var item = await repositoryWrapper.Item.GetBy(x => x.Id == id);
+                if (item.Count() != 0)
+                {
+                    var single = item.First();
+                    value.ApplyTo(single);
+                    await repositoryWrapper.SaveAsync();
+                }
+                else return NotFound("User not indentified");
+
+                return Ok(value);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
 
         public override async Task<ActionResult<IEnumerable<Vente>>> GetAll()
@@ -112,35 +158,6 @@ namespace Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
-
-        
-        //public override async Task<ActionResult<IEnumerable<Vente>>> GetBy(string search, DateTime start, DateTime end)
-        //{
-        //    try
-        //    {
-        //        var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-        //        var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
-        //        Equals(claim));
-
-        //        if (identity.Count() != 0)
-        //        {
-
-        //            var result = await repositoryWrapper.Item.GetByInclude(x => x.Date.Date >= start && x.Date <= end 
-        //            && (x.Client.Prenom.Contains(search) || x.Client.Nom.Contains(search)
-        //            || x.Contact_Livraison.Contains(search) || x.Heure_Livraison.Contains(search)
-        //            || x.Offre.Gamme.Marque.Name.Contains(search) || x.Offre.Gamme.Style.Name.Contains(search)
-        //            || x.Offre.Gamme.Categorie.Name.Contains(search)), x => x.Offre, x => x.Offre.Gamme,
-        //            x => x.Offre.Gamme.Marque, x => x.Offre.Taille, x => x.Offre.Model, x => x.Offre.Gamme.Categorie);
-
-        //            return Ok(result);
-        //        }
-        //        else return NotFound("User not indentified");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-        //    }
-        //}
 
         [HttpGet("{entrepriseId:Guid}/{start:DateTime}/{end:DateTime}")]
         [Authorize]
