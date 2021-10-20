@@ -17,9 +17,5 @@ namespace Models
         [ForeignKey(nameof(Pays))]
         public Guid? PaysId { get; set; }
         public Pays Pays { get; set; }
-
-        [ForeignKey(nameof(Entreprise))]
-        public Guid? EntrepriseId { get; set; }
-        public Entreprise Entreprise { get; set; }
     }
 }

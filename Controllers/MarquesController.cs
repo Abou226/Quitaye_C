@@ -24,6 +24,7 @@ namespace Controllers
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
+        private readonly IFileManager _fileManager;
 
         public MarquesController(IGenericRepositoryWrapper<Marque, User> wrapper,
             IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, IMapper mapper) : base(wrapper)
@@ -132,11 +133,21 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.EntrepriseId == identity.First().EntrperiseId);
+                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.UserId == identity.First().Id);
                     if (entreprise.Count() != 0)
                     {
-                        var result = await repositoryWrapper.Item.GetBy(x => (x.EntrepriseId == id));
-                        return Ok(result);
+                        List<Guid> list = new List<Guid>();
+                        foreach (var item in entreprise)
+                        {
+                            list.Add((Guid)item.UserId);
+                        }
+
+                        if (list.Contains(identity.First().Id))
+                        {
+                            var result = await repositoryWrapper.Item.GetBy(x => (x.EntrepriseId == id));
+                            return Ok(result);
+                        }
+                        else return NotFound("Non membre de cette entreprise");
                     }
                     else return NotFound("Non membre de cette entreprise");
                 }
@@ -148,7 +159,7 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Marque>> AddAsync([FromBody] Marque value)
+        public override async Task<ActionResult<Marque>> AddAsync([FromForm] Marque value)
         {
             try
             {
@@ -161,6 +172,12 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
+                    if (value.Image != null)
+                    {
+                       var result = await _fileManager.Upload(_settings.AccessKey, _settings.SecretKey, _settings.BucketName, Amazon.RegionEndpoint.USEast1, value.Image);
+                        value.Url = result.Url;
+                    }
+
                     value.Id = Guid.NewGuid();
                     value.UserId = identity.First().Id;
                     value.EntrepriseId = value.EntrepriseId;

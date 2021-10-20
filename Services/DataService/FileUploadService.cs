@@ -117,7 +117,7 @@ namespace Services
                     FilePath = filePath,
                     Key = keyName,
                     StorageClass = S3StorageClass.Standard,
-                    CannedACL = S3CannedACL.PublicReadWrite,
+                    CannedACL = S3CannedACL.PublicRead,
                     PartSize = 6291456,
                 };
 

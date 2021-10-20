@@ -21,12 +21,18 @@ namespace Controllers
         private readonly IGenericRepositoryWrapper<Matière_Premiere, User> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
+        private readonly IFileManager _fileManager;
+        private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
 
-        public Matiere_PremieresController(IGenericRepositoryWrapper<Matière_Premiere, User> wrapper,
-            IConfigSettings settings, IMapper mapper) : base(wrapper)
+        public Matiere_PremieresController(IGenericRepositoryWrapper<Matière_Premiere, User> wrapper, 
+            IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, IFileManager fileManager, 
+            IConfigSettings settings, 
+            IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
             _settings = settings;
+            _fileManager = fileManager;
+            _entrepriseUser = entrepriseUser;
             _mapper = mapper;
         }
 
@@ -96,7 +102,7 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Matière_Premiere>> AddAsync([FromBody] Matière_Premiere value)
+        public override async Task<ActionResult<Matière_Premiere>> AddAsync([FromForm] Matière_Premiere value)
         {
             try
             {
@@ -109,6 +115,12 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
+
+                    if (value.Image != null)
+                    {
+                        var result = await _fileManager.Upload(_settings.AccessKey, _settings.SecretKey, _settings.BucketName, Amazon.RegionEndpoint.USEast1, value.Image);
+                        value.Url = result.Url;
+                    }
                     //if (value.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
                     //    value.Date = DateTime.Now;
                     //value.ServerTime = DateTime.Now;
@@ -151,5 +163,42 @@ namespace Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
+        [HttpGet("{id:Guid}")]
+        public async Task<ActionResult<IEnumerable<Model>>> GetBy(Guid id)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.UserId == identity.First().Id);
+                    if (entreprise.Count() != 0)
+                    {
+                        List<Guid> list = new List<Guid>();
+                        foreach (var item in entreprise)
+                        {
+                            list.Add((Guid)item.UserId);
+                        }
+
+                        if (list.Contains(identity.First().Id))
+                        {
+                            var result = await repositoryWrapper.Item.GetBy(x => (x.EntrepriseId == id));
+                            return Ok(result.OrderBy(x => x.Name));
+                        }
+                        else return NotFound("Non membre cette entreprise");
+                    }
+                    else return NotFound("Non membre de cette entreprise");
+                }
+                else return NotFound("User not indentified");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
     }
 }

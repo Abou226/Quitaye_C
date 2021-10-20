@@ -24,13 +24,14 @@ namespace Controllers
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
-
+        private readonly IFileManager _fileManager;
         public GammesController(IGenericRepositoryWrapper<Gamme, User, Marque, Style, Categorie> wrapper,
-            IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser,
+            IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, IFileManager fileManager,
             IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
             _entrepriseUser = entrepriseUser;
+            _fileManager = fileManager;
             _settings = settings;
             _mapper = mapper;
         }
@@ -134,11 +135,22 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.EntrepriseId == identity.First().EntrperiseId);
+                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.UserId == identity.First().Id);
                     if (entreprise.Count() != 0)
                     {
-                        var result = await repositoryWrapper.Item.GetBy(x => (x.EntrepriseId == id));
-                        return Ok(result);
+                        List<Guid> list = new List<Guid>();
+                        foreach (var item in entreprise)
+                        {
+                            list.Add((Guid)item.UserId);
+                        }
+
+                        if (list.Contains(identity.First().Id))
+                        {
+                            var result = await repositoryWrapper.Item.GetBy(x => (x.EntrepriseId == id));
+                            return Ok(result);
+                        }
+                        else
+                            return NotFound("Non membre de cette entreprise");
                     }
                     else return NotFound("Non membre de cette entreprise");
                 }
@@ -150,7 +162,7 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Gamme>> AddAsync([FromBody] Gamme value)
+        public override async Task<ActionResult<Gamme>> AddAsync([FromForm] Gamme value)
         {
             try
             {
@@ -163,6 +175,14 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
+                    if (value.Image != null)
+                    {
+                        var result = await _fileManager.Upload(_settings.AccessKey, 
+                            _settings.SecretKey, _settings.BucketName, 
+                            Amazon.RegionEndpoint.USEast1, value.Image);
+                        value.Url = result.Url;
+                    }
+
                     value.Id = Guid.NewGuid();
                     value.UserId = identity.First().Id;
                     value.EntrepriseId = value.EntrepriseId;

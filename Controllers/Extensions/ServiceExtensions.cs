@@ -53,6 +53,7 @@ namespace Quitaye.Controllers.Extensions
             services.Configure<ConfigSettings>(config.GetSection("ConfigSettings"));
             services.AddScoped<IConfigSettings, ConfigSettings>();
             services.AddScoped<IFacebook, FacebookService>();
+            services.AddScoped<IFileManager, FileManager>();
             services.AddAWSService<IAmazonS3>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));

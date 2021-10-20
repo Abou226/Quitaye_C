@@ -1,13 +1,119 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="Quitaye.Views.NouvelleEntreprise" 
-             NavigationPage.HasNavigationBar="False">
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+             xmlns:pancake="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" 
+             xmlns:local="clr-namespace:Quitaye.ViewModels" xmlns:models="clr-namespace:Models;assembly=Models"
+             x:Class="Quitaye.Views.NouvelleEntreprise" NavigationPage.HasNavigationBar="False">
+
+    <ContentPage.BindingContext>
+        <local:NouvelleEntrepriseViewModel/>
+    </ContentPage.BindingContext>
+
     <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
-        </StackLayout>
+        <ScrollView Orientation="Vertical">
+            <Grid>
+                <Image Source="PhoneBackground.png" HeightRequest="600" Aspect="Fill"/>
+                <Grid RowDefinitions="Auto, *" BackgroundColor="Transparent">
+
+                    <pancake:PancakeView Grid.Row="1" CornerRadius="20" 
+                                         BackgroundColor="{DynamicResource VeryLight}" Margin="25,35,25,65">
+                        <pancake:PancakeView.Border>
+                            <pancake:Border Color="Transparent" Thickness="2"/>
+                        </pancake:PancakeView.Border>
+                        <pancake:PancakeView.Shadow>
+                            <pancake:DropShadow Color="{DynamicResource FourthColor}" 
+                                                Offset="10,10"/>
+                        </pancake:PancakeView.Shadow>
+                        <StackLayout HorizontalOptions="Center" VerticalOptions="CenterAndExpand" Margin="30">
+                            <!--<Label  HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    TextColor="{DynamicResource FourthColor}" 
+                                     FontAttributes="Bold" 
+                                     >
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding Prenom}"/>
+                                        <Span Text=" "/>
+                                        <Span Text="{Binding Nom_Famille}"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>-->
+                            <Label  HorizontalOptions="Center"
+                                    VerticalOptions="Center" Margin="0,0,0,0"
+                                    TextColor="{DynamicResource Secondary}" 
+                                    FontSize="40" FontAttributes="Bold" 
+                                    Text="Votre entreprise" >
+                            </Label>
+                            <Grid >
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition/>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                    <RowDefinition/>
+                                    <RowDefinition />
+
+                                </Grid.RowDefinitions>
+
+                                <Entry Placeholder="Nom entreprise" Text="{Binding Nom_Entreprise, Mode=TwoWay}"
+                                       PlaceholderColor="{DynamicResource Secondary}" 
+                                       TextColor="{DynamicResource Secondary}" />
+
+                                <Picker Grid.Row="1" Title="Type_Entreprise..." 
+                                            HorizontalOptions="FillAndExpand"
+                                            ItemsSource="{Binding Types}" 
+                                            
+                                            TitleColor="{DynamicResource Secondary}" 
+                                            VerticalOptions="Center" 
+                                            ItemDisplayBinding="{Binding Type}"
+                                            TextColor="{DynamicResource Secondary}" 
+                                            SelectedItem="{Binding Type, Mode=TwoWay}"/>
+                                <Grid Grid.Row="2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <Picker Title="Pays..."  
+                                            HorizontalOptions="FillAndExpand"
+                                            ItemsSource="{Binding Pays}" 
+                                            
+                                            TitleColor="{DynamicResource Secondary}" 
+                                            VerticalOptions="Center" 
+                                            
+                                            ItemDisplayBinding="{Binding NameEn}"
+                                            TextColor="{DynamicResource Secondary}" 
+                                            SelectedItem="{Binding Pay, Mode=TwoWay}"/>
+
+                                    <Picker Title="Ville..."  Grid.Column="1"
+                                            HorizontalOptions="FillAndExpand"
+                                            ItemsSource="{Binding Villes}" 
+                                            
+                                            TitleColor="{DynamicResource Secondary}" 
+                                            VerticalOptions="Center" 
+                                            ItemDisplayBinding="{Binding Name}"
+                                            TextColor="{DynamicResource Secondary}" 
+                                            SelectedItem="{Binding Ville, Mode=TwoWay}"/>
+                                </Grid>
+                                <Entry Grid.Row="3" Placeholder="Adresse" 
+                                       Text="{Binding Adresse, Mode=TwoWay}" 
+                                       PlaceholderColor="{DynamicResource Secondary}" 
+                                       TextColor="{DynamicResource Secondary}" />
+
+                                <Entry  Text="{Binding Nb_Employés, Mode=TwoWay}" Grid.Row="4"
+                                            Placeholder="Nb Employés"  Keyboard="Numeric" 
+                                            PlaceholderColor="{DynamicResource Secondary}" 
+                                            TextColor="{DynamicResource Secondary}"/>
+
+                                <Button Text="Valider" Grid.Row="5" HorizontalOptions="Center" 
+                                        TextColor="{DynamicResource ThirdColor}" 
+                                        CornerRadius="20" 
+                                        BackgroundColor="{DynamicResource Secondary}" 
+                                        Command="{Binding AddCommand}"/>
+                            </Grid>
+                        </StackLayout>
+                    </pancake:PancakeView>
+                </Grid>
+            </Grid>
+        </ScrollView>
     </ContentPage.Content>
 </ContentPage>

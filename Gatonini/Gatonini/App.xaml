@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Application xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Gatonini.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <Color x:Key="Primary">#F2EE57</Color>
+            <Color x:Key="Secondary">#B41E1F</Color>
+            <Color x:Key="ThirdColor">#1C1E1C</Color>
+            <Color x:Key="Light">#e1edf3</Color>
+            <Color x:Key="VeryLight">#ffffff</Color>
+            <Color x:Key="LightDark">#7C7878</Color>
+
+            <Style x:Key="ButtonOutline" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="Transparent"/>
+                <Setter Property="TextColor" Value="{StaticResource Primary}"/>
+                <Setter Property="BorderColor" Value="{StaticResource Primary}"/>
+                <Setter Property="BorderWidth" Value="1"/>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

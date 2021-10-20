@@ -13,8 +13,5 @@ namespace Models
         [Required(ErrorMessage = "Le nom est requis")]
         [StringLength(60, ErrorMessage = "La taille du nom ne peut dépasser 60 characters")]
         public string Name { get; set; }
-        [ForeignKey(nameof(Entreprise))]
-        public Guid? EntrepriseId { get; set; }
-        public Entreprise Entreprise { get; set; }
     }
 }

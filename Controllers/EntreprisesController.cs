@@ -18,13 +18,13 @@ namespace Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class EntreprisesController : GenericController<Entreprise, User, EntrepriseUser>
+    public class EntreprisesController : GenericController<Entreprise, User, Type_Entreprise, Quartier, EntrepriseUser>
     {
-        private readonly IGenericRepositoryWrapper<Entreprise, User, EntrepriseUser> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<Entreprise, User, Type_Entreprise, Quartier, EntrepriseUser> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
 
-        public EntreprisesController(IGenericRepositoryWrapper<Entreprise, User, EntrepriseUser> wrapper,
+        public EntreprisesController(IGenericRepositoryWrapper<Entreprise, User, Type_Entreprise, Quartier, EntrepriseUser> wrapper,
             IConfigSettings settings, IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
@@ -42,10 +42,27 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
+                    var entrepriseUser = await repositoryWrapper.ItemE.GetBy(x => x.EntrepriseId == id);
+
+                    List<Guid> list = new List<Guid>();
+                    foreach (var item in entrepriseUser)
+                    {
+                        list.Add((Guid)(item.UserId));
+                    }
                     Entreprise u = new Entreprise();
                     u.Id = id;
-                    repositoryWrapper.Item.Delete(u);
-                    await repositoryWrapper.SaveAsync();
+                    if (list.Contains(identity.First().Id))
+                    {
+                        foreach (var item in entrepriseUser)
+                        {
+                            repositoryWrapper.ItemE.Delete(item);
+                            await repositoryWrapper.SaveAsync();
+                        }
+
+                        repositoryWrapper.Item.Delete(u);
+                        await repositoryWrapper.SaveAsync();
+                    }
+
                     return Ok(u);
                 }
                 else return NotFound("Utilisateur non identifier");
@@ -87,7 +104,7 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var entrepriseUser = await repositoryWrapper.ItemC.GetBy(x => x.UserId == identity.First().Id);
+                    var entrepriseUser = await repositoryWrapper.ItemE.GetBy(x => x.UserId == identity.First().Id);
                     if (entrepriseUser.Count() != 0)
                     {
                         List<Guid> list = new List<Guid>();
@@ -97,7 +114,7 @@ namespace Controllers
                         }
                         var gro = from l in list group l by new { EntrepriseId = l } into gr select gr.Key.EntrepriseId;
 
-                        var result = await repositoryWrapper.Item.GetBy(x => gro.Contains(x.Id));
+                        var result = await repositoryWrapper.Item.GetByInclude(x => gro.Contains(x.Id), x => x.Type, x => x.Quartier);
                         return Ok(result);
                     }
                     else return null;
@@ -119,7 +136,7 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.ItemC.GetBy(x => x.UserId == identity.First().Id);
+                    var result = await repositoryWrapper.ItemE.GetBy(x => x.UserId == identity.First().Id);
                     if (result.Count() != 0)
                     {
                         List<string> list = new List<string>();
@@ -127,7 +144,7 @@ namespace Controllers
                         {
                             list.Add(item.EntrepriseId.ToString());
                         }
-                        var entreprise = await repositoryWrapper.Item.GetBy(x => list.Contains(x.Id.ToString()));
+                        var entreprise = await repositoryWrapper.Item.GetByInclude(x => list.Contains(x.Id.ToString()), x => x.Type, x => x.Quartier);
 
                         return Ok(entreprise);
                     }
@@ -152,10 +169,10 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.ItemC.GetBy(x => x.UserId == identity.First().Id);
+                    var result = await repositoryWrapper.ItemE.GetBy(x => x.UserId == identity.First().Id);
                     if (result.Count() != 0)
                     {
-                        var entreprise = await repositoryWrapper.Item.GetBy(x => x.Id == id);
+                        var entreprise = await repositoryWrapper.Item.GetByInclude(x => x.Id == id, x => x.Type, x => x.Quartier);
                         return Ok(entreprise);
                     } else return null;
                 }
@@ -188,6 +205,14 @@ namespace Controllers
                     await repositoryWrapper.ItemA.AddAsync(value);
                     await repositoryWrapper.SaveAsync();
 
+                    EntrepriseUser use = new EntrepriseUser();
+                    use.Id = Guid.NewGuid();
+                    use.EntrepriseId = value.Id;
+                    use.DateOfAdd = DateTime.Now;
+                    use.UserId = identity.First().Id;
+                    await repositoryWrapper.ItemE.AddAsync(use);
+                    await repositoryWrapper.SaveAsync();
+
                     return Ok(value);
                 }
                 else return NotFound("User not identified");
@@ -208,7 +233,7 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetBy(x => x.Name.Contains(search));
+                    var result = await repositoryWrapper.Item.GetByInclude(x => x.Name.Contains(search), x => x.Type, x => x.Quartier);
 
                     return Ok(result);
                 }
@@ -231,7 +256,7 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetBy(x => x.Name.Contains(search));
+                    var result = await repositoryWrapper.Item.GetByInclude(x => x.Name.Contains(search), x => x.Type, x => x.Quartier);
 
                     return Ok(result);
                 }
@@ -255,8 +280,8 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetBy(x => x.OwnerId == identity.FirstOrDefault().Id 
-                    && (x.DateOfCreation.Date >= start && x.DateOfCreation.Date <= end));
+                    var result = await repositoryWrapper.Item.GetByInclude(x => x.OwnerId == identity.FirstOrDefault().Id 
+                    && (x.DateOfCreation.Date >= start && x.DateOfCreation.Date <= end), x => x.Type, x => x.Quartier);
 
                     return Ok(result);
                 }
@@ -280,7 +305,7 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetBy(x =>(x.DateOfCreation.Date >= start && x.DateOfCreation.Date <= end));
+                    var result = await repositoryWrapper.Item.GetByInclude(x =>(x.DateOfCreation.Date >= start && x.DateOfCreation.Date <= end), x => x.Type, x => x.Quartier);
 
                     return Ok(result);
                 }

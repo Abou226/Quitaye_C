@@ -21,11 +21,6 @@ namespace Models
 
         [StringLength(150, ErrorMessage = "La taille de l'url ne peut dépasser 150 characters")]
         public string Url { get; set; }
-        public DateTime DateOfCreation { get; set; }
-
-        [ForeignKey(nameof(User))]
-        public Guid? UserId { get; set; }
-        public User User { get; set; }
 
         [NotMapped]
         public IFormFile Image { get; set; }

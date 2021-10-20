@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
-             xmlns:local="clr-namespace:Quitaye.ViewModels"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Quitaye.Views.InitialPage" 
-             xmlns:pancake="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+             xmlns:pancake="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" 
+             xmlns:local="clr-namespace:Quitaye.ViewModels" xmlns:models="clr-namespace:Models;assembly=Models"
              NavigationPage.HasNavigationBar="False">
 
     <ContentPage.BindingContext>
@@ -15,11 +15,7 @@
             <Grid>
                 <Image Source="PhoneBackground.png" HeightRequest="600" Aspect="Fill"/>
                 <Grid RowDefinitions="Auto, *" BackgroundColor="Transparent">
-                    <Label Text="{Binding Title}" TextColor="{DynamicResource Secondary}" 
-                   FontSize="30" FontAttributes="Bold" 
-                   HorizontalTextAlignment="Center" Margin="0,50,0,0">
-                        
-                    </Label>
+
                     <pancake:PancakeView Grid.Row="1" CornerRadius="20" 
                                          BackgroundColor="{DynamicResource VeryLight}" Margin="25,35,25,65">
                         <pancake:PancakeView.Border>
@@ -29,27 +25,77 @@
                             <pancake:DropShadow Color="{DynamicResource FourthColor}" 
                                                 Offset="10,10"/>
                         </pancake:PancakeView.Shadow>
-                        <StackLayout HorizontalOptions="Center" VerticalOptions="Center" Margin="30">
-                            <!--<Label  HorizontalOptions="Center"
-                                    VerticalOptions="Center"
-                                    TextColor="{DynamicResource FourthColor}" 
-                                     FontAttributes="Bold" 
-                                     >
-                                <Label.FormattedText>
-                                    <FormattedString>
-                                        <Span Text="{Binding Prenom}"/>
-                                        <Span Text=" "/>
-                                        <Span Text="{Binding Nom_Famille}"/>
-                                    </FormattedString>
-                                </Label.FormattedText>
-                            </Label>-->
+                        <StackLayout HorizontalOptions="Center" 
+                                     VerticalOptions="Center" Margin="30">
                             
                             <Label  HorizontalOptions="Center"
                                     VerticalOptions="Center"
                                     TextColor="{DynamicResource Secondary}" 
-                                    FontSize="40" FontAttributes="Bold" 
-                                    Text="Créer votre première entreprise" >
+                                    FontSize="{Binding FontSize}" FontAttributes="Bold" 
+                                    Text="{Binding HeaderText}"
+                                    IsVisible="{Binding MakeHeaderVisible}" >
                             </Label>
+
+                            <CollectionView ItemsSource="{Binding Entreprises}" 
+                                            SelectionMode="Single"
+                                            Margin="0,10" HeightRequest="200">
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
+                                </CollectionView.ItemsLayout>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackLayout x:DataType="models:Entreprise">
+                                            
+                                            <VisualStateManager.VisualStateGroups>
+                                                <VisualStateGroup x:Name="ColorStates">
+                                                    <VisualState x:Name="Normal" />
+                                                    <VisualState x:Name="Selected">
+                                                        <VisualState.Setters>
+                                                            <Setter TargetName="myPancakeView" 
+                                                                            Property="pancake:PancakeView.BackgroundColor" 
+                                                                Value="Azure"/>
+                                                        </VisualState.Setters>
+                                                    </VisualState>
+                                                </VisualStateGroup>
+                                            </VisualStateManager.VisualStateGroups>
+
+                                            <pancake:PancakeView CornerRadius="30" Margin="20,10,20,10"
+                                                         Padding="5,5,10,5" Grid.Row="1" BackgroundColor="{DynamicResource Primary}" >
+                                                <pancake:PancakeView.Border>
+                                                    <pancake:Border Color="{DynamicResource Secondary}" Thickness="3"/>
+                                                </pancake:PancakeView.Border>
+                                                <StackLayout>
+                                                    <Label  TextColor="{DynamicResource Secondary}" 
+                                                            Text="{Binding Name}"
+                                                            HorizontalOptions="Center" 
+                                                            VerticalOptions="Center" FontAttributes="Bold" >
+                                                    </Label>
+                                                    <Label Text="{Binding Type.Type}" 
+                                                           TextColor="{DynamicResource FourthColor}" 
+                                                           FontSize="14" HorizontalOptions="Center" />
+                                                    <Label 
+                                                           TextColor="{DynamicResource FourthColor}" HorizontalOptions="Center"
+                                                           FontSize="14">
+                                                        <Label.FormattedText>
+                                                            <FormattedString >
+                                                                <Span Text="Adresse : " FontAttributes="Bold"/>
+                                                                <Span Text="{Binding Quartier.Name}"/>
+                                                            </FormattedString>
+                                                        </Label.FormattedText>
+                                                    </Label>
+                                                </StackLayout>
+                                            </pancake:PancakeView>
+                                            <StackLayout.GestureRecognizers>
+                                                <TapGestureRecognizer 
+                                                        NumberOfTapsRequired="1"
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:InitialViewModel}}, Path=EntrepriseTapped}"		
+                                                        CommandParameter="{Binding .}">
+                                                </TapGestureRecognizer>
+                                            </StackLayout.GestureRecognizers>
+                                        </StackLayout>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
 
                             <pancake:PancakeView CornerRadius="30" Margin="20,60,20,30"
                                                          Padding="5,5,10,5" Grid.Row="1" BackgroundColor="{DynamicResource ThirdColor}" >
@@ -59,13 +105,13 @@
                                 <StackLayout  
                                                  Margin="8,0,8,0" Grid.Row="0" 
                                                  Orientation="Horizontal">
-                                    <Image  Source="facebook.png" BackgroundColor="Transparent" WidthRequest="30"/>
-                                    <Label Text="Créer une entreprise" TextColor="{DynamicResource Secondary}" 
+                                    <Image  Source="add.png" BackgroundColor="Transparent" WidthRequest="30"/>
+                                    <Label Text="Créer un project" TextColor="{DynamicResource Secondary}" 
                                                HorizontalOptions="Center" VerticalOptions="Center" FontSize="14" />
                                     <StackLayout.GestureRecognizers>
                                         <TapGestureRecognizer 
                                                         NumberOfTapsRequired="1"
-                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:LoginViewModel}}, Path=FacebookCommand}"		
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:InitialViewModel}}, Path=AddCommand}"		
                                                         CommandParameter="{Binding .}">
                                         </TapGestureRecognizer>
                                     </StackLayout.GestureRecognizers>

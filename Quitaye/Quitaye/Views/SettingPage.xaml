@@ -1,0 +1,507 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+             xmlns:pancake="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" 
+             xmlns:models="clr-namespace:Models;assembly=Models" 
+             xmlns:viewmodel="clr-namespace:Quitaye" 
+             xmlns:converters="clr-namespace:Quitaye.Converters"
+             x:Class="Quitaye.Views.SettingPage" 
+             NavigationPage.HasNavigationBar="False">
+
+    <ContentPage.BindingContext>
+        <viewmodel:SettingViewModel/>
+    </ContentPage.BindingContext>
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:InvertBooleanConverter x:Key="invertBooleanConverter" />
+            <converters:DynamicColorConverter x:Key="dynamicColorConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid>
+        <Grid x:Name="UnitéProduction" IsVisible="{Binding IsUsine}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50" />
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid BackgroundColor="{DynamicResource Primary}">
+                <Grid HeightRequest="50" BackgroundColor="{DynamicResource Primary}" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackLayout Orientation="Horizontal" HeightRequest="40"
+                                         HorizontalOptions="StartAndExpand" 
+                                         WidthRequest="35">
+                        <ImageButton Source="Back.png" 
+                                             Command="{Binding BackCommand}"
+                                             BackgroundColor="{DynamicResource Primary}" 
+                                             WidthRequest="30" Margin="15,0,0,0"/>
+                        <!--<StackLayout.GestureRecognizers>
+                                <TapGestureRecognizer 
+                                                NumberOfTapsRequired="1"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type local:CartViewModel}}, Path=BackCommand}"
+                                                CommandParameter="{Binding .}">
+                                </TapGestureRecognizer>
+                                </StackLayout.GestureRecognizers>-->
+                    </StackLayout>
+                    <StackLayout    Orientation="Horizontal" Grid.Column="1"
+                                            HorizontalOptions="CenterAndExpand">
+                        <Label Text="{Binding Entreprise.Name, StringFormat='Paramettre {0}'}" HorizontalOptions="Center" 
+                                       VerticalOptions="Center" FontAttributes="Bold" 
+                                       FontSize="25" TextColor="{DynamicResource Secondary}"/>
+                    </StackLayout>
+                </Grid>
+            </Grid>
+            <ScrollView Grid.Row="1" Orientation="Vertical" MinimumHeightRequest="800">
+                <StackLayout Orientation="Vertical" BackgroundColor="{DynamicResource Primary}">
+                    
+                    <RefreshView 
+                            IsRefreshing="{Binding IsNotBusy, Mode=TwoWay}"
+                            Command="{Binding RefreshCommand}" 
+                            RefreshColor="{DynamicResource Primary}" >
+                        <StackLayout Margin="20,5">
+                            <StackLayout Orientation="Vertical">
+                                <Label Text="Sections" TextColor="{DynamicResource Secondary}" 
+                                       FontSize="16" 
+                                       FontAttributes="Bold" Margin="0,20,0,0"/>
+                                <CollectionView ItemsSource="{Binding Sections}"
+                                                SelectionMode="Single"
+                                                x:Name="Section_CollectionView"
+                                                     Margin="0,10,0,0"
+                                                    HeightRequest="70">
+                                    <CollectionView.ItemsLayout>
+                                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10" />
+                                    </CollectionView.ItemsLayout>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <pancake:PancakeView Grid.Column="1" CornerRadius="30" HeightRequest="50" 
+                                                     WidthRequest="100" x:DataType="models:Section"
+                                                         Margin="5,5,5,5" 
+                                                         BackgroundColor="{DynamicResource VeryLight}" >
+                                                <pancake:PancakeView.Border>
+                                                    <pancake:Border Color="{DynamicResource Primary}" 
+                                                            Thickness="3"/>
+                                                </pancake:PancakeView.Border>
+                                                <pancake:PancakeView.Shadow>
+                                                    <pancake:DropShadow Color="{DynamicResource Primary}" 
+                                                                Offset="10,10"/>
+                                                </pancake:PancakeView.Shadow>
+                                                <Grid>
+                                                    <Grid>
+                                                        <!--<Frame CornerRadius="30" Padding="-10" Margin="0"  >-->
+                                                        <pancake:PancakeView CornerRadius="35" Margin="0,0,0,0">
+                                                            <Grid>
+                                                                <Grid.RowDefinitions>
+                                                                    <RowDefinition />
+                                                                    <RowDefinition Height="auto"/>
+                                                                </Grid.RowDefinitions>
+                                                                <Image Source="{Binding CurrentIcon}"     
+                                                                    HorizontalOptions="Center"
+                                                                    VerticalOptions="Center"
+                                                                    Aspect="AspectFill" WidthRequest="25" />
+                                                            </Grid>
+                                                        </pancake:PancakeView>
+                                                        <!--</Frame>-->
+                                                    </Grid>
+                                                </Grid>
+                                                <pancake:PancakeView.GestureRecognizers>
+                                                    <TapGestureRecognizer 
+                                                        NumberOfTapsRequired="1"
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:SettingViewModel}}, Path=SectionTappedCommand}"		
+                                                        CommandParameter="{Binding .}">
+                                                    </TapGestureRecognizer>
+                                                </pancake:PancakeView.GestureRecognizers>
+                                            </pancake:PancakeView>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                    <CollectionView.EmptyView>
+                                        <ContentView>
+                                            <StackLayout HorizontalOptions="CenterAndExpand"
+                                            VerticalOptions="CenterAndExpand">
+                                                <Label  Text="Aucun resultat à afficher."
+                                                        Margin="10,25,10,10"
+                                                        FontAttributes="Bold"
+                                                        FontSize="18"
+                                                        HorizontalOptions="Fill"
+                                                        HorizontalTextAlignment="Center" 
+                                                        TextColor="{DynamicResource Secondary}"/>
+                                                <Label  Text="Verifier votre connection internet !"
+                                                        FontAttributes="Italic"
+                                                        FontSize="12"
+                                                        HorizontalOptions="Fill"
+                                                        HorizontalTextAlignment="Center" 
+                                                        TextColor="{DynamicResource Secondary}" />
+                                            </StackLayout>
+                                        </ContentView>
+                                    </CollectionView.EmptyView>
+                                </CollectionView>
+
+                                <StackLayout IsVisible="{Binding IsGamme, Converter={StaticResource invertBooleanConverter}}">
+                                    <Label  Text="{Binding CurrentSection.Nom, StringFormat='{0}..'}" 
+                                        TextColor="{DynamicResource Secondary}" 
+                                        FontSize="16" 
+                                        FontAttributes="Bold" 
+                                        Margin="0,20,0,0"/>
+                                    <StackLayout Margin="0,10,0,0" Orientation="Horizontal">
+
+                                        <Entry  Margin="5,0" HorizontalOptions="FillAndExpand" 
+                                            VerticalOptions="Center" Text="{Binding Nom, Mode=TwoWay}" 
+                                            Placeholder="Nom...." 
+                                            TextColor="{DynamicResource Secondary}" />
+                                    </StackLayout>
+                                    <StackLayout Orientation="Horizontal">
+
+                                        <Entry  Margin="5,0" HorizontalOptions="FillAndExpand" 
+                                            Placeholder="Description..."
+                                            VerticalOptions="Center" 
+                                            Text="{Binding Description, Mode=TwoWay}" 
+                                            TextColor="{DynamicResource Secondary}" />
+                                    </StackLayout>
+
+                                    <StackLayout Orientation="Horizontal" >
+                                        <Label Text="Style Spécial : " HorizontalOptions="Center" VerticalOptions="Center"
+                                                    TextColor="{DynamicResource Secondary}" 
+                                                    IsVisible="{Binding IsStyle}" />
+                                        <CheckBox IsChecked="False" 
+                                                        Color="{DynamicResource Secondary}" 
+                                                        IsVisible="{Binding IsStyle}" />
+
+                                        <ImageButton    Margin="0,-5" Grid.Column="2"
+                                                            Source="add_image.png" 
+                                                            HorizontalOptions="EndAndExpand" 
+                                                            VerticalOptions="Center"
+                                                            HeightRequest="30" 
+                                                            WidthRequest="60"
+                                                            CornerRadius="15" 
+                                                            Command="{Binding AddImageComand}"
+                                                            BackgroundColor="{DynamicResource Primary}" />
+                                    </StackLayout>
+                                    
+                                    <Image  Grid.Row="0" HorizontalOptions="Center"
+                                        VerticalOptions="Start" 
+                                        Source="{Binding PictureSource}" 
+                                        HeightRequest="250" />
+                                    <Button Margin="0,20,0,0" 
+                                        Command="{Binding AddCommand}" 
+                                        Text="+ Ajouter"  
+                                        CornerRadius="20" 
+                                        BackgroundColor="{DynamicResource Secondary}" 
+                                        TextColor="{DynamicResource ThirdColor}" 
+                                        FontAttributes="Bold" 
+                                        HorizontalOptions="Center" 
+                                        Padding="30,10" />
+                                </StackLayout>
+                                
+                                <Grid IsVisible="{Binding IsGamme}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Picker Title="Catégorie..."  HorizontalOptions="FillAndExpand"
+                                            ItemsSource="{Binding Categories}" 
+                                            FontSize="14"
+                                            TitleColor="{DynamicResource Secondary}" 
+                                            VerticalOptions="Center" 
+                                            ItemDisplayBinding="{Binding Name}"
+                                            TextColor="{DynamicResource Secondary}" 
+                                            SelectedItem="{Binding Categorie, Mode=TwoWay}"/>
+                                    <Picker Grid.Column="1" Title="Style.........." 
+                                    HorizontalOptions="FillAndExpand"
+                                            ItemsSource="{Binding Styles}" 
+                                            FontSize="14"
+                                            TitleColor="{DynamicResource Secondary}" 
+                                            VerticalOptions="Center" 
+                                            ItemDisplayBinding="{Binding Name}"
+                                            TextColor="{DynamicResource Secondary}" 
+                                            SelectedItem="{Binding Style, Mode=TwoWay}"/>
+                                    <Picker Grid.Row="1" Title="Nom de saveur........"
+                                    HorizontalOptions="FillAndExpand"
+                                            ItemsSource="{Binding Marques}" 
+                                            FontSize="14"
+                                            TitleColor="{DynamicResource Secondary}" 
+                                            VerticalOptions="Center" 
+                                            IsVisible="{Binding Style_Special, Converter={StaticResource invertBooleanConverter}}"
+                                            ItemDisplayBinding="{Binding Name}"
+                                            TextColor="{DynamicResource Secondary}" 
+                                            SelectedItem="{Binding Marque, Mode=TwoWay}"/>
+
+
+                                    <Grid Grid.Row="1" Grid.Column="1">
+                                        <Label  Text="Prix_Unité :" Margin="0,15,0,0" TextColor="{DynamicResource Secondary}"/>
+                                        <Entry Grid.Column="1"  Text="{Binding Prix_Unité, Mode=TwoWay}" 
+                                   TextColor="{DynamicResource Secondary}" Placeholder="Prix_Unité" 
+                                   Keyboard="Numeric" />
+                                    </Grid>
+                                    <Grid Grid.Row="3" Grid.ColumnSpan="2">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition />
+                                        </Grid.RowDefinitions>
+                                        <ImageButton Margin="0,-5" 
+                                                     Grid.Column="1" Source="add_image.png" 
+                                                     HorizontalOptions="End" 
+                                                     HeightRequest="30" WidthRequest="60"
+                                                     CornerRadius="15" Command="{Binding AddImageComand}"
+                                                     BackgroundColor="{DynamicResource Primary}" />
+                                        <Image  Grid.Row="1" HorizontalOptions="Center"
+                                                VerticalOptions="Start" 
+                                                Source="{Binding PictureSource}" 
+                                                HeightRequest="250" />
+                                    </Grid>
+
+                                    <Button  Grid.Row="4" Grid.ColumnSpan="2" 
+                                             HorizontalOptions="Center" 
+                                             Margin="0,20,0,0" 
+                                             Command="{Binding AddCommand}" Text="+ Ajouter"
+                                             CornerRadius="20" Padding="30,10"
+                                             BackgroundColor="{DynamicResource Secondary}"
+                                             TextColor="{DynamicResource ThirdColor}" FontAttributes="Bold" />
+                                    
+                                </Grid>
+                            </StackLayout>
+                            <CollectionView x:Name="GammesCollectionView" IsVisible="{Binding IsGamme}"
+                                            ItemsSource="{Binding Items}"
+                                            Margin="0,10">
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+                                </CollectionView.ItemsLayout>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <SwipeView >
+                                            <SwipeView.LeftItems>
+                                                <SwipeItems>
+                                                    <SwipeItem
+                                                        BackgroundColor="Red"
+                                                        IconImageSource="delete.png"
+                                                        Text="Supprimer"
+                                                        Command="{Binding Source={x:Reference GammesCollectionView}, Path=BindingContext.DeleteCommand}"
+                                                        CommandParameter="{Binding .}">
+                                                    </SwipeItem>
+                                                </SwipeItems>
+                                            </SwipeView.LeftItems>
+                                            <StackLayout >
+                                                <VisualStateManager.VisualStateGroups>
+                                                    <VisualStateGroup x:Name="ColorStates">
+                                                        <VisualState x:Name="Normal" />
+                                                        <VisualState x:Name="Selected">
+                                                            <VisualState.Setters>
+                                                                <Setter TargetName="myPancakeView" 
+                                                            Property="pancake:PancakeView.BackgroundColor" 
+                                                            Value="Azure"/>
+                                                            </VisualState.Setters>
+                                                        </VisualState>
+                                                    </VisualStateGroup>
+                                                </VisualStateManager.VisualStateGroups>
+
+                                                <pancake:PancakeView x:Name="myPancakeView" CornerRadius="30" 
+                                                         Padding="10" Margin="5" 
+                                                         BackgroundColor="{DynamicResource Secondary}" >
+                                                    <pancake:PancakeView.Border>
+                                                        <pancake:Border Color="{DynamicResource Primary}" 
+                                                                        Thickness="3"/>
+                                                    </pancake:PancakeView.Border>
+                                                    <pancake:PancakeView.Shadow>
+                                                        <pancake:DropShadow Color="{DynamicResource Primary}" 
+                                                                            Offset="10,10"/>
+                                                    </pancake:PancakeView.Shadow>
+                                                    <StackLayout    Orientation="Horizontal" 
+                                                                    HorizontalOptions="StartAndExpand"
+                                                                    BackgroundColor="Transparent">
+                                                        <pancake:PancakeView CornerRadius="40" 
+                                                                     BackgroundColor="White">
+                                                            <Image  Source="{Binding Url}"
+                                                            Margin="0"
+                                                            HorizontalOptions="Center"
+                                                            VerticalOptions="Center"
+                                                            WidthRequest="80"
+                                                            HeightRequest="70"
+                                                            Aspect="AspectFill"/>
+                                                        </pancake:PancakeView>
+                                                        <StackLayout    HorizontalOptions="Center"
+                                                                        VerticalOptions="Center" 
+                                                                        BackgroundColor="Transparent">
+                                                            <Label  x:Name="lblNom" 
+                                                                    FontAttributes="Bold" 
+                                                                    TextColor="{DynamicResource Secondary}">
+                                                                <Label.FormattedText>
+                                                                    <FormattedString >
+                                                                        <Span Text="{Binding Marque.Name}"/>
+                                                                        <Span Text=" "/>
+                                                                        <Span Text="{Binding Style.Name}"/>
+                                                                    </FormattedString>
+                                                                </Label.FormattedText>
+                                                            </Label>
+                                                            <StackLayout Orientation="Horizontal">
+                                                                <Label  TextColor="{DynamicResource ThirdColor}" 
+                                                                        FontAttributes="Bold">
+                                                                    <Label.FormattedText>
+                                                                        <FormattedString>
+                                                                            <Span Text="Catégorie : "/>
+                                                                            <Span Text="{Binding Categorie.Name}"/>
+                                                                        </FormattedString>
+                                                                    </Label.FormattedText>
+                                                                </Label>
+                                                            </StackLayout>
+                                                            <StackLayout Orientation="Horizontal">
+                                                                <StackLayout>
+                                                                    <Label 
+                                                                            TextColor="{DynamicResource ThirdColor}" 
+                                                                            FontSize="10">
+                                                                        <Label.FormattedText>
+                                                                            <FormattedString>
+                                                                                <Span Text="Description :" 
+                                                                                      FontAttributes="Bold"/>
+                                                                                <Span Text="{Binding Description}"/>
+                                                                            </FormattedString>
+                                                                        </Label.FormattedText>
+                                                                    </Label>
+                                                                </StackLayout>
+                                                            </StackLayout>
+                                                        </StackLayout>
+                                                    </StackLayout>
+                                                </pancake:PancakeView>
+                                            </StackLayout>
+                                        </SwipeView>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                                <CollectionView.EmptyView>
+                                    <ContentView>
+                                        <StackLayout HorizontalOptions="CenterAndExpand"
+                                            VerticalOptions="CenterAndExpand">
+                                            <Label  Text="Aucun element à affiché."
+                                                    Margin="10,25,10,10"
+                                                    FontAttributes="Bold"
+                                                    FontSize="18"
+                                                    HorizontalOptions="Fill"
+                                                    HorizontalTextAlignment="Center" 
+                                                    TextColor="{DynamicResource Secondary}"/>
+                                            <Label  Text="Vous pouvez ajouter des éléments par dessus!"
+                                                    FontAttributes="Italic"
+                                                    FontSize="12"
+                                                    HorizontalOptions="Fill"
+                                                    HorizontalTextAlignment="Center" 
+                                                    TextColor="{DynamicResource Secondary}" />
+                                        </StackLayout>
+                                    </ContentView>
+                                </CollectionView.EmptyView>
+                            </CollectionView>
+                            <CollectionView x:Name="PanierCollectionView" IsVisible="{Binding IsGamme, Converter={StaticResource invertBooleanConverter}}"
+                                            ItemsSource="{Binding Items}"
+                                            Margin="0,10">
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+                                </CollectionView.ItemsLayout>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <SwipeView >
+                                            <SwipeView.LeftItems>
+                                                <SwipeItems>
+                                                    <SwipeItem
+                                                        BackgroundColor="Red"
+                                                        IconImageSource="delete.png"
+                                                        Text="Supprimer"
+                                                        Command="{Binding Source={x:Reference PanierCollectionView}, Path=BindingContext.DeleteCommand}"
+                                                        CommandParameter="{Binding .}">
+                                                    </SwipeItem>
+                                                </SwipeItems>
+                                            </SwipeView.LeftItems>
+                                            <StackLayout >
+                                                <VisualStateManager.VisualStateGroups>
+                                                    <VisualStateGroup x:Name="ColorStates">
+                                                        <VisualState x:Name="Normal" />
+                                                        <VisualState x:Name="Selected">
+                                                            <VisualState.Setters>
+                                                                <Setter TargetName="myPancakeView" 
+                                                            Property="pancake:PancakeView.BackgroundColor" 
+                                                            Value="Azure"/>
+                                                            </VisualState.Setters>
+                                                        </VisualState>
+                                                    </VisualStateGroup>
+                                                </VisualStateManager.VisualStateGroups>
+
+                                                <pancake:PancakeView x:Name="myPancakeView" CornerRadius="30" 
+                                                         Padding="10" Margin="5" 
+                                                         BackgroundColor="{DynamicResource Secondary}" >
+                                                    <pancake:PancakeView.Border>
+                                                        <pancake:Border Color="{DynamicResource Primary}" 
+                                                                        Thickness="3"/>
+                                                    </pancake:PancakeView.Border>
+                                                    <pancake:PancakeView.Shadow>
+                                                        <pancake:DropShadow Color="{DynamicResource Primary}" 
+                                                                            Offset="10,10"/>
+                                                    </pancake:PancakeView.Shadow>
+                                                    <StackLayout Orientation="Horizontal" 
+                                                                 HorizontalOptions="StartAndExpand"
+                                                                 BackgroundColor="Transparent">
+                                                        <Image  Source="{Binding Url}"
+                                                                Margin="0,5,0,5"
+                                                                HorizontalOptions="Center"
+                                                                VerticalOptions="Center"
+                                                                WidthRequest="70"
+                                                                HeightRequest="50"
+                                                                Aspect="AspectFill"/>
+
+                                                        <StackLayout    HorizontalOptions="Center"
+                                                                        VerticalOptions="Center" 
+                                                                        BackgroundColor="Transparent">
+                                                            <Label  x:Name="lblNom" 
+                                                                    FontAttributes="Bold" 
+                                                                    TextColor="{DynamicResource ThirdColor}"
+                                                                    Text="{Binding Name}" 
+                                                                    FontSize="20">
+                                                            </Label>
+                                                            <Label  
+                                                                TextColor="{DynamicResource ThirdColor}" >
+                                                                <Label.FormattedText>
+                                                                    <FormattedString>
+                                                                        <Span Text="Description : "/>
+                                                                        <Span Text="{Binding Description}"/>
+                                                                    </FormattedString>
+                                                                </Label.FormattedText>
+                                                            </Label>
+                                                        </StackLayout>
+                                                    </StackLayout>
+                                                </pancake:PancakeView>
+                                            </StackLayout>
+                                        </SwipeView>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                                <CollectionView.EmptyView>
+                                    <ContentView>
+                                        <StackLayout HorizontalOptions="CenterAndExpand"
+                                            VerticalOptions="CenterAndExpand">
+                                            <Label  Text="Aucun element à affiché."
+                                                    Margin="10,25,10,10"
+                                                    FontAttributes="Bold"
+                                                    FontSize="18"
+                                                    HorizontalOptions="Fill"
+                                                    HorizontalTextAlignment="Center" 
+                                                    TextColor="{DynamicResource Secondary}"/>
+                                            <Label  Text="Vous pouvez ajouter des éléments par dessus!"
+                                                    FontAttributes="Italic"
+                                                    FontSize="12"
+                                                    HorizontalOptions="Fill"
+                                                    HorizontalTextAlignment="Center" 
+                                                    TextColor="{DynamicResource Secondary}" />
+                                        </StackLayout>
+                                    </ContentView>
+                                </CollectionView.EmptyView>
+                            </CollectionView>
+                        </StackLayout>
+                    </RefreshView>
+                </StackLayout>
+            </ScrollView>
+        </Grid>
+    </Grid>
+</ContentPage>

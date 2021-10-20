@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -27,5 +28,8 @@ namespace Models
         [ForeignKey(nameof(User))]
         public Guid? UserId { get; set; }
         public User User { get; set; }
+
+        [NotMapped]
+        public IFormFile Image { get; set; }
     }
 }

@@ -241,6 +241,27 @@ namespace Services
             var all = Convert<D>.FromJson(json);
             return all;
         }
+
+        public async Task<T> AddFormDataAsync(T value, string token, string url = null)
+        {
+            var response = new HttpResponseMessage();
+
+            var type = value.GetType().ToString();
+            var a = type.Split('.');
+            foreach (var item in a)
+            {
+                type = item;
+            }
+            response = await Client.PostFormDataAsync("api/" + type+"s" + url, token, value);
+            if (response.IsSuccessStatusCode)
+                return value;
+            else
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                var mes = response.ReasonPhrase.ToString();
+                return null;
+            }
+        }
     }
 
     public class DataService<T> : BaseVM.BaseViewModel, IDataService<T> where T : class
@@ -299,7 +320,16 @@ namespace Services
 
                 HttpContent httpContent = new StringContent(jsons);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var response = await Client.PostAsync("api/" + values.FirstOrDefault().GetType().ToString() + "s" + url, httpContent);
+                var type = values.First().GetType().ToString();
+                var a = type.Split('.');
+                foreach (var item in a)
+                {
+                    type = item;
+                }
+                var response = new HttpResponseMessage();
+                if (url == null)
+                    response = await Client.PostAsync("api/" + type + "s", httpContent);
+                else response = await Client.PostAsync("api/" + type + "s/" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return values;
                 else
@@ -408,7 +438,7 @@ namespace Services
             }
         }
 
-        public async Task<object> PostAsync(object value, string token, string url = null)
+        public async Task<T> PostAsync(object value, string token, string url = null)
         {
             try
             {
@@ -426,7 +456,10 @@ namespace Services
 
                 response = await Client.PostAsync("api/" + url, httpContent);
                 if (response.IsSuccessStatusCode)
-                    return value;
+                {
+                    var all = ConvertSingle<T>.FromJson( await response.Content.ReadAsStringAsync());
+                    return all;
+                }
                 else
                 {
                     var message = await response.Content.ReadAsStringAsync();
@@ -449,6 +482,26 @@ namespace Services
             var json = await Client.GetStringAsync("api/" + url);
             var all = Convert<object>.FromJson(json);
             return all;
+        }
+
+        public async Task<T> AddFormDataAsync(T value, string token, string url = null)
+        {
+            var response = new HttpResponseMessage();
+            var type = value.GetType().ToString();
+            var a = type.Split('.');
+            foreach (var item in a)
+            {
+                type = item;
+            }
+            response = await Client.PostFormDataAsync("api/"+ type+"s" + url, token, value);
+            if (response.IsSuccessStatusCode)
+                return value;
+            else
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                var mes = response.ReasonPhrase.ToString();
+                return null;
+            }
         }
     }
 }

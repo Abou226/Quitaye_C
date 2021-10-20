@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -21,5 +22,11 @@ namespace Models
         [ForeignKey(nameof(Entreprise))]
         public Guid? EntrepriseId { get; set; }
         public Guid? UserId { get; set; }
+
+        [StringLength(120, ErrorMessage = "La taille de l'url ne peut dépasser 120 characters")]
+        public string Url { get; set; }
+
+        [NotMapped]
+        public IFormFile Image { get; set; }
     }
 }

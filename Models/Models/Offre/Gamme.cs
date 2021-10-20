@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -34,5 +35,14 @@ namespace Models
         [ForeignKey(nameof(User))]
         public Guid? UserId { get; set; }
         public User User { get; set; }
+        [Required(ErrorMessage = "L'url est requise")]
+        [StringLength(120, ErrorMessage = "La taille de l'url ne peut dépasser 120 characters")]
+        public string Url { get; set; }
+
+        [Column(TypeName = "decimal (18, 2)")]
+        public decimal Prix_Min { get; set; }
+
+        [NotMapped]
+        public IFormFile Image { get; set; }
     }
 }

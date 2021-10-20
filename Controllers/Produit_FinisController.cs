@@ -23,15 +23,17 @@ namespace Controllers
         private readonly IGenericRepositoryWrapper<Produit_Fini, User, Offre, Gamme, Marque, Style, Categorie, Taille, Model> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
+        private readonly IFileManager _fileManager;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
 
         public Produit_FinisController(IGenericRepositoryWrapper<Produit_Fini, User, Offre, Gamme, Marque, Style, Categorie, Taille, Model> wrapper,
-            IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser,
+            IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, IFileManager fileManager,
             IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
             _entrepriseUser = entrepriseUser;
             _settings = settings;
+            _fileManager = fileManager;
             _mapper = mapper;
         }
 
@@ -136,16 +138,27 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.EntrepriseId == identity.First().EntrperiseId);
+                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.UserId == identity.First().Id);
                     if (entreprise.Count() != 0)
                     {
-                        var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id), 
-                            x=> x.Offre, x => x.Offre.Gamme,
-                            x => x.Offre.Gamme.Marque, x => x.Offre.Gamme.Style, 
+                        List<Guid> list = new List<Guid>();
+                        foreach (var item in entreprise)
+                        {
+                            list.Add((Guid)item.UserId);
+                        }
+
+                        if (list.Contains(identity.First().Id))
+                        {
+                            var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id),
+                            x => x.Offre, x => x.Offre.Gamme,
+                            x => x.Offre.Gamme.Marque, x => x.Offre.Gamme.Style,
                             x => x.Offre.Gamme.Categorie, x => x.Offre.Taille, x => x.Offre.Model);
-                        return Ok(result);
+                            return Ok(result.OrderByDescending(x => x.Quantité));
+                        }
+                        else return NotFound("Non membre cette entreprise");
                     }
                     else return NotFound("Non membre de cette entreprise");
+                    
                 }
                 else return NotFound("User not indentified");
             }
@@ -155,7 +168,7 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Produit_Fini>> AddAsync([FromBody] Produit_Fini value)
+        public override async Task<ActionResult<Produit_Fini>> AddAsync([FromForm] Produit_Fini value)
         {
             try
             {
@@ -168,6 +181,13 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
+
+                    if (value.Image != null)
+                    {
+                        var result = await _fileManager.Upload(_settings.AccessKey, _settings.SecretKey, _settings.BucketName, Amazon.RegionEndpoint.USEast1, value.Image);
+                        value.Url = result.Url;
+                    }
+
                     value.Id = Guid.NewGuid();
                     value.UserId = identity.First().Id;
                     value.EntrepriseId = value.EntrepriseId;

@@ -1,44 +1,45 @@
-﻿using Models;
+﻿using BaseVM;
+using Models;
 using Plugin.Connectivity;
+using Services;
 using System;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Xamarin.Essentials;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Quitaye.Views;
-using BaseVM;
-using Services;
-using Quitaye.Views.Login;
-using System.Linq;
 
 [assembly: Dependency(typeof(BaseViewModel))]
-[assembly: Dependency(typeof(DataService<Test>))]
-[assembly: Dependency(typeof(DataService<Entreprise>))]
-[assembly: Dependency(typeof(DataService<RefreshToken>))]
+[assembly: Dependency(typeof(CheckInternetService<Test>))]
 namespace Quitaye
 {
     public partial class App : Application
     {
         public IBaseViewModel BaseVM { get; }
-        public IDataService<Entreprise> EntrepriseData { get; }
-        public IDataService<RefreshToken> Token { get; }
-        public IInitialService Initial { get; }
         public IDataService<Test> Test { get; }
         public App()
         {
             InitializeComponent();
             BaseVM = DependencyService.Get<IBaseViewModel>();
             Test = DependencyService.Get<IDataService<Test>>();
-            EntrepriseData = DependencyService.Get<IDataService<Entreprise>>();
-            Token = DependencyService.Get<IDataService<RefreshToken>>();
             Device.StartTimer(TimeSpan.FromSeconds(BaseVM.InternetCheckTime), () =>
             {
                 // Do something
                 CheckConnection();
                 return true; // True = Repeat again, False = Stop the timer
             });
+            OSAppTheme currentTheme = Application.Current.RequestedTheme;
+            if (currentTheme == OSAppTheme.Dark)
+            {
+                Resources["Primary"] = Resources["ThirdColor"];
+                Resources["ThirdColor"] = Resources["Primary"];
+            }
+            else if (currentTheme == OSAppTheme.Light)
+            {
+                Resources["Primary"] = Resources["Primary"];
+                Resources["ThirdColor"] = Resources["ThirdColor"];
+            }
         }
 
         private async void CheckConnection()
@@ -71,57 +72,57 @@ namespace Quitaye
             }
         }
 
-        public App(IHost host) : this() => Host = host;
+        //public App(IHost host) : this() => Host = host;
 
+        //public static IHost Host { get; private set; }
 
-        public static IHost Host { get; private set; }
-
-        public static IHostBuilder BuildHost() =>
-            XamarinHost.CreateDefaultBuilder<App>()
-            .ConfigureServices((context, services) =>
-            {
-                services.AddScoped<HomePage>();
-                services.AddScoped<LoginView>();
-                services.AddScoped<SignUpView>();
-                services.AddScoped<InitialPage>();
-                services.AddScoped(typeof(IDataService<>), typeof(DataService<>));
-                services.AddScoped<IBaseViewModel, BaseViewModel>();
-                services.AddScoped<IInitialService, InitialService>();
-                
-                services.AddScoped<IFileUploadService, FileUploadService>();
-                services.AddScoped<ILogInService, LogInService>();
-                services.AddScoped<ISignUpService, SignUpService>();
-            });
+        //public static IHostBuilder BuildHost() =>
+        //    XamarinHost.CreateDefaultBuilder<App>()
+        //    .ConfigureServices((context, services) =>
+        //    {
+        //        services.AddScoped<HomePage>();
+        //        services.AddScoped<LoginPage>();
+        //        services.AddScoped<SignUpPage>();
+        //        services.AddScoped<RapportPayement>();
+        //        services.AddScoped(typeof(IDataService<>), typeof(DataService<>));
+        //        services.AddScoped<IBaseViewModel, BaseViewModel>();
+        //        services.AddScoped<IInitialService, InitialService>();
+        //        services.AddScoped<IFileUploadService, FileUploadService>();
+        //        services.AddScoped<ILogInService, LogInService>();
+        //        services.AddScoped<ISignUpService, SignUpService>();
+        //    });
 
 
         protected override async void OnStart()
         {
-            await Host.StartAsync();
+            //await Host.StartAsync();
             //SecureStorage.RemoveAll();
+            //await CheckConnection();
             var token = await SecureStorage.GetAsync("Token");
             if (string.IsNullOrWhiteSpace(token))
             {
-                MainPage = new NavigationPage(Host.Services.GetRequiredService<LoginView>());
+                MainPage = new NavigationPage(new LoginPage());
             }
             else
             {
                 var last = await SecureStorage.GetAsync("LastEntreprise");
                 if (!string.IsNullOrWhiteSpace(last))
                 {
-                    MainPage = new NavigationPage(Host.Services.GetRequiredService<HomePage>());
+                    MainPage = new NavigationPage(new HomePage());
                 }
-                else MainPage = new NavigationPage(Host.Services.GetRequiredService<InitialPage>());
+                else MainPage = new NavigationPage(new InitialPage());
             }
         }
 
         protected override void OnSleep()
         {
-            Task.Run(async () => await Host.SleepAsync());
+            //Task.Run(async () => await Host.SleepAsync());
         }
 
         protected override void OnResume()
         {
-            Task.Run(async () => await Host.ResumeAsync());
+            //Task.Run(async () => await Host.ResumeAsync()); 
+
         }
     }
 }

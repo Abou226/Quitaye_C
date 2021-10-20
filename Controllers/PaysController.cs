@@ -91,7 +91,7 @@ namespace Controllers
                 {
                     var result = await repositoryWrapper.ItemA.GetAll();
 
-                    return Ok(result);
+                    return Ok(result.OrderBy(x => x.NameEn));
                 }
                 else return NotFound("User not indentified");
             }
@@ -111,9 +111,9 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetBy(x =>
-                    (x.EntrepriseId.ToString() == search) && (x.Name.Contains(search)));
+                    (x.Id.ToString() == search) && (x.Name.Contains(search)));
 
-                    return Ok(result);
+                    return Ok(result.OrderBy(x => x.Name));
                 }
                 else return NotFound("User not indentified");
             }
@@ -133,13 +133,8 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.EntrepriseId == identity.First().EntrperiseId);
-                    if (entreprise.Count() != 0)
-                    {
-                        var result = await repositoryWrapper.Item.GetBy(x => (x.EntrepriseId == id));
-                        return Ok(result);
-                    }
-                    else return NotFound("Non membre de cette entreprise");
+                    var result = await repositoryWrapper.Item.GetBy(x => (x.Id == id));
+                    return Ok(result.OrderBy(x => x.Name));
                 }
                 else return NotFound("User not indentified");
             }
@@ -149,7 +144,7 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Pays>> AddAsync([FromBody] Pays value)
+        public override async Task<ActionResult<Pays>> AddAsync([FromForm] Pays value)
         {
             try
             {
@@ -162,13 +157,64 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    value.Id = Guid.NewGuid();
-                    value.EntrepriseId = value.EntrepriseId;
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
+                    var lines = System.IO.File.ReadAllLines("stri", System.Text.Encoding.UTF7);
+                    foreach (var item in lines)
+                    {
+                        var spli = item.Split(',');
+                        var p = await repositoryWrapper.Item.GetBy(x => x.Alpha_2 == spli[2] || x.Alpha_3 == spli[3]);
+                        if(p.Count() == 0)
+                        {
+                            var pay = new Pays();
+                            pay.Id = Guid.NewGuid();
+                            pay.Name = spli[4];
+                            pay.NameEn = spli[5];
+                            pay.Alpha_2 = spli[2];
+                            pay.Alpha_3 = spli[3];
+                            pay.Indicatif = Convert.ToInt32(spli[1]);
+                            await repositoryWrapper.ItemA.AddAsync(pay);
+                            await repositoryWrapper.SaveAsync();
+                        }
+                    }
                     return Ok(value);
                 }
                 else return NotFound("User not identified");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("AllContries")]
+        public async Task<ActionResult<Pays>> AddAllContriesAsync([FromForm] Pays value)
+        {
+            try
+            {
+                if (value == null)
+                    return NotFound();
+
+                var lines = System.IO.File.ReadAllLines(@"C:\Users\Aboubacar Traore\Downloads\sql_pays.csv", System.Text.Encoding.UTF7);
+                foreach (var item in lines)
+                {
+                    var spli = item.Split(',');
+                    var p = await repositoryWrapper.Item.GetBy(x => x.Alpha_2 == spli[2].Trim(new Char[] { '"' }) || x.Alpha_3 == spli[3].Trim(new Char[] { '"' }));
+                    if (p.Count() == 0)
+                    {
+
+                        var pay = new Pays();
+                        pay.Id = Guid.NewGuid();
+                        pay.Name = spli[4].Trim(new Char[] { '"' });
+                        
+                        pay.NameEn = spli[5].Trim(new Char[] { '"' });
+                        pay.Alpha_2 = spli[2].Trim(new Char[] { '"' });
+                        pay.Alpha_3 = spli[3].Trim(new Char[] { '"' });
+                        pay.Indicatif = Convert.ToInt32(spli[1].Trim(new Char[] { '"' }));
+                        await repositoryWrapper.ItemA.AddAsync(pay);
+                        await repositoryWrapper.SaveAsync();
+                    }
+                }
+                return Ok(value);
             }
             catch (Exception ex)
             {
@@ -187,9 +233,9 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetBy(x =>
-                    (x.EntrepriseId.ToString() == search) && (x.Name.Contains(search)));
+                    (x.Id.ToString() == search) && (x.Name.Contains(search)));
 
-                    return Ok(result);
+                    return Ok(result.OrderBy(x => x.Name));
                 }
                 else return NotFound("User not indentified");
             }
@@ -213,7 +259,7 @@ namespace Controllers
                 {
                     var result = await repositoryWrapper.Item.GetAll();
 
-                    return Ok(result);
+                    return Ok(result.OrderBy(x => x.Name));
                 }
                 else return NotFound("User not indentified");
             }

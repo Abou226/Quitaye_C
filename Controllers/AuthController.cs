@@ -54,7 +54,8 @@ namespace Quitaye.Server.Controllers
                     if (string.IsNullOrWhiteSpace(resultUser.Value.Username.ToString())
                         && (!string.IsNullOrWhiteSpace(logIn.Username) && !string.IsNullOrWhiteSpace(logIn.Password)))
                     {
-                        var result = await _userRepository.Item.GetBy(x => x.Username == logIn.Username && x.Password == _settings.PaswordEncryption(logIn.Password + _settings.Key));
+                        var result = await _userRepository.Item.GetBy(x => x.Username == logIn.Username 
+                        && x.Password == _settings.PaswordEncryption(logIn.Password + _settings.Key));
                         if (result.Count() != 0)
                         {
                             var token = await GenerateAccessToken(result.First().Id);

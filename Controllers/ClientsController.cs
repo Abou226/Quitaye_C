@@ -42,7 +42,7 @@ namespace Controllers
             try
             {
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                var identity = await repositoryWrapper.ItemA.GetBy(x => x.Id.ToString().
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
@@ -81,6 +81,32 @@ namespace Controllers
             }
         }
 
+        [AllowAnonymous]
+        [HttpGet("Email/{email}")]
+        public async Task<ActionResult<Client>> GetUser([FromRoute] string email)
+        {
+            try
+            {
+                //var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                //var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                //Equals(claim));
+                //if (identity.Count() != 0)
+                {
+                    var result = await repositoryWrapper.ItemA.GetBy(x => (x.Email == email));
+                    if (result.Count() != 0)
+                    {
+                        return Ok(result.First());
+                    }
+                    else return null;
+                }
+                //else return NotFound("User not indentified");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
         public override async Task<ActionResult<IEnumerable<Client>>> GetAll()
         {
             try
@@ -107,7 +133,7 @@ namespace Controllers
             try
             {
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                var identity = await repositoryWrapper.ItemA.GetBy(x => x.Id.ToString().
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
@@ -135,11 +161,22 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.EntrepriseId == identity.First().EntrperiseId);
+                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.UserId == identity.First().Id);
                     if (entreprise.Count() != 0)
                     {
-                        var result = await repositoryWrapper.Item.GetBy(x => (x.EntrepriseId == id));
-                        return Ok(result);
+                        List<Guid> list = new List<Guid>();
+                        foreach (var item in entreprise)
+                        {
+                            list.Add((Guid)item.UserId);
+                        }
+
+                        if (list.Contains(identity.First().Id))
+                        {
+                            var result = await repositoryWrapper.Item.GetBy(x => (x.EntrepriseId == id));
+                            return Ok(result);
+                        }
+                        else
+                            return NotFound("Non membre de cette entreprise");
                     }
                     else return NotFound("Non membre de cette entreprise");
                 }
@@ -151,6 +188,7 @@ namespace Controllers
             }
         }
 
+        [AllowAnonymous]
         public override async Task<ActionResult<Client>> AddAsync([FromBody] Client value)
         {
             try
@@ -158,26 +196,46 @@ namespace Controllers
                 if (value == null)
                     return NotFound();
 
-                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
-                Equals(claim));
-
-                if (identity.Count() != 0)
+                if (!string.IsNullOrWhiteSpace(value.Username))
                 {
-                    value.EntrepriseId = value.EntrepriseId;
-                    value.Id = Guid.NewGuid();
-                    value.UserId = identity.First().Id;
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
-                    return Ok(value);
+                    var u = await repositoryWrapper.ItemA.GetBy(x => x.Username == value.Username);
+                    if (u.Count() != 0)
+                        return BadRequest("Nom d'utilisateur deja existant, veiller choisir un nom d'utilisateur unique");
+                    {
+                        await Add(value);
+                    }
                 }
-                else return NotFound("User not identified");
+                else
+                {
+                    var u = await repositoryWrapper.ItemA.GetBy(x => x.Email == value.Email);
+                    if (u.Count() != 0)
+                        return BadRequest("Nom d'utilisateur deja existant, veiller choisir un nom d'utilisateur unique");
+                    {
+                        await Add(value);
+                    }
+                }
+
+                //else return NotFound();
+                return Ok(value);
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
+        async Task Add(Client value)
+        {
+            value.Id = Guid.NewGuid();
+            if (value.DateOfCreation == Convert.ToDateTime("0001-01-01T00:00:00"))
+                value.DateOfCreation = DateTime.Now;
+            //value.ServerTime = DateTime.Now;
+            if (!string.IsNullOrWhiteSpace(value.Password))
+                value.Password = _settings.PaswordEncryption(value.Password + _settings.Key);
+            await repositoryWrapper.ItemA.AddAsync(value);
+            await repositoryWrapper.SaveAsync();
+        }
+
 
         [HttpGet("{entrepriseId:Guid}/{search}")]
         [Authorize]
@@ -186,7 +244,7 @@ namespace Controllers
             try
             {
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                var identity = await repositoryWrapper.ItemA.GetBy(x => x.Id.ToString().
                 Equals(claim));
 
                 if (identity.Count() != 0)

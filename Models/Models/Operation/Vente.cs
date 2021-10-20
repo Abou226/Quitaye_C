@@ -41,11 +41,20 @@ namespace Models
         [ForeignKey(nameof(QuartierId))]
         public Guid? QuartierId { get; set; }
         public Quartier Quartier { get; set; }
+
+        [StringLength(120, ErrorMessage = "La taille de designation ne peut dépasser 120 characters")]
+        public string Designation { get; set; }
+
+        [StringLength(120, ErrorMessage = "La taille de Autres_Info ne peut dépasser 120 characters")]
+        public string Autres_Info { get; set; }
+
         public DateTime Date_Livraison { get; set; }
         [StringLength(5, ErrorMessage = "La taille de l'heure ne peut dépasser 5 characters")]
         public string Heure_Livraison { get; set; }
 
         [StringLength(15, ErrorMessage = "La taille du contact de livraison ne peut dépasser 15 characters")]
         public string Contact_Livraison { get; set; }
+
+        public Guid? PanierId { get; set; }
     }
 }

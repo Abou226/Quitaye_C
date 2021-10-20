@@ -91,7 +91,7 @@ namespace Controllers
                 {
                     var result = await repositoryWrapper.ItemA.GetAll();
 
-                    return Ok(result);
+                    return Ok(result.OrderBy(x => x.Name));
                 }
                 else return NotFound("User not indentified");
             }
@@ -105,15 +105,16 @@ namespace Controllers
         {
             try
             {
+
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
                 var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetBy(x =>
-                    (x.EntrepriseId.ToString() == search) && (x.Name.Contains(search)));
+                    (x.Id.ToString() == search) && (x.Name.Contains(search)));
 
-                    return Ok(result);
+                    return Ok(result.OrderBy(x => x.Name));
                 }
                 else return NotFound("User not indentified");
             }
@@ -133,13 +134,29 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.EntrepriseId == identity.First().EntrperiseId);
-                    if (entreprise.Count() != 0)
-                    {
-                        var result = await repositoryWrapper.Item.GetBy(x => (x.EntrepriseId == id));
-                        return Ok(result);
-                    }
-                    else return NotFound("Non membre de cette entreprise");
+                    var result = await repositoryWrapper.Item.GetBy(x => (x.Id == id));
+                    return Ok(result.OrderBy(x => x.Name));
+                }
+                else return NotFound("User not indentified");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet("pays/{id:Guid}")]
+        public async Task<ActionResult<IEnumerable<Ville>>> GetByPays([FromRoute] Guid id)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    var result = await repositoryWrapper.Item.GetBy(x => (x.PaysId == id));
+                    return Ok(result.OrderBy(x => x.Name));
                 }
                 else return NotFound("User not indentified");
             }
@@ -163,7 +180,6 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     value.Id = Guid.NewGuid();
-                    value.EntrepriseId = value.EntrepriseId;
                     await repositoryWrapper.ItemA.AddAsync(value);
                     await repositoryWrapper.SaveAsync();
                     return Ok(value);
@@ -176,6 +192,76 @@ namespace Controllers
             }
         }
 
+        [HttpGet("Mali")]
+        [AllowAnonymous]
+        public async Task<ActionResult<Ville>> AddMaliVilles()
+        {
+
+            try
+            {
+                var mali = await repositoryWrapper.ItemC.GetBy(x => x.NameEn == "Mali");
+                if (mali.Count() != 0)
+                {
+                    var villes = new string[] { "Bamako",
+                                                "Tombouctou",
+                                                "Banamba",
+                                                "Macina",
+                                                "Nara",
+                                                "Bafoulabé",
+                                                "San",
+                                                "Sikasso",
+                                                "Mopti",
+                                                "Koutiala",
+                                                "Kayes",
+                                                "Ségou",
+                                                "Nioro du Sahel",
+                                                "Niono",
+                                                "Markala",
+                                                "Kolondiéba",
+                                                "Kati",
+                                                "Gao",
+                                                "Kolokani",
+                                                "Ménaka",
+                                                "Bougouni",
+                                                "Niafunké",
+                                                "Koulikoro",
+                                                "Djenné",
+                                                "Sokolo",
+                                                "Yorosso",
+                                                "Kangaba",
+                                                "Kidal",
+                                                "Diré",
+                                                "Goundam",
+                                                "Douentza",
+                                                "Ténenkou",
+                                                "Bandiagara",
+                                                "Kimparana",
+                                                "Kita",
+                                                "Araouane",
+                                                "Taoudeni",
+                                                "Tessalit" };
+                    foreach (var item in villes)
+                    {
+                        var v = await repositoryWrapper.Item.GetBy(x => x.Name == item);
+                        if (v.Count() == 0)
+                        {
+                            var ville = await repositoryWrapper.Item.AddAsync(new Ville()
+                            {
+                                Name = item,
+                                PaysId = mali.First().Id,
+                                Id = Guid.NewGuid()
+                            });
+                            await repositoryWrapper.SaveAsync();
+                        }
+                    }
+                }
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
         public override async Task<ActionResult<IEnumerable<Ville>>> GetBy(string search, DateTime start, DateTime end)
         {
             try
@@ -187,9 +273,9 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetBy(x =>
-                    (x.EntrepriseId.ToString() == search) && (x.Name.Contains(search)));
+                    (x.Id.ToString() == search) && (x.Name.Contains(search)));
 
-                    return Ok(result);
+                    return Ok(result.OrderBy(x => x.Name));
                 }
                 else return NotFound("User not indentified");
             }
@@ -213,7 +299,7 @@ namespace Controllers
                 {
                     var result = await repositoryWrapper.Item.GetAll();
 
-                    return Ok(result);
+                    return Ok(result.OrderBy(x => x.Name));
                 }
                 else return NotFound("User not indentified");
             }

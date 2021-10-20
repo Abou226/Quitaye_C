@@ -26,12 +26,14 @@ namespace Controllers
         private readonly IGenericRepositoryWrapper<Type_Entreprise, User> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
+        private readonly IFileManager _fileManager;
         public Type_EntreprisesController(IGenericRepositoryWrapper<Type_Entreprise, User> wrapper,
-            IConfigSettings settings,
+            IConfigSettings settings, IFileManager fileManager,
             IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
             _settings = settings;
+            _fileManager = fileManager;
             _mapper = mapper;
         }
 
@@ -158,31 +160,13 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    var S3Client = new AmazonS3Client(_settings.AccessKey, _settings.SecretKey, Amazon.RegionEndpoint.USEast1);
-                    var fileTransferUtility = new TransferUtility(S3Client);
-
-                    // Use TransferUtilityUploadRequest to configure options.
-                    // In this example we subscribe to an event.
-
-                    var uploadRequest = new TransferUtilityUploadRequest
+                    if(value.Image != null)
                     {
-                        BucketName = _settings.BucketName,
-                        InputStream = value.Image.OpenReadStream(),
-                        Key = value.Image.FileName,
-                        StorageClass = S3StorageClass.Standard,
-                        CannedACL = S3CannedACL.PublicReadWrite,
-                        PartSize = 6291456,
-                    };
-
-                    //uploadRequest.UploadProgressEvent += new EventHandler<UploadProgressArgs>(uploadRequest_UploadPartProgressEvent);
-
-                    await fileTransferUtility.UploadAsync(uploadRequest);
-
-                    value.Url = "https://" + _settings.BucketName + ".s3.amazonaws.com/" + value.Image.FileName;
+                        await _fileManager.Upload(_settings.AccessKey, _settings.SecretKey, _settings.BucketName, Amazon.RegionEndpoint.USEast1, value.Image);
+                        value.Url = "https://" + _settings.BucketName + ".s3.amazonaws.com/" + value.Image.FileName;
+                    }
                     value.Id = Guid.NewGuid();
-                    if (value.DateOfCreation == Convert.ToDateTime("0001-01-01T00:00:00"))
-                        value.DateOfCreation = DateTime.Now;
-                    value.UserId = identity.First().Id;
+                    
                     await repositoryWrapper.ItemA.AddAsync(value);
                     await repositoryWrapper.SaveAsync();
                     return Ok(value);

@@ -134,12 +134,22 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.EntrepriseId == identity.First().EntrperiseId);
+                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.UserId == identity.First().Id);
                     if (entreprise.Count() != 0)
                     {
-                        var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id), x => x.Gamme,
-                            x =>x.Gamme.Marque, x => x.Gamme.Style, x => x.Gamme.Categorie);
-                        return Ok(result);
+                        List<Guid> list = new List<Guid>();
+                        foreach (var item in entreprise)
+                        {
+                            list.Add((Guid)item.UserId);
+                        }
+
+                        if (list.Contains(identity.First().Id))
+                        {
+                            var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id), x => x.Gamme,
+                            x => x.Gamme.Marque, x => x.Gamme.Style, x => x.Gamme.Categorie);
+                            return Ok(result);
+                        }
+                        else return NotFound("Non membre de cette entreprise");
                     }
                     else return NotFound("Non membre de cette entreprise");
                 }

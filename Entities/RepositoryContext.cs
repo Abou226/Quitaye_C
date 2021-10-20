@@ -19,6 +19,9 @@ namespace Entities
         public DbSet<Entreprise> Entreprises { get; set; }
         public DbSet<Telephone> Telephones { get; set; }
         public DbSet<Email> Email { get; set; }
+        public DbSet<PanierReservation> PanierReservations { get; set; }
+        public DbSet<PanierVente> PanierVentes { get; set; }
+        public DbSet<Reservation> Reservations { get; set; }
         public DbSet<EntrepriseUser> EntrepriseUsers { get; set; }
         public DbSet<Livraison> Livraisons { get; set; }
         public DbSet<Payement> Payements { get; set; }

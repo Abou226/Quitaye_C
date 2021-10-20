@@ -23,15 +23,21 @@ namespace Controllers
         private readonly IGenericRepositoryWrapper<Vente, User, Offre, Gamme, Marque, Taille, Model, Categorie> repositoryWrapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUserRepository;
         private readonly IConfigSettings _settings;
+        private readonly IGenericRepositoryWrapper<PanierVente> panierRepository;
+        private readonly IGenericRepositoryWrapper<Num_Vente> num_vente_repository;
         private readonly IMapper _mapper;
 
-        public VentesController(IGenericRepositoryWrapper<Vente, User, Offre, Gamme, Marque, Taille, Model, Categorie> wrapper, 
-            IGenericRepositoryWrapper<EntrepriseUser> entrepriseUserRepository,
+        public VentesController(IGenericRepositoryWrapper<Vente, User, Offre, Gamme, 
+            Marque, Taille, Model, Categorie> wrapper,
+            IGenericRepositoryWrapper<EntrepriseUser> entrepriseUserRepository, 
+            IGenericRepositoryWrapper<PanierVente> _panierRepository, IGenericRepositoryWrapper<Num_Vente> _num_vente_repository,
             IConfigSettings settings, IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
             _settings = settings;
+            num_vente_repository = _num_vente_repository;
             _entrepriseUserRepository = entrepriseUserRepository;
+            _panierRepository = panierRepository;
             _mapper = mapper;
         }
 
@@ -128,7 +134,9 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Vente>> AddAsync([FromBody] Vente value)
+        [HttpPost]
+        [Authorize]
+        public  async Task<ActionResult<Vente>> AddAsync([FromBody] List<Vente> value)
         {
             try
             {
@@ -141,14 +149,47 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    if (value.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
-                        value.Date = DateTime.Now;
-                    value.ServerTime = DateTime.Now;
-                    value.UserId = identity.First().Id;
-                    value.Id = Guid.NewGuid();
-                    await repositoryWrapper.ItemA.AddAsync(value);
+                    Num_Vente numss = new Num_Vente();
+                    numss.Id = Guid.NewGuid();
+                    numss.EntrepriseId = identity.First().Id;
+                    Random rd = new Random();
+                    string num = "";
+                    string nums = "";
+                    string mois = DateTime.Now.ToString("MM");
+                    string année = DateTime.Now.ToString("yy");
+                    string jour = DateTime.Now.ToString("dd");
+                    int c = 1;
+                    int a = rd.Next(0, 26);
+                    char ch = (char)('a' + a);
+                    string ord = "";
+                    while (c != 0)
+                    {
+                        num = rd.Next(10000, 100000).ToString();
+                        nums = rd.Next(10000, 100000).ToString();
+                        ord = jour + mois + année + "-" + DateTime.Now.ToString("hh:mm") + ch + "." + num + "." + nums;
+                        var ser = await num_vente_repository.Item.GetBy(x => x.Name == ord.ToUpper());
+                        c = ser.Count();
+                    }
+                    numss.Name = ord.ToUpper();
+                    numss.Entreprise = identity.First().Entreprise;
+                    numss.Date = DateTime.Now;
+                    await num_vente_repository.Item.AddAsync(numss);
                     await repositoryWrapper.SaveAsync();
-
+                    var num_vente = await num_vente_repository.Item.AddAsync(numss);
+                    foreach (var item in value)
+                    {
+                        if (item.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
+                            item.Date = DateTime.Now;
+                        item.ServerTime = DateTime.Now;
+                        item.UserId = identity.First().Id;
+                        item.Id = Guid.NewGuid();
+                        item.Num_VenteId = num_vente.Id;
+                        await repositoryWrapper.ItemA.AddAsync(item);
+                        await repositoryWrapper.SaveAsync();
+                        var pan = await panierRepository.Item.GetBy(x => x.Id == item.PanierId);
+                         panierRepository.Item.Delete(pan.First());
+                        await panierRepository.SaveAsync();
+                    }
                     return Ok(value);
                 }
                 else return NotFound("User not identified");

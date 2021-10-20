@@ -1,22 +1,20 @@
 ﻿using System;
-using Firebase;
+
 using Android.App;
 using Android.Content.PM;
 using Android.Runtime;
 using Android.OS;
-using Acr.UserDialogs;
 using Quitaye.Droid.Services;
-using Android.Content;
 using Android.Gms.Auth.Api.SignIn;
 using Xamarin.Forms;
+using Android.Content;
 using Firebase.Auth;
-using Xamarin.Facebook;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
+using Firebase;
+using Acr.UserDialogs;
 
 namespace Quitaye.Droid
 {
-    [Activity(Label = "Quitaye", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
+    [Activity(Label = "Quitaye", Icon = "@mipmap/icon", Theme = "@style/MainTheme", MainLauncher = false, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         public static FirebaseApp app;
@@ -31,12 +29,8 @@ namespace Quitaye.Droid
 
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
-            var host = App.BuildHost()
-        .UseContentRoot(System.Environment.GetFolderPath(
-            System.Environment.SpecialFolder.Personal)).Build();
-
-            var application = host.Services.GetRequiredService<App>();
-            LoadApplication(application);
+            
+            LoadApplication(new App());
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {

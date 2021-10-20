@@ -10,6 +10,7 @@ namespace Models
     public class Panier
     {
         public Guid Id { get; set; }
+        [ForeignKey(nameof(Offre))]
         public Guid? OffreId { get; set; }
         public Offre Offre { get; set; }
         [Required(ErrorMessage = "La quantité est requise")]

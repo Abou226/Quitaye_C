@@ -96,16 +96,16 @@ namespace Quitaye.Server.Controllers
         {
             try
             {
-                //var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                //var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
-                //Equals(claim));
-                //if (identity.Count() != 0)
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.ItemA.GetAll();
                     
                     return Ok(result);
                 }
-                //else return NotFound("User not indentified");
+                else return NotFound("User not indentified");
             }
             catch (Exception ex)
             {

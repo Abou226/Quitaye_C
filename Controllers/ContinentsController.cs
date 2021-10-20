@@ -111,7 +111,7 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetBy(x =>
-                    (x.EntrepriseId.ToString() == search) && (x.Name.Contains(search)));
+                    (x.Id.ToString() == search) && (x.Name.Contains(search)));
 
                     return Ok(result);
                 }
@@ -136,7 +136,7 @@ namespace Controllers
                     var entreprise = await _entrepriseUser.Item.GetBy(x => x.EntrepriseId == identity.First().EntrperiseId);
                     if (entreprise.Count() != 0)
                     {
-                        var result = await repositoryWrapper.Item.GetBy(x => (x.EntrepriseId == id));
+                        var result = await repositoryWrapper.Item.GetBy(x => (x.Id == id));
                         return Ok(result);
                     }
                     else return NotFound("Non membre de cette entreprise");
@@ -162,7 +162,6 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    value.EntrepriseId = value.EntrepriseId;
                     value.Id = Guid.NewGuid();
                     await repositoryWrapper.ItemA.AddAsync(value);
                     await repositoryWrapper.SaveAsync();
@@ -187,7 +186,7 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetBy(x =>
-                    (x.EntrepriseId.ToString() == search) && (x.Name.Contains(search)));
+                    (x.Id.ToString() == search) && (x.Name.Contains(search)));
 
                     return Ok(result);
                 }
