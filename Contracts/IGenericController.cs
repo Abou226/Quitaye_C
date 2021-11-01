@@ -13,7 +13,7 @@ namespace Contracts
         Task<ActionResult<IEnumerable<A>>> GetAll();
         Task<ActionResult<IEnumerable<A>>> GetBy(string search);
         Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
-        Task<ActionResult<A>> AddAsync(A value);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
         Task<ActionResult<A>> UpdateAsync(A value);
         Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
         Task<ActionResult<A>> Delete(Guid id);
@@ -24,7 +24,7 @@ namespace Contracts
         Task<ActionResult<IEnumerable<A>>> GetAll();
         Task<ActionResult<IEnumerable<A>>> GetBy(string search);
         Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
-        Task<ActionResult<A>> AddAsync(A value);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
         Task<ActionResult<A>> UpdateAsync(A value);
         Task<ActionResult<A>> Delete(Guid id);
     }
@@ -34,7 +34,7 @@ namespace Contracts
         Task<ActionResult<IEnumerable<A>>> GetAll();
         Task<ActionResult<IEnumerable<A>>> GetBy(string search);
         Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
-        Task<ActionResult<A>> AddAsync(A value);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
         Task<ActionResult<A>> UpdateAsync(A value);
         Task<ActionResult<A>> Delete(Guid id);
     }
@@ -44,7 +44,7 @@ namespace Contracts
         Task<ActionResult<IEnumerable<A>>> GetAll();
         Task<ActionResult<IEnumerable<A>>> GetBy(string search);
         Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
-        Task<ActionResult<A>> AddAsync(A value);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
         Task<ActionResult<A>> UpdateAsync(A value);
         Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
         Task<ActionResult<A>> Delete(Guid id);
@@ -55,7 +55,7 @@ namespace Contracts
         Task<ActionResult<IEnumerable<A>>> GetAll();
         Task<ActionResult<IEnumerable<A>>> GetBy(string search);
         Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
-        Task<ActionResult<A>> AddAsync(A value);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
         Task<ActionResult<A>> UpdateAsync(A value);
         Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
         Task<ActionResult<A>> Delete(Guid id);
@@ -66,7 +66,7 @@ namespace Contracts
         Task<ActionResult<IEnumerable<A>>> GetAll();
         Task<ActionResult<IEnumerable<A>>> GetBy(string search);
         Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
-        Task<ActionResult<A>> AddAsync(A value);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
         Task<ActionResult<A>> UpdateAsync(A value);
         Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
         Task<ActionResult<A>> Delete(Guid id);
@@ -77,7 +77,7 @@ namespace Contracts
         Task<ActionResult<IEnumerable<A>>> GetAll();
         Task<ActionResult<IEnumerable<A>>> GetBy(string search);
         Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
-        Task<ActionResult<A>> AddAsync(A value);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
         Task<ActionResult<A>> UpdateAsync(A value);
         Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
         Task<ActionResult<A>> Delete(Guid id);
@@ -88,7 +88,7 @@ namespace Contracts
         Task<ActionResult<IEnumerable<A>>> GetAll();
         Task<ActionResult<IEnumerable<A>>> GetBy(string search);
         Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
-        Task<ActionResult<A>> AddAsync(A value);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
         Task<ActionResult<A>> UpdateAsync(A value);
         Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
         Task<ActionResult<A>> Delete(Guid id);
@@ -99,7 +99,7 @@ namespace Contracts
         Task<ActionResult<IEnumerable<A>>> GetAll();
         Task<ActionResult<IEnumerable<A>>> GetBy(string search);
         Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
-        Task<ActionResult<A>> AddAsync(A value);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
         Task<ActionResult<A>> UpdateAsync(A value);
         Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
         Task<ActionResult<A>> Delete(Guid id);
@@ -110,7 +110,7 @@ namespace Contracts
         Task<ActionResult<IEnumerable<A>>> GetAll();
         Task<ActionResult<IEnumerable<A>>> GetBy(string search);
         Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
-        Task<ActionResult<A>> AddAsync(A value);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
         Task<ActionResult<A>> UpdateAsync(A value);
         Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
         Task<ActionResult<A>> Delete(Guid id);
@@ -121,7 +121,7 @@ namespace Contracts
         Task<ActionResult<IEnumerable<A>>> GetAll();
         Task<ActionResult<IEnumerable<A>>> GetBy(string search);
         Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
-        Task<ActionResult<A>> AddAsync(A value);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
         Task<ActionResult<A>> UpdateAsync(A value);
         Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
         Task<ActionResult<A>> Delete(Guid id);
@@ -132,7 +132,7 @@ namespace Contracts
         Task<ActionResult<IEnumerable<A>>> GetAll();
         Task<ActionResult<IEnumerable<A>>> GetBy(string search);
         Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
-        Task<ActionResult<A>> AddAsync(A value);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
         Task<ActionResult<A>> UpdateAsync(A value);
         Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
         Task<ActionResult<A>> Delete(Guid id);

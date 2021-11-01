@@ -56,5 +56,7 @@ namespace Models
         public string Contact_Livraison { get; set; }
 
         public Guid? PanierId { get; set; }
+
+        public bool Annulée { get; set; }
     }
 }

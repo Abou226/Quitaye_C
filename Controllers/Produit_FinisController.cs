@@ -168,11 +168,11 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Produit_Fini>> AddAsync([FromForm] Produit_Fini value)
+        public override async Task<ActionResult<IEnumerable<Produit_Fini>>> AddAsync([FromBody] List<Produit_Fini> values)
         {
             try
             {
-                if (value == null)
+                if (values == null)
                     return NotFound();
 
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
@@ -181,19 +181,22 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-
-                    if (value.Image != null)
+                    foreach (var value in values)
                     {
-                        var result = await _fileManager.Upload(_settings.AccessKey, _settings.SecretKey, _settings.BucketName, Amazon.RegionEndpoint.USEast1, value.Image);
-                        value.Url = result.Url;
-                    }
+                        if (value.Image != null)
+                        {
+                            var result = await _fileManager.Upload(_settings.AccessKey, _settings.SecretKey, _settings.BucketName, Amazon.RegionEndpoint.USEast1, value.Image);
+                            value.Url = result.Url;
+                        }
 
-                    value.Id = Guid.NewGuid();
-                    value.UserId = identity.First().Id;
-                    value.EntrepriseId = value.EntrepriseId;
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
-                    return Ok(value);
+                        value.Id = Guid.NewGuid();
+                        value.UserId = identity.First().Id;
+                        value.EntrepriseId = value.EntrepriseId;
+                        await repositoryWrapper.ItemA.AddAsync(value);
+                        await repositoryWrapper.SaveAsync();
+                    }
+                    
+                    return Ok(values);
                 }
                 else return NotFound("User not identified");
             }

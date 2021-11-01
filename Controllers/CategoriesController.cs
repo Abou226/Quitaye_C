@@ -3,6 +3,7 @@ using AutoMapper;
 using Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Repository;
@@ -37,16 +38,62 @@ namespace Controllers
             _mapper = mapper;
         }
 
+        [HttpDelete("{id}")]
+        public override async Task<ActionResult<Categorie>> Delete([FromRoute] Guid id)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    Categorie u = new Categorie();
+                    u.Id = id;
+                    repositoryWrapper.Item.Delete(u);
+                    await repositoryWrapper.SaveAsync();
+                    return Ok(u);
+                }
+                else return NotFound("Utilisateur non identifier");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        public override async Task<ActionResult<Categorie>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        {
+            try
+            {
+                var item = await repositoryWrapper.Item.GetBy(x => x.Id == id);
+                if (item.Count() != 0)
+                {
+                    var single = item.First();
+                    value.ApplyTo(single);
+                    await repositoryWrapper.SaveAsync();
+                }
+                else return NotFound("User not indentified");
+
+                return Ok(value);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+
         public override async Task<ActionResult<IEnumerable<Categorie>>> GetAll()
         {
             try
             {
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemA.GetBy(x => x.Id.ToString().
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.ItemA.GetBy(x => (x.EntrepriseId == identity.FirstOrDefault().EntrepriseId));
+                    var result = await repositoryWrapper.ItemA.GetAll();
 
                     return Ok(result);
                 }
@@ -117,7 +164,7 @@ namespace Controllers
         }
 
 
-        public override async Task<ActionResult<Categorie>> AddAsync([FromForm] Categorie value)
+        public override async Task<ActionResult<IEnumerable<Categorie>>> AddAsync([FromForm] Categorie value)
         {
             try
             {
@@ -130,16 +177,20 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    if (value.Image != null)
+                    //foreach (var value in values)
                     {
-                        var result = await _fileManager.Upload(_settings.AccessKey, _settings.SecretKey, _settings.BucketName, Amazon.RegionEndpoint.USEast1, value.Image);
-                        value.Url = result.Url;
+                        if (value.Image != null)
+                        {
+                            var result = await _fileManager.Upload(_settings.AccessKey, _settings.SecretKey, _settings.BucketName, Amazon.RegionEndpoint.USEast1, value.Image);
+                            value.Url = result.Url;
+                        }
+                        value.Id = Guid.NewGuid();
+                        value.UserId = identity.First().Id;
+                        value.EntrepriseId = value.EntrepriseId;
+                        await repositoryWrapper.ItemA.AddAsync(value);
+                        await repositoryWrapper.SaveAsync();
                     }
-                    value.Id = Guid.NewGuid();
-                    value.UserId = identity.First().Id;
-                    value.EntrepriseId = value.EntrepriseId;
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
+                    
                     return Ok(value);
                 }
                 else return NotFound("User not identified");
@@ -155,13 +206,13 @@ namespace Controllers
             try
             {
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemA.GetBy(x => x.Id.ToString().
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
                 Equals(claim));
 
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetBy(x =>
-                    (x.EntrepriseId == identity.FirstOrDefault().EntrepriseId) && (x.Name.Contains(search)));
+                    (x.EntrepriseId == identity.FirstOrDefault().EntrperiseId) && (x.Name.Contains(search)));
 
                     return Ok(result);
                 }
@@ -180,13 +231,13 @@ namespace Controllers
             try
             {
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemA.GetBy(x => x.Id.ToString().
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
                 Equals(claim));
 
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetBy(x =>
-                    (x.EntrepriseId == identity.FirstOrDefault().EntrepriseId));
+                    (x.EntrepriseId == identity.FirstOrDefault().EntrperiseId));
 
                     return Ok(result);
                 }

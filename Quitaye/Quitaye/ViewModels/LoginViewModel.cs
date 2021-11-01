@@ -26,7 +26,6 @@ namespace Quitaye.ViewModels
         private ICommand _eyeCommand;
         private ICommand _forgotPasswordCommand;
 
-
         public IDataService<Entreprise> EntrepriseData { get; }
         public IDataService<RefreshToken> Token { get; }
         public INavigation Navigation { get; }

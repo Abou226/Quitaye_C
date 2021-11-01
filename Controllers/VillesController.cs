@@ -166,11 +166,11 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Ville>> AddAsync([FromBody] Ville value)
+        public override async Task<ActionResult<IEnumerable<Ville>>> AddAsync([FromBody] List<Ville> values)
         {
             try
             {
-                if (value == null)
+                if (values == null)
                     return NotFound();
 
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
@@ -179,10 +179,14 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    value.Id = Guid.NewGuid();
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
-                    return Ok(value);
+                    foreach (var value in values)
+                    {
+                        value.Id = Guid.NewGuid();
+                        await repositoryWrapper.ItemA.AddAsync(value);
+                        await repositoryWrapper.SaveAsync();
+                    }
+                    
+                    return Ok(values);
                 }
                 else return NotFound("User not identified");
             }

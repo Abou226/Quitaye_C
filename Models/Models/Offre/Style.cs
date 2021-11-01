@@ -32,6 +32,7 @@ namespace Models
 
         public bool Style_Special { get; set; }
 
+
         [NotMapped]
         public IFormFile Image { get; set; }
     }

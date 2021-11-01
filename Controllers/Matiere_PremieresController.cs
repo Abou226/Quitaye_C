@@ -16,7 +16,7 @@ namespace Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class Matiere_PremieresController : GenericController<Matière_Premiere, User>
+    public class Matière_PremieresController : GenericController<Matière_Premiere, User>
     {
         private readonly IGenericRepositoryWrapper<Matière_Premiere, User> repositoryWrapper;
         private readonly IConfigSettings _settings;
@@ -24,7 +24,7 @@ namespace Controllers
         private readonly IFileManager _fileManager;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
 
-        public Matiere_PremieresController(IGenericRepositoryWrapper<Matière_Premiere, User> wrapper, 
+        public Matière_PremieresController(IGenericRepositoryWrapper<Matière_Premiere, User> wrapper, 
             IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, IFileManager fileManager, 
             IConfigSettings settings, 
             IMapper mapper) : base(wrapper)
@@ -102,11 +102,11 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Matière_Premiere>> AddAsync([FromForm] Matière_Premiere value)
+        public override async Task<ActionResult<IEnumerable<Matière_Premiere>>> AddAsync([FromBody] List<Matière_Premiere> values)
         {
             try
             {
-                if (value == null)
+                if (values == null)
                     return NotFound();
 
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
@@ -115,21 +115,20 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-
-                    if (value.Image != null)
+                    foreach (var value in values)
                     {
-                        var result = await _fileManager.Upload(_settings.AccessKey, _settings.SecretKey, _settings.BucketName, Amazon.RegionEndpoint.USEast1, value.Image);
-                        value.Url = result.Url;
+                        if (value.Image != null)
+                        {
+                            var result = await _fileManager.Upload(_settings.AccessKey, _settings.SecretKey, _settings.BucketName, Amazon.RegionEndpoint.USEast1, value.Image);
+                            value.Url = result.Url;
+                        }
+                        value.UserId = identity.First().Id;
+                        value.Id = Guid.NewGuid();
+                        await repositoryWrapper.ItemA.AddAsync(value);
+                        await repositoryWrapper.SaveAsync();
                     }
-                    //if (value.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
-                    //    value.Date = DateTime.Now;
-                    //value.ServerTime = DateTime.Now;
-                    value.UserId = identity.First().Id;
-                    value.Id = Guid.NewGuid();
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
-
-                    return Ok(value);
+                    
+                    return Ok(values);
                 }
                 else return NotFound("User not identified");
             }

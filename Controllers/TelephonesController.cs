@@ -150,11 +150,11 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Telephone>> AddAsync([FromBody] Telephone value)
+        public override async Task<ActionResult<IEnumerable<Telephone>>> AddAsync([FromBody] List<Telephone> values)
         {
             try
             {
-                if (value == null)
+                if (values == null)
                     return NotFound();
 
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
@@ -163,12 +163,16 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    value.OwnerId = identity.First().Id;
-                    value.Id = Guid.NewGuid();
-                    value.EntrepriseId = value.EntrepriseId;
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
-                    return Ok(value);
+                    foreach (var value in values)
+                    {
+                        value.OwnerId = identity.First().Id;
+                        value.Id = Guid.NewGuid();
+                        value.EntrepriseId = value.EntrepriseId;
+                        await repositoryWrapper.ItemA.AddAsync(value);
+                        await repositoryWrapper.SaveAsync();
+                    }
+                    
+                    return Ok(values);
                 }
                 else return NotFound("User not identified");
             }

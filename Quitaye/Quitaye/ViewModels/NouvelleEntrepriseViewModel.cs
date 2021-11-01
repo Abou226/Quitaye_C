@@ -170,7 +170,8 @@ namespace Quitaye.ViewModels
                         IsNotBusy = false;
                         UserDialogs.Instance.ShowLoading("Validation");
 
-                        var item = await EntrepriseService.AddAsync(new Entreprise()
+                        var list = new List<Entreprise>();
+                        list.Add(new Entreprise()
                         {
                             Name = Nom_Entreprise,
                             VilleId = Ville.Id,
@@ -178,11 +179,12 @@ namespace Quitaye.ViewModels
                             Quartier = new Quartier() { Name = Adresse },
                             Nb_Employés = Convert.ToInt32(Nb_Employés),
                             DateOfCreation = DateTime.Now,
-                        }, await SecureStorage.GetAsync("Token"));
+                        });
+                        var item = await EntrepriseService.AddListAsync(list, await SecureStorage.GetAsync("Token"));
                         ClearData();
                         if (item != null)
                         {
-                            await SecureStorage.SetAsync("LastEntreprise", item.Id.ToString());
+                            await SecureStorage.SetAsync("LastEntreprise", item.First().Id.ToString());
                             Application.Current.MainPage = new NavigationPage(new HomePage());
                         }
                     }

@@ -189,34 +189,36 @@ namespace Controllers
         }
 
         [AllowAnonymous]
-        public override async Task<ActionResult<Client>> AddAsync([FromBody] Client value)
+        public override async Task<ActionResult<IEnumerable<Client>>> AddAsync([FromBody] List<Client> values)
         {
             try
             {
-                if (value == null)
+                if (values == null)
                     return NotFound();
 
-                if (!string.IsNullOrWhiteSpace(value.Username))
+                foreach (var value in values)
                 {
-                    var u = await repositoryWrapper.ItemA.GetBy(x => x.Username == value.Username);
-                    if (u.Count() != 0)
-                        return BadRequest("Nom d'utilisateur deja existant, veiller choisir un nom d'utilisateur unique");
+                    if (!string.IsNullOrWhiteSpace(value.Username))
                     {
-                        await Add(value);
+                        var u = await repositoryWrapper.ItemA.GetBy(x => x.Username == value.Username);
+                        if (u.Count() != 0)
+                            return BadRequest("Nom d'utilisateur deja existant, veiller choisir un nom d'utilisateur unique");
+                        {
+                            await Add(value);
+                        }
+                    }
+                    else
+                    {
+                        var u = await repositoryWrapper.ItemA.GetBy(x => x.Email == value.Email);
+                        if (u.Count() != 0)
+                            return BadRequest("Nom d'utilisateur deja existant, veiller choisir un nom d'utilisateur unique");
+                        {
+                            await Add(value);
+                        }
                     }
                 }
-                else
-                {
-                    var u = await repositoryWrapper.ItemA.GetBy(x => x.Email == value.Email);
-                    if (u.Count() != 0)
-                        return BadRequest("Nom d'utilisateur deja existant, veiller choisir un nom d'utilisateur unique");
-                    {
-                        await Add(value);
-                    }
-                }
-
                 //else return NotFound();
-                return Ok(value);
+                return Ok(values);
             }
             catch (Exception ex)
             {

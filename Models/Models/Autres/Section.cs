@@ -73,5 +73,18 @@ namespace Models
         }
 
 
+        private string description;
+
+        public string Description
+        {
+            get { return description; }
+            set 
+            {
+                if (description == value)
+                    return;
+                description = value;
+                OnPropertyChanged();
+            }
+        }
     }
 }

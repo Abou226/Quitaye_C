@@ -509,7 +509,7 @@ namespace Repository
 
         public async Task<IEnumerable<A>> GetByInclude(Expression<Func<A, C>> include, Expression<Func<A, D>> include1, Expression<Func<A, E>> include2, Expression<Func<A, bool>> expression)
         {
-            return await RepositoryContext.Set<A>().Include(include).Include(include1).Include(include2).Where(expression).ToListAsync();
+            return await RepositoryContext.Set<A>().Include(expression).Include(include).Include(include1).Include(include2).ToListAsync();
         }
 
         public async Task<IEnumerable<B>> GetByB(Expression<Func<B, bool>> expression)
@@ -670,7 +670,7 @@ namespace Repository
 
         public async Task<IEnumerable<A>> GetByInclude(Expression<Func<A, C>> include, Expression<Func<A, D>> include1, Expression<Func<A, E>> include2, Expression<Func<A, F>> include3, Expression<Func<A, bool>> expression)
         {
-            return await RepositoryContext.Set<A>().Include(include).Include(include1).Include(include2).Include(include3).Include(expression).ToListAsync();
+            return await RepositoryContext.Set<A>().Include(expression).Include(include).Include(include1).Include(include2).Include(include3).ToListAsync();
         }
 
         public async Task<IEnumerable<A>> GetByInclude(Expression<Func<A, bool>> expression, Expression<Func<A, C>> include, Expression<Func<A, D>> include1, Expression<Func<A, F>> include2)
@@ -725,7 +725,12 @@ namespace Repository
 
         public async Task<IEnumerable<A>> GetByInclude(Expression<Func<A, bool>> expression, Expression<Func<A, C>> include, Expression<Func<A, D>> include1, Expression<Func<A, E>> include3, Expression<Func<A, F>> include2)
         {
-            return await RepositoryContext.Set<A>().Include(include).Include(include1).Include(include2).Include(include3).ToListAsync();
+            return await RepositoryContext.Set<A>().Where(expression).Include(include).Include(include1).Include(include2).Include(include3).ToListAsync();
+        }
+
+        public async Task<IEnumerable<A>> GetByInclude(Expression<Func<A, bool>> expression, Expression<Func<A, C>> include, Expression<Func<A, D>> include1, Expression<Func<A, E>> include3)
+        {
+            return await RepositoryContext.Set<A>().Where(expression).Include(include).Include(include1).Include(include3).ToListAsync();
         }
     }
 
@@ -831,7 +836,7 @@ namespace Repository
 
         public async Task<IEnumerable<A>> GetByInclude(Expression<Func<A, C>> include, Expression<Func<A, D>> include1, Expression<Func<A, E>> include2, Expression<Func<A, F>> include3, Expression<Func<A, G>> include4, Expression<Func<A, bool>> expression)
         {
-            return await RepositoryContext.Set<A>().Include(include).Include(include1).Include(include2).Include(include3).Include(include4).Where(expression).ToListAsync();
+            return await RepositoryContext.Set<A>().Include(expression).Include(include).Include(include1).Include(include2).Include(include3).Include(include4).ToListAsync();
         }
 
         public async Task<IEnumerable<A>> GetByInclude(Expression<Func<A, bool>> expression, Expression<Func<A, C>> include1, Expression<Func<A, D>> include2, Expression<Func<A, E>> include3, Expression<Func<A, F>> include4, Expression<Func<A, G>> include5)
@@ -1147,7 +1152,7 @@ namespace Repository
 
         public async Task<IEnumerable<A>> GetByInclude(Expression<Func<A, bool>> expression, Expression<Func<A, C>> include, Expression<Func<A, D>> include1, Expression<Func<A, E>> include2, Expression<Func<A, F>> include3)
         {
-            return await RepositoryContext.Set<A>().Include(include).Include(include1).Include(include2).Include(include3).Where(expression).ToListAsync();
+            return await RepositoryContext.Set<A>().Include(expression).Include(include).Include(include1).Include(include2).Include(include3).Where(expression).ToListAsync();
         }
     }
 
@@ -1308,7 +1313,7 @@ namespace Repository
 
         public async Task<IEnumerable<A>> GetByInclude(Expression<Func<A, C>> include1, Expression<Func<A, D>> include2, Expression<Func<A, E>> include3, Expression<Func<A, F>> include4, Expression<Func<A, G>> include5, Expression<Func<A, H>> include6, Expression<Func<A, bool>> expression)
         {
-            return await RepositoryContext.Set<A>().Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).Where(expression).ToListAsync();
+            return await RepositoryContext.Set<A>().Include(expression).Include(include1).Include(include2).Include(include3).Include(include4).Include(include5).Include(include6).ToListAsync();
         }
 
         public async Task<IEnumerable<A>> GetByInclude(Expression<Func<A, C>> include1, Expression<Func<A, D>> include2, Expression<Func<A, E>> include3, Expression<Func<A, F>> include4, Expression<Func<A, G>> include5, Expression<Func<A, H>> include6, Expression<Func<A, I>> include7)
@@ -1756,7 +1761,7 @@ namespace Repository
 
         public async Task<IEnumerable<A>> GetByInclude(Expression<Func<A, C>> include, Expression<Func<A, D>> include1, Expression<Func<A, E>> include2, Expression<Func<A, F>> include3, Expression<Func<A, G>> include4, Expression<Func<A, bool>> expression)
         {
-            return await RepositoryContext.Set<A>().Include(include).Include(include1).Include(include2).Include(include3).Include(include4).Where(expression).ToListAsync();
+            return await RepositoryContext.Set<A>().Include(expression).Include(include).Include(include1).Include(include2).Include(include3).Include(include4).ToListAsync();
         }
 
         public async Task<IEnumerable<A>> GetByInclude(Expression<Func<A, bool>> expression, Expression<Func<A, C>> include1, Expression<Func<A, D>> include2, Expression<Func<A, E>> include3, Expression<Func<A, F>> include4, Expression<Func<A, G>> include5)

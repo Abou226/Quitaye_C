@@ -15,6 +15,7 @@ namespace Entities
 
         }
 
+        public DbSet<Occasion> Occasions { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Entreprise> Entreprises { get; set; }
         public DbSet<Telephone> Telephones { get; set; }
@@ -38,6 +39,7 @@ namespace Entities
         public DbSet<Vente> Ventes { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<ExternalLogin> ExternalLogins { get; set; }
+        public DbSet<Heure> Heures { get; set; }
         public DbSet<Panier> Paniers { get; set; }
         public DbSet<Num_Payement> Num_Payements { get; set; }
         public DbSet<Num_Vente> num_Ventes { get; set; }

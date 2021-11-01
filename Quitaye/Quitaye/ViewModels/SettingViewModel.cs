@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Models;
 using Plugin.Connectivity;
+using Quitaye.ViewModels;
 using Services;
 using System;
 using System.Collections.Generic;
@@ -37,18 +38,11 @@ namespace Quitaye
 {
     public class SettingViewModel : BaseVM.BaseViewModel
     {
-        public ObservableCollection<Style> Styles { get; }
-        public ObservableCollection<Marque> Marques { get; }
-        public ObservableCollection<Categorie> Categories { get; }
-        public ObservableCollection<Model> Models { get; }
+        
         public IBaseViewModel BaseVM { get; }
         public IDataService<Test> Test { get; }
-        public IDataService<Style> StyleService { get; }
-        public IDataService<Marque> MarqueService { get; }
-        public ObservableCollection<object> Items { get; }
-        public IDataService<Gamme> GammeService { get; }
-        public IDataService<Produit_Fini> ProduitFiniService { get; }
-        public IDataService<Matière_Premiere> Matière_PremièreService { get; }
+        
+        
         public IInitialService Init { get; }
 
         private bool _is_style = true;
@@ -65,16 +59,18 @@ namespace Quitaye
             }
         }
 
-        private string guid;
 
-        public string EntrepriseId
+        private ObjectViewModel<object> currentVM;
+
+        public ObjectViewModel<object> CurrentVM
         {
-            get { return guid; }
+            get { return currentVM; }
             set 
             {
-                if (guid == value)
+                if (currentVM == value)
                     return;
-                guid = value;
+
+                currentVM = value;
                 OnPropertyChanged();
             }
         }
@@ -93,20 +89,6 @@ namespace Quitaye
             }
         }
 
-        private string _description;
-
-        public string Description
-        {
-            get { return _description; }
-            set 
-            {
-                if (_description == value)
-                    return;
-                _description = value;
-                OnPropertyChanged();
-            }
-        }
-
         private Section section1;
 
         public Section CurrentSection
@@ -121,102 +103,7 @@ namespace Quitaye
             }
         }
 
-
-        private Taille taille;
-
-        public Taille Taille
-        {
-            get { return taille; }
-            set 
-            {
-                if (taille == value)
-                    return;
-
-                taille = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private Style style;
-
-        public Style Style
-        {
-            get { return style; }
-            set 
-            {
-                if (style == value)
-                    return;
-
-                style = value;
-                OnPropertyChanged();
-                if (style.Style_Special)
-                    Style_Special = true;
-                else Style_Special = false;
-            }
-        }
-
-        private Marque marque;
-
-        public Marque Marque
-        {
-            get { return marque; }
-            set 
-            {
-                if (marque == value)
-                    return;
-                marque = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private Categorie categorie;
-
-        public Categorie Categorie
-        {
-            get { return categorie; }
-            set 
-            {
-                if (categorie == value)
-                    return;
-
-                categorie = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private Gamme gamme;
-
-        public Gamme Gamme
-        {
-            get { return gamme; }
-            set 
-            {
-                if (gamme == value)
-                    return;
-                gamme = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private Model model;
-
-        public Model Model
-        {
-            get { return model; }
-            set 
-            {
-                if (model == value)
-                    return;
-                model = value;
-                OnPropertyChanged();
-            }
-        }
-
         public IMessage MessageAlert { get; }
-        public ObservableCollection<Gamme> Gammes { get; }
-        public ICommand AddImageComand { get; }
-        public IDataService<Model> ModelService { get; }
-        public IDataService<Categorie> CategorieService { get; }
         private Entreprise entreprise;
 
         public INavigation Navigation { get; }
@@ -234,78 +121,10 @@ namespace Quitaye
             }
         }
 
-        public ICommand AddStyleCommand { get; }
-        public ICommand AddTailleCommand { get; }
-        public ICommand AddMarqueCommand { get; }
-        private bool _isGamme;
-
-        public bool IsGamme
-        {
-            get { return _isGamme; }
-            set 
-            {
-                if (_isGamme == value)
-                    return;
-                _isGamme = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public ICommand AddModelCommand { get; }
-        public ICommand AddGammeCommand { get; }
-        public ICommand AddCategorieCommand { get; }
-
-        public ICommand AddCommand { get; }
-
         public ICommand SectionTappedCommand { get; }
         public IFormFile Image { get; set; }
 
-        private decimal prix_Unité;
-
-        public decimal Prix_Unité
-        {
-            get { return prix_Unité; }
-            set 
-            {
-                if (prix_Unité == value)
-                    return;
-
-                prix_Unité = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private string _url;
-
-        public string Url
-        {
-            get { return _url; }
-            set 
-            {
-                if (_url == value)
-                    return;
-
-                _url = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private bool style_Special;
-
-        public bool Style_Special
-        {
-            get { return style_Special; }
-            set 
-            {
-                if (style_Special == value)
-                    return;
-
-                style_Special = value;
-                OnPropertyChanged();
-            }
-        }
-
-
+        
         public ObservableCollection<Section> Sections { get; }
         private ImageSource _pictureSource;
         public ImageSource PictureSource
@@ -320,22 +139,7 @@ namespace Quitaye
                 OnPropertyChanged();
             }
         }
-        public Stream Stream { get; set; }
-        private async void OnAddImageCommand(object obj)
-        {
-            var result = await MediaPicker.PickPhotoAsync(new MediaPickerOptions()
-            {
-                Title = "Veillez selectionner une image"
-            });
-
-            
-            if(result != null)
-            {
-                FileResult = result;
-                Stream = await result.OpenReadAsync();
-                PictureSource = ImageSource.FromStream(() => Stream);
-            }
-        }
+        
 
         private bool _isUsine;
 
@@ -352,149 +156,278 @@ namespace Quitaye
             }
         }
 
+
+        private bool styleVisible = true;
+
+        public bool StyleVisible
+        {
+            get { return styleVisible; }
+            set 
+            {
+                if (styleVisible == value)
+                    return;
+
+                styleVisible = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool categorieVisible = false;
+
+        public bool CategorieVisible
+        {
+            get { return categorieVisible; }
+            set 
+            {
+                if (categorieVisible == value)
+                    return;
+
+                categorieVisible = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool marqueVisible = false;
+
+        public bool MarqueVisible
+        {
+            get { return marqueVisible; }
+            set 
+            {
+                if (marqueVisible == value)
+                    return;
+
+                marqueVisible = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool matiere_premièreVisible = false;
+
+        public bool Matière_PremiereVisible
+        {
+            get { return matiere_premièreVisible; }
+            set 
+            {
+                if (matiere_premièreVisible == value)
+                    return;
+
+                matiere_premièreVisible = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _produitFiniVisible = false;
+
+        public bool ProduitFiniVisible
+        {
+            get { return _produitFiniVisible; }
+            set 
+            {
+                if (_produitFiniVisible == value)
+                    return;
+                _produitFiniVisible = value;
+                OnPropertyChanged();
+            }
+        }
+
+
+        private bool tailleVisible = false;
+
+        public bool TailleVisible
+        {
+            get { return tailleVisible; }
+            set 
+            {
+                if (tailleVisible == value)
+                    return;
+
+                tailleVisible = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool gammeVisible = false;
+
+        public bool GammeVisible
+        {
+            get { return gammeVisible; }
+            set 
+            {
+                if (gammeVisible == value)
+                    return;
+
+                gammeVisible = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool heureVisible;
+
+        public bool HeureVisible
+        {
+            get { return heureVisible; }
+            set 
+            {
+                if (heureVisible == value)
+                    return;
+                heureVisible = value;
+                OnPropertyChanged();
+            }
+        }
+
+
+        private bool modelVisible = false;
+
+        public bool ModelVisible
+        {
+            get { return modelVisible; }
+            set 
+            {
+                if (modelVisible == value)
+                    return;
+
+                modelVisible = value;
+                OnPropertyChanged();
+            }
+        }
+
+
         public FileResult FileResult { get; set; }
 
         public IDataService<Taille> TailleService { get; }
 
         public SettingViewModel()
         {
-            Styles = new ObservableCollection<Style>();
-            Marques = new ObservableCollection<Marque>();
-            Categories = new ObservableCollection<Categorie>();
             Sections = new ObservableCollection<Section>();
-            Models = new ObservableCollection<Model>();
-            ModelService = DependencyService.Get<IDataService<Model>>();
-            GammeService = DependencyService.Get<IDataService<Gamme>>();
-            CategorieService = DependencyService.Get<IDataService<Categorie>>();
-            Items = new ObservableCollection<object>();
             BaseVM = DependencyService.Get<IBaseViewModel>();
             SectionTappedCommand = new Command(OnSectionTappedCommand);
-            ProduitFiniService = DependencyService.Get<IDataService<Produit_Fini>>();
-            Matière_PremièreService = DependencyService.Get<IDataService<Matière_Premiere>>();
-            AddImageComand = new Command(OnAddImageCommand);
-            AddCommand = new Command(OnAddCommand);
             TailleService = DependencyService.Get<IDataService<Taille>>();
             Test = DependencyService.Get<IDataService<Test>>();
-            Gammes = new ObservableCollection<Gamme>();
             MessageAlert = DependencyService.Get<IMessage>();
-            MarqueService = DependencyService.Get<IDataService<Marque>>();
-            StyleService = DependencyService.Get<IDataService<Style>>();
             Init = DependencyService.Get<IInitialService>();
             GetSections();
         }
 
-        private async void OnAddCommand(object obj)
-        {
-            if (CurrentSection.Nom == "Styles")
-                await OnAddStyleCommand(obj);
-            else if (CurrentSection.Nom == "Models")
-                await OnAddModelCommand(obj);
-            else if (CurrentSection.Nom == "Marques")
-                await OnAddMarqueCommand(obj);
-            else if (CurrentSection.Nom == "Tailles")
-                await OnAddTailleCommand(obj);
-            else if (CurrentSection.Nom == "Gammes")
-                await OnAddGammeCommand(obj);
-            else if (CurrentSection.Nom == "Categories")
-                await OnAddCategorieCommand(obj);
-            
-        }
-
-        private async Task OnAddTailleCommand(object obj)
-        {
-            if (!string.IsNullOrWhiteSpace(Nom) && !string.IsNullOrWhiteSpace(Description)
-                && !string.IsNullOrWhiteSpace(FileResult.FileName))
-            {
-                if (IsNotBusy)
-                    return;
-
-                try
-                {
-                    IsNotBusy = false;
-                    UserDialogs.Instance.ShowLoading("Validation....");
-                    //var stream = File.Op;
-                    //long sd = 123450404;
-                    if (!string.IsNullOrWhiteSpace(FileResult.FileName))
-                    {
-                        Stream = await FileResult.OpenReadAsync();
-                        Image = new FormFile(Stream, Stream.Position, Stream.Length, FileResult.FileName, FileResult.FileName);
-                    }
-                    else Image = null;
-
-                    var result = await TailleService.AddFormDataAsync(new Taille()
-                    {
-                        Name = Nom,
-                        Description = Description,
-                        EntrepriseId = Entreprise.Id,
-                    }, await SecureStorage.GetAsync("Token"));
-
-                    ClearData();
-                    if (result == null)
-                    {
-
-                    }
-                    UserDialogs.Instance.HideLoading();
-
-                    await GetMarquesAsync();
-
-                    if (result != null)
-                    {
-                        BaseVM.RefreshProduit = true;
-                        await Application.Current.MainPage.DisplayAlert("Confirmation", "Opération effectuée avec succès !", "OK");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    //await Initializes(ex, OnAddGammeCommand(obj));
-                }
-                finally
-                {
-                    IsNotBusy = true;
-                    UserDialogs.Instance.HideLoading();
-                }
-            }
-        }
-
-        private async void OnSectionTappedCommand(object obj)
+        
+        private void OnSectionTappedCommand(object obj)
         {
             var value = (Section)obj;
             CurrentSection = value;
             ChangeIcon(value);
-            IsStyle = false;
-            if(value.Nom == "Gammes")
+
+            MakeVisible(value);
+        }
+
+        private void MakeVisible(Section value)
+        {
+            if (value.Nom == "Categories")
             {
-                IsGamme = true;
-                GetCategoriesAsync();
-                GetMarquesAsync();
-                GetStylesAsync();
-                await GetGammesAsync();
+                MarqueVisible = false;
+                StyleVisible = false;
+                CategorieVisible = true;
+                TailleVisible = false;
+                GammeVisible = false;
+                HeureVisible = false;
+                ModelVisible = false;
+                ProduitFiniVisible = false;
+                Matière_PremiereVisible = false;
             }
-            else
+            else if (value.Nom == "Gammes")
             {
-                IsGamme = false;
-                if (value.Nom == "Categories")
-                    await GetCategoriesAsync();
-                else if (value.Nom == "Styles")
-                {
-                    IsStyle = true;
-                    await GetStylesAsync();
-                }
-                else if (value.Nom == "Tailles")
-                {
-                    await GetTaillesAsync();
-                }
-                else if (value.Nom == "Marques")
-                    await GetMarquesAsync();
-                else if (value.Nom == "Models")
-                    await GetModelsAsync();
-                else if(value.Nom == "Matière Première")
-                {
-                    await GetMatièrePremièresAsync();
-                }
-                else if(value.Nom == "Produit Fini")
-                {
-                    await GetProduitFinisAsync();
-                }
+                MarqueVisible = false;
+                StyleVisible = false;
+                CategorieVisible = false;
+                TailleVisible = false;
+                ModelVisible = false;
+                HeureVisible = false;
+                GammeVisible = true;
+                ProduitFiniVisible = false;
+                Matière_PremiereVisible = false;
+            }
+            else if (value.Nom == "Styles")
+            {
+                MarqueVisible = false;
+                StyleVisible = true;
+                HeureVisible = false;
+                CategorieVisible = false;
+                TailleVisible = false;
+                ModelVisible = false;
+                GammeVisible = false;
+                ProduitFiniVisible = false;
+                Matière_PremiereVisible = false;
+            }
+            else if (value.Nom == "Tailles")
+            {
+                MarqueVisible = false;
+                StyleVisible = false;
+                CategorieVisible = false;
+                TailleVisible = true;
+                ModelVisible = false;
+                GammeVisible = false;
+                HeureVisible = false;
+                ProduitFiniVisible = false;
+                Matière_PremiereVisible = false;
+            }
+            else if (value.Nom == "Marques")
+            {
+                MarqueVisible = true;
+                StyleVisible = false;
+                CategorieVisible = false;
+                HeureVisible = false;
+                TailleVisible = false;
+                ModelVisible = false;
+                GammeVisible = false;
+                ProduitFiniVisible = false;
+                Matière_PremiereVisible = false;
+            }
+            else if (value.Nom == "Models")
+            {
+                MarqueVisible = false;
+                StyleVisible = false;
+                CategorieVisible = false;
+                TailleVisible = false;
+                ModelVisible = true;
+                HeureVisible = false;
+                GammeVisible = false;
+                ProduitFiniVisible = false;
+                Matière_PremiereVisible = false;
+            }
+            else if (value.Nom == "Matière Première")
+            {
+                MarqueVisible = false;
+                StyleVisible = false;
+                CategorieVisible = false;
+                TailleVisible = false;
+                HeureVisible = false;
+                GammeVisible = false;
+                ModelVisible = false;
+                ProduitFiniVisible = false;
+                Matière_PremiereVisible = true;
+            }
+            else if (value.Nom == "Produit Fini")
+            {
+                MarqueVisible = false;
+                StyleVisible = false;
+                CategorieVisible = false;
+                TailleVisible = false;
+                GammeVisible = false;
+                HeureVisible = false;
+                ModelVisible = false;
+                ProduitFiniVisible = true;
+                Matière_PremiereVisible = false;
+            }
+            else if (value.Nom == "Heure")
+            {
+                MarqueVisible = false;
+                StyleVisible = false;
+                CategorieVisible = false;
+                TailleVisible = false;
+                GammeVisible = false;
+                HeureVisible = true;
+                ModelVisible = false;
+                ProduitFiniVisible = false;
+                Matière_PremiereVisible = false;
             }
         }
 
@@ -558,7 +491,8 @@ namespace Quitaye
                     item.CurrentIcon = item.Black_Icon;
                     item.Color = "FourthColor";
                 }
-            }else if(section.Nom == "Produit Fini")
+            }
+            else if(section.Nom == "Produit Fini")
             {
                 section.CurrentIcon = section.Icon;
                 foreach (var item in Sections.Where(x => x.Nom != "Produit Fini"))
@@ -570,6 +504,14 @@ namespace Quitaye
             {
                 section.CurrentIcon = section.Icon;
                 foreach (var item in Sections.Where(x => x.Nom != "Matière Première"))
+                {
+                    item.CurrentIcon = item.Black_Icon;
+                    item.Color = "FourthColor";
+                }
+            }else if(section.Nom == "Heure")
+            {
+                section.CurrentIcon = section.Icon;
+                foreach (var item in Sections.Where(x => x.Nom != "Heure"))
                 {
                     item.CurrentIcon = item.Black_Icon;
                     item.Color = "FourthColor";
@@ -606,6 +548,13 @@ namespace Quitaye
             });
             Sections.Add(new Section()
             {
+                Nom = "Tailles",
+                Icon = "size.png",
+                Black_Icon = "size_black.png",
+                CurrentIcon = "size_black.png"
+            });
+            Sections.Add(new Section()
+            {
                 Nom = "Categories",
                 Icon = "category.png",
                 Black_Icon = "category_black.png",
@@ -622,11 +571,10 @@ namespace Quitaye
             Sections.Add(new Section()
             {
                 Nom = "Matière Première",
-                Icon = "inventory.png",
-                Black_Icon = "inventory_black.png",
-                CurrentIcon = "inventory_black.png"
+                Icon = "natural_resources.png",
+                Black_Icon = "natural_resources_black.png",
+                CurrentIcon = "natural_resources_black.png"
             });
-
             Sections.Add(new Section()
             {
                 Nom = "Produit Fini",
@@ -634,360 +582,13 @@ namespace Quitaye
                 Black_Icon = "inventory_black.png",
                 CurrentIcon = "inventory_black.png"
             });
-        }
-
-        private async Task OnAddCategorieCommand(object obj)
-        {
-            if (!string.IsNullOrWhiteSpace(Nom) && !string.IsNullOrWhiteSpace(Description) 
-                && !string.IsNullOrWhiteSpace(FileResult.FileName))
+            Sections.Add(new Section()
             {
-                if (IsNotBusy)
-                    return;
-
-                try
-                {
-                    IsNotBusy = false;
-                    UserDialogs.Instance.ShowLoading("Validation....");
-                    //var stream = File.Op;
-                    //long sd = 123450404;
-                    if (!string.IsNullOrWhiteSpace(FileResult.FileName))
-                    {
-                        Stream = await FileResult.OpenReadAsync();
-                        Image = new FormFile(Stream, Stream.Position, Stream.Length, FileResult.FileName, FileResult.FileName);
-                    }
-                    else Image = null;
-
-                    
-                    var result = await CategorieService.AddFormDataAsync(new Categorie()
-                    {
-                        Name = Nom,
-                        EntrepriseId = Entreprise.Id,
-                        Image = Image,
-                        Description = Description,
-                        Url = "d",
-                    }, await SecureStorage.GetAsync("Token")) ;
-                    ClearData();
-                    if (result == null)
-                    {
-
-                    }
-                    UserDialogs.Instance.HideLoading();
-
-                    await GetCategoriesAsync();
-
-                    if (result != null)
-                    {
-                        BaseVM.RefreshProduit = true;
-                        await Application.Current.MainPage.DisplayAlert("Confirmation", "Opération effectuée avec succès !", "OK");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await Initialize(ex, OnAddCategorieCommand(obj));
-                }
-                finally
-                {
-                    IsNotBusy = true;
-                    UserDialogs.Instance.HideLoading();
-                }
-            }
-        }
-
-        private async Task OnAddGammeCommand(object obj)
-        {
-            if (Style_Special)
-            {
-                if (Categorie != null && Style != null && Prix_Unité != 0)
-                {
-                    if (IsNotBusy)
-                        return;
-
-                    try
-                    {
-                        IsNotBusy = false;
-                        UserDialogs.Instance.ShowLoading("Validation....");
-                        //var stream = File.Op;
-                        //long sd = 123450404;
-                        if (!string.IsNullOrWhiteSpace(FileResult.FileName))
-                        {
-                            Stream = await FileResult.OpenReadAsync();
-                            Image = new FormFile(Stream, Stream.Position, Stream.Length, FileResult.FileName, FileResult.FileName);
-                        }
-                        else Image = null;
-
-                        var result = await GammeService.AddFormDataAsync(new Gamme()
-                        {
-                            CategorieId = Categorie.Id,
-                            StyleId = Style.Id,
-                            Image = Image,
-                            EntrepriseId = Entreprise.Id,
-                            Prix_Unité = Prix_Unité,
-                            Url = "d",
-                        }, await SecureStorage.GetAsync("Token"));
-
-                        ClearData();
-                        if (result == null)
-                        {
-
-                        }
-                        UserDialogs.Instance.HideLoading();
-
-                        await GetGammesAsync();
-
-                        if (result != null)
-                        {
-                            BaseVM.RefreshProduit = true;
-                            await Application.Current.MainPage.DisplayAlert("Confirmation", "Opération effectuée avec succès !", "OK");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        await Initialize(ex, OnAddGammeCommand(obj));
-                    }
-                    finally
-                    {
-                        IsNotBusy = true;
-                        UserDialogs.Instance.HideLoading();
-                    }
-                }
-            }
-            else
-            {
-                if (Categorie != null && Marque != null && Style != null && Prix_Unité != 0)
-                {
-                    if (IsNotBusy)
-                        return;
-
-                    try
-                    {
-                        IsNotBusy = false;
-                        UserDialogs.Instance.ShowLoading("Validation....");
-                        //var stream = File.Op;
-                        //long sd = 123450404;
-                        if (!string.IsNullOrWhiteSpace(FileResult.FileName))
-                        {
-                            Stream = await FileResult.OpenReadAsync();
-                            Image = new FormFile(Stream, Stream.Position, Stream.Length, FileResult.FileName, FileResult.FileName);
-                        }
-                        else Image = null;
-
-                        var result = await GammeService.AddFormDataAsync(new Gamme()
-                        {
-                            MarqueId = Marque.Id,
-                            CategorieId = Categorie.Id,
-                            StyleId = Style.Id,
-                            Image = Image,
-                            EntrepriseId = Entreprise.Id,
-                            Prix_Unité = Prix_Unité,
-                            Url = "d",
-                        }, await SecureStorage.GetAsync("Token"));
-
-                        ClearData();
-                        if (result == null)
-                        {
-
-                        }
-                        UserDialogs.Instance.HideLoading();
-
-                        await GetGammesAsync();
-
-                        if (result != null)
-                        {
-                            BaseVM.RefreshProduit = true;
-                            await Application.Current.MainPage.DisplayAlert("Confirmation", "Opération effectuée avec succès !", "OK");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        await Initialize(ex, OnAddGammeCommand(obj));
-                    }
-                    finally
-                    {
-                        IsNotBusy = true;
-                        UserDialogs.Instance.HideLoading();
-                    }
-                }
-            }
-            
-        }
-
-        
-        private async Task OnAddMarqueCommand(object obj)
-        {
-            if (!string.IsNullOrWhiteSpace(Nom) && !string.IsNullOrWhiteSpace(Description)
-                && !string.IsNullOrWhiteSpace(FileResult.FileName))
-            {
-                if (IsNotBusy)
-                    return;
-
-                try
-                {
-                    IsNotBusy = false;
-                    UserDialogs.Instance.ShowLoading("Validation....");
-                    //var stream = File.Op;
-                    //long sd = 123450404;
-                    if (!string.IsNullOrWhiteSpace(FileResult.FileName))
-                    {
-                        Stream = await FileResult.OpenReadAsync();
-                        Image = new FormFile(Stream, Stream.Position, Stream.Length, FileResult.FileName, FileResult.FileName);
-                    }
-                    else Image = null;
-
-                    var result = await MarqueService.AddFormDataAsync(new Marque()
-                    {
-                        Name = Nom,
-                        EntrepriseId = Entreprise.Id,
-                        Description = Description,
-                        Image = Image,
-                        Url = "d",
-                    }, await SecureStorage.GetAsync("Token"));
-
-                    ClearData();
-                    if (result == null)
-                    {
-
-                    }
-                    UserDialogs.Instance.HideLoading();
-
-                    await GetMarquesAsync();
-
-                    if (result != null)
-                    {
-                        BaseVM.RefreshProduit = true;
-                        await Application.Current.MainPage.DisplayAlert("Confirmation", "Opération effectuée avec succès !", "OK");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await Initialize(ex, OnAddMarqueCommand(obj));
-                }
-                finally
-                {
-                    IsNotBusy = true;
-                    UserDialogs.Instance.HideLoading();
-                }
-            }
-        }
-
-        private async Task OnAddModelCommand(object obj)
-        {
-            if (!string.IsNullOrWhiteSpace(Nom) && !string.IsNullOrWhiteSpace(Description)
-                && !string.IsNullOrWhiteSpace(FileResult.FileName))
-            {
-                if (IsNotBusy)
-                    return;
-
-                try
-                {
-                    IsNotBusy = false;
-                    UserDialogs.Instance.ShowLoading("Validation....");
-                    //var stream = File.Op;
-                    //long sd = 123450404;
-                    if (!string.IsNullOrWhiteSpace(FileResult.FileName))
-                    {
-                        Stream = await FileResult.OpenReadAsync();
-                        Image = new FormFile(Stream, Stream.Position, Stream.Length, FileResult.FileName, FileResult.FileName);
-                    }
-                    else Image = null;
-
-                    var result = await ModelService.AddFormDataAsync(new Model()
-                    {
-                        Name = Nom,
-                        Description = Description,
-                        EntrepriseId = Entreprise.Id,
-                    }, await SecureStorage.GetAsync("Token"));
-
-                    ClearData();
-                    if (result == null)
-                    {
-
-                    }
-                    UserDialogs.Instance.HideLoading();
-
-                    await GetModelsAsync();
-
-                    if (result != null)
-                    {
-                        BaseVM.RefreshProduit = true;
-                        await Application.Current.MainPage.DisplayAlert("Confirmation", "Opération effectuée avec succès !", "OK");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await Initialize(ex, OnAddModelCommand(obj));
-                }
-                finally
-                {
-                    IsNotBusy = true;
-                    UserDialogs.Instance.HideLoading();
-                }
-            }
-        }
-
-        private void ClearData()
-        {
-            Nom = null;
-            Description = null;
-            FileResult = null;
-            PictureSource = null;
-            FileResult = null;
-        }
-
-        private async Task OnAddStyleCommand(object obj)
-        {
-            if (!string.IsNullOrWhiteSpace(Nom) && !string.IsNullOrWhiteSpace(Description)
-                && !string.IsNullOrWhiteSpace(FileResult.FileName))
-            {
-                if (IsNotBusy)
-                    return;
-
-                try
-                {
-                    IsNotBusy = false;
-                    UserDialogs.Instance.ShowLoading("Validation....");
-                    //var stream = File.Op;
-                    //long sd = 123450404;
-                    if (!string.IsNullOrWhiteSpace(FileResult.FileName))
-                    {
-                        Stream = await FileResult.OpenReadAsync();
-                        Image = new FormFile(Stream, Stream.Position, Stream.Length, FileResult.FileName, FileResult.FileName);
-                    }
-                    else Image = null;
-
-                    var result = await StyleService.AddFormDataAsync(new Style()
-                    {
-                        Name = Nom,
-                        EntrepriseId = Entreprise.Id,
-                        Description = Description,
-                        Image = Image,
-                        Style_Special = Style_Special,
-                        Url = "d",
-                    }, await SecureStorage.GetAsync("Token"));
-                    ClearData();
-                    if (result == null)
-                    {
-
-                    }
-                    UserDialogs.Instance.HideLoading();
-
-                    await GetStylesAsync();
-
-                    if (result != null)
-                    {
-                        BaseVM.RefreshProduit = true;
-                        await Application.Current.MainPage.DisplayAlert("Confirmation", "Opération effectuée avec succès !", "OK");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await Initialize(ex, OnAddStyleCommand(obj));
-                }
-                finally
-                {
-                    IsNotBusy = true;
-                    UserDialogs.Instance.HideLoading();
-                }
-            }
+                Nom = "Heure",
+                Icon = "time.png",
+                Black_Icon = "time_black.png",
+                CurrentIcon = "time_black.png"
+            });
         }
 
         public SettingViewModel(INavigation navigation, Entreprise entreprise) : this()
@@ -995,345 +596,13 @@ namespace Quitaye
             Navigation = navigation;
             Entreprise = entreprise;
             if (Entreprise.Type.Type.Contains("production"))
+            {
                 IsUsine = true;
-            GetStylesAsync();
-        }
-
-        private async Task CheckConnection()
-        {
-            if (CrossConnectivity.Current.IsConnected)
-            {
-                do
-                {
-                    try
-                    {
-                        var result = await Test.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Tests");
-                        //if(result == null)
-                        {
-                            BaseVM.IsInternetOn = true;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        if (ex.Message.Contains("host"))
-                        {
-                            BaseVM.IsInternetOn = false;
-                        }
-                        else BaseVM.IsInternetOn = true;
-                    }
-                } while (!BaseVM.IsInternetOn);
-            }
-            else
-            {
-                BaseVM.IsInternetOn = false;
+                StyleVisible = true;
             }
         }
 
-        async Task GetStylesAsync()
-        {
-            await CheckConnection();
-            //do
-            //{
-            if (BaseVM.IsInternetOn)
-            {
-                if (IsNotBusy)
-                    return;
-
-                try
-                {
-                    IsNotBusy = false;
-                    UserDialogs.Instance.ShowLoading("Chargement....");
-                    var styles = await StyleService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Styles/"+ Entreprise.Id.ToString());
-                    Items.Clear();
-                    Styles.Clear();
-                    if (styles.Count() != 0)
-                    {
-                        foreach (var item in styles)
-                        {
-                            Items.Add(item);
-                            Styles.Add(item);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await Initialize(ex, GetStylesAsync());
-                }
-                finally
-                {
-                    IsNotBusy = true;
-                    UserDialogs.Instance.HideLoading();
-                }
-            }
-            //} while (!BaseVM.IsInternetOn);
-        }
-
-        async Task GetTaillesAsync()
-        {
-            await CheckConnection();
-            //do
-            //{
-            if (BaseVM.IsInternetOn)
-            {
-                if (IsNotBusy)
-                    return;
-
-                try
-                {
-                    IsNotBusy = false;
-                    UserDialogs.Instance.ShowLoading("Chargement....");
-                    var styles = await TailleService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Tailles/" + Entreprise.Id.ToString());
-                    Items.Clear();
-                    
-                    if (styles.Count() != 0)
-                    {
-                        foreach (var item in styles)
-                        {
-                            Items.Add(item);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await Initialize(ex, GetTaillesAsync());
-                }
-                finally
-                {
-                    IsNotBusy = true;
-                    UserDialogs.Instance.HideLoading();
-                }
-            }
-            //} while (!BaseVM.IsInternetOn);
-        }
-
-        async Task GetMarquesAsync()
-        {
-            await CheckConnection();
-            do
-            {
-                if (BaseVM.IsInternetOn)
-                {
-                    if (IsNotBusy)
-                        return;
-
-                    try
-                    {
-                        IsNotBusy = false;
-                        UserDialogs.Instance.ShowLoading("Chargement....");
-                        var marques = await MarqueService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Marques/"+Entreprise.Id.ToString());
-                        Items.Clear();
-                        Marques.Clear();
-                        if (marques.Count() != 0)
-                        {
-                            foreach (var item in marques)
-                            {
-                                Items.Add(item);
-                                Marques.Add(item);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        await Initialize(ex, GetMarquesAsync());
-                    }
-                    finally
-                    {
-                        IsNotBusy = true;
-                        UserDialogs.Instance.HideLoading();
-                    }
-                }
-            } while (!BaseVM.IsInternetOn);
-        }
-
-        async Task GetModelsAsync()
-        {
-            await CheckConnection();
-            do
-            {
-                if (BaseVM.IsInternetOn)
-                {
-                    if (IsNotBusy)
-                        return;
-
-                    try
-                    {
-                        IsNotBusy = false;
-                        UserDialogs.Instance.ShowLoading("Chargement....");
-                        var models = await ModelService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Models/"+Entreprise.Id.ToString());
-                        Items.Clear();
-                        Models.Clear();
-                        if (models.Count() != 0)
-                        {
-                            foreach (var item in models)
-                            {
-                                Items.Add(item);
-                                Models.Add(item);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        await Initialize(ex, GetModelsAsync());
-                    }
-                    finally
-                    {
-                        IsNotBusy = true;
-                        UserDialogs.Instance.HideLoading();
-                    }
-                }
-            } while (!BaseVM.IsInternetOn);
-        }
-
-        async Task GetProduitFinisAsync()
-        {
-            await CheckConnection();
-            do
-            {
-                if (BaseVM.IsInternetOn)
-                {
-                    if (IsNotBusy)
-                        return;
-
-                    try
-                    {
-                        IsNotBusy = false;
-                        UserDialogs.Instance.ShowLoading("Chargement....");
-                        var produit_Finis = await ProduitFiniService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Produit_Finis/" + Entreprise.Id.ToString());
-                        Items.Clear();
-                        if (produit_Finis.Count() != 0)
-                        {
-                            foreach (var item in produit_Finis)
-                            {
-                                Items.Add(item);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        await Initialize(ex, GetProduitFinisAsync());
-                    }
-                    finally
-                    {
-                        IsNotBusy = true;
-                        UserDialogs.Instance.HideLoading();
-                    }
-                }
-            } while (!BaseVM.IsInternetOn);
-        }
-
-        async Task GetMatièrePremièresAsync()
-        {
-            await CheckConnection();
-            do
-            {
-                if (BaseVM.IsInternetOn)
-                {
-                    if (IsNotBusy)
-                        return;
-
-                    try
-                    {
-                        IsNotBusy = false;
-                        UserDialogs.Instance.ShowLoading("Chargement....");
-                        var matières = await Matière_PremièreService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Matiere_Premieres/" + Entreprise.Id.ToString());
-                        Items.Clear();
-                        if (matières.Count() != 0)
-                        {
-                            foreach (var item in matières)
-                            {
-                                Items.Add(item);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        await Initialize(ex, GetMatièrePremièresAsync());
-                    }
-                    finally
-                    {
-                        IsNotBusy = true;
-                        UserDialogs.Instance.HideLoading();
-                    }
-                }
-            } while (!BaseVM.IsInternetOn);
-        }
-
-        async Task GetGammesAsync()
-        {
-            await CheckConnection();
-            do
-            {
-                if (BaseVM.IsInternetOn)
-                {
-                    if (IsNotBusy)
-                        return;
-
-                    try
-                    {
-                        IsNotBusy = false;
-                        UserDialogs.Instance.ShowLoading("Chargement....");
-                        var gammes = await GammeService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Gammes/"+Entreprise.Id.ToString());
-                        Items.Clear();
-                        if (gammes.Count() != 0)
-                        {
-                            foreach (var item in gammes)
-                            {
-                                Items.Add(item);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        await Initialize(ex, GetGammesAsync());
-                    }
-                    finally
-                    {
-                        IsNotBusy = true;
-                        UserDialogs.Instance.HideLoading();
-                    }
-                }
-            } while (!BaseVM.IsInternetOn);
-        }
-
-        async Task GetCategoriesAsync()
-        {
-            await CheckConnection();
-            do
-            {
-                if (BaseVM.IsInternetOn)
-                {
-                    if (IsNotBusy)
-                        return;
-
-                    try
-                    {
-                        IsNotBusy = false;
-                        UserDialogs.Instance.ShowLoading("Chargement....");
-                        var categories = await CategorieService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Categories/" + Entreprise.Id.ToString());
-                        Items.Clear();
-                        Categories.Clear();
-                        if (categories.Count() != 0)
-                        {
-                            foreach (var item in categories)
-                            {
-                                Items.Add(item);
-                                Categories.Add(item);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        await Initialize(ex, GetCategoriesAsync());
-                    }
-                    finally
-                    {
-                        IsNotBusy = true;
-                        UserDialogs.Instance.HideLoading();
-                    }
-                }
-            } while (!BaseVM.IsInternetOn);
-        }
-
+        
         private async Task Initialize(Exception ex, Task action)
         {
             Debug.WriteLine($"Echec operation: {ex.Message}");

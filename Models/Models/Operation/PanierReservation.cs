@@ -14,9 +14,17 @@ namespace Models
         [Key]
         public Guid Id { get; set; }
 
-        [ForeignKey(nameof(Offre))]
-        public Guid? OffreId { get; set; }
-        public Offre Offre { get; set; }
+        [ForeignKey(nameof(Gamme))]
+        public Guid? GammeId { get; set; }
+        public Gamme Gamme { get; set; }
+
+        [ForeignKey(nameof(Taille))]
+        public Guid TailleId { get; set; }
+        public Taille Taille { get; set; }
+
+        [ForeignKey(nameof(Model))]
+        public Guid ModelId { get; set; }
+        public Model Model { get; set; }
         public DateTime DateOfCreation { get; set; }
 
         [ForeignKey(nameof(User))]
@@ -50,18 +58,14 @@ namespace Models
         [Required(ErrorMessage = "Le temps du serveur est requis")]
         public DateTime ServerTime { get; set; }
 
-        [ForeignKey(nameof(Num_Vente))]
-        public Guid? NumVenteId { get; set; }
-
-        public Num_Vente Num_Vente { get; set; }
-
         [Required(ErrorMessage = "La mention est requise")]
         [StringLength(100, ErrorMessage = "La taille de la mention ne peut dépasser 100 characters")]
         public string Mention { get; set; }
 
+        public Client Client { get; set; }
+
         [ForeignKey(nameof(Client))]
         public Guid? ClientId { get; set; }
-        public Client Client { get; set; }
 
         [StringLength(60, ErrorMessage = "La taille du details de livraison ne peut dépasser 60 characters")]
         public string Details_Adresse { get; set; }
@@ -69,7 +73,6 @@ namespace Models
         public Guid? QuartierId { get; set; }
         public Quartier Quartier { get; set; }
 
-        [Required(ErrorMessage = "Le contact du client est requis")]
         [StringLength(15, ErrorMessage = "La taille du contact client ne peut dépasser 15 charaters")]
         public string Contact_Client { get; set; }
 
@@ -82,5 +85,9 @@ namespace Models
         public Entreprise Entreprise { get; set; }
 
         public bool Annulée { get; set; }
+
+        [ForeignKey(nameof(Marque))]
+        public Guid? MarqueId { get; set; }
+        public Marque Marque { get; set; }
     }
 }

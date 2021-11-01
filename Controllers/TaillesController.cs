@@ -18,14 +18,14 @@ namespace Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class TaillesController : GenericController<Taille, User>
+    public class TaillesController : GenericController<Taille, User, Categorie>
     {
-        private readonly IGenericRepositoryWrapper<Taille, User> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<Taille, User, Categorie> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
 
-        public TaillesController(IGenericRepositoryWrapper<Taille, User> wrapper,
+        public TaillesController(IGenericRepositoryWrapper<Taille, User, Categorie> wrapper,
             IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, 
             IMapper mapper) : base(wrapper)
         {
@@ -145,7 +145,7 @@ namespace Controllers
 
                         if (list.Contains(identity.First().Id))
                         {
-                            var result = await repositoryWrapper.Item.GetBy(x => (x.EntrepriseId == id));
+                            var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id), x => x.Categorie);
                             return Ok(result);
                         }
                         else return NotFound("Non membre de cette entreprise");
@@ -160,11 +160,11 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Taille>> AddAsync([FromBody] Taille value)
+        public override async Task<ActionResult<IEnumerable<Taille>>> AddAsync([FromBody] List<Taille> values)
         {
             try
             {
-                if (value == null)
+                if (values == null)
                     return NotFound();
 
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
@@ -173,12 +173,16 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    value.UserId = identity.First().Id;
-                    value.Id = Guid.NewGuid();
-                    value.EntrepriseId = value.EntrepriseId;
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
-                    return Ok(value);
+                    foreach (var value in values)
+                    {
+                        value.UserId = identity.First().Id;
+                        value.Id = Guid.NewGuid();
+                        value.EntrepriseId = value.EntrepriseId;
+                        await repositoryWrapper.ItemA.AddAsync(value);
+                        await repositoryWrapper.SaveAsync();
+                    }
+                    
+                    return Ok(values);
                 }
                 else return NotFound("User not identified");
             }

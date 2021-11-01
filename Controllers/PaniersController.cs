@@ -154,11 +154,11 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Panier>> AddAsync([FromBody] Panier value)
+        public override async Task<ActionResult< IEnumerable<Panier>>> AddAsync([FromBody] List<Panier> values)
         {
             try
             {
-                if (value == null)
+                if (values == null)
                     return NotFound();
 
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
@@ -167,14 +167,18 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    value.EntrepriseId = value.EntrepriseId;
-                    value.UserId = identity.First().Id;
-                    value.Id = Guid.NewGuid();
-                    if (value.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
-                        value.Date = DateTime.Now;
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
-                    return Ok(value);
+                    foreach (var value in values)
+                    {
+                        value.EntrepriseId = value.EntrepriseId;
+                        value.UserId = identity.First().Id;
+                        value.Id = Guid.NewGuid();
+                        if (value.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
+                            value.Date = DateTime.Now;
+                        await repositoryWrapper.ItemA.AddAsync(value);
+                        await repositoryWrapper.SaveAsync();
+                    }
+                    
+                    return Ok(values);
                 }
                 else return NotFound("User not identified");
             }
@@ -209,9 +213,9 @@ namespace Controllers
             }
         }
 
-        [HttpGet("{entrepriseId:Guid}/{start:DateTime}/{end:DateTime}")]
+        [HttpGet("{start:DateTime}/{end:DateTime}/{entrepriseId:Guid}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<Panier>>> GetBy([FromRoute] Guid entrepriseId, DateTime start, DateTime end)
+        public async Task<ActionResult<IEnumerable<Panier>>> GetBy([FromRoute] DateTime start, DateTime end, Guid entrepriseId)
         {
             try
             {
@@ -222,11 +226,12 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x => x.EntrepriseId == entrepriseId &&
-                    x.Date.Date >= start && x.Date.Date <= end,
-                    x => x.Offre, x => x.Offre.Gamme,
-                    x => x.Offre.Gamme.Marque, x => x.Offre.Gamme.Style,
-                    x => x.Offre.Gamme.Categorie,
-                    x => x.Offre.Taille, x => x.Offre.Model);
+                                x.Date.Date >= start && x.Date.Date <= end,
+                                x => x.Offre, x => x.Offre.Gamme,
+                                x => x.Offre.Gamme.Marque, 
+                                x => x.Offre.Gamme.Style,
+                                x => x.Offre.Gamme.Categorie,
+                                x => x.Offre.Taille, x => x.Offre.Model);
 
                     return Ok(result);
                 }

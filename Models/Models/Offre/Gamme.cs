@@ -42,6 +42,9 @@ namespace Models
         [Column(TypeName = "decimal (18, 2)")]
         public decimal Prix_Min { get; set; }
 
+        [Column(TypeName = "decimal (18, 2)")]
+        public decimal Note { get; set; }
+
         [NotMapped]
         public IFormFile Image { get; set; }
     }

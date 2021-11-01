@@ -121,7 +121,7 @@ namespace Controllers
                     && (x.Client.Prenom.Contains(search) || x.Client.Nom.Contains(search)
                     || x.Contact_Livraison.Contains(search) || x.Heure_Livraison.Contains(search)
                     || x.Offre.Gamme.Marque.Name.Contains(search) || x.Offre.Gamme.Style.Name.Contains(search)
-                    || x.Offre.Gamme.Categorie.Name.Contains(search)), x => x.Offre, x => x.Offre.Gamme, 
+                    || x.Offre.Gamme.Categorie.Name.Contains(search)) && x.Annulée == false, x => x.Offre, x => x.Offre.Gamme, 
                     x => x.Offre.Gamme.Marque, x => x.Offre.Taille, x => x.Offre.Model, x => x.Offre.Gamme.Categorie);
 
                     return Ok(result);
@@ -136,11 +136,11 @@ namespace Controllers
 
         [HttpPost]
         [Authorize]
-        public  async Task<ActionResult<Vente>> AddAsync([FromBody] List<Vente> value)
+        public override async Task<ActionResult<IEnumerable<Vente>>> AddAsync([FromBody] List<Vente> values)
         {
             try
             {
-                if (value == null)
+                if (values == null)
                     return NotFound();
 
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
@@ -149,6 +149,7 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
+                    
                     Num_Vente numss = new Num_Vente();
                     numss.Id = Guid.NewGuid();
                     numss.EntrepriseId = identity.First().Id;
@@ -176,7 +177,7 @@ namespace Controllers
                     await num_vente_repository.Item.AddAsync(numss);
                     await repositoryWrapper.SaveAsync();
                     var num_vente = await num_vente_repository.Item.AddAsync(numss);
-                    foreach (var item in value)
+                    foreach (var item in values)
                     {
                         if (item.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
                             item.Date = DateTime.Now;
@@ -190,7 +191,7 @@ namespace Controllers
                          panierRepository.Item.Delete(pan.First());
                         await panierRepository.SaveAsync();
                     }
-                    return Ok(value);
+                    return Ok(values);
                 }
                 else return NotFound("User not identified");
             }
@@ -234,6 +235,46 @@ namespace Controllers
             }
         }
 
+        [HttpGet("Resume/{entrepriseId:Guid}/{start:DateTime}/{end:DateTime}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<Vente>>> GetForChart([FromRoute] Guid entrepriseId, DateTime start, DateTime end)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+
+                if (identity.Count() != 0)
+                {
+                    var entrepriseUser = await _entrepriseUserRepository.Item.GetBy(x => x.UserId == identity.First().Id);
+                    if (entrepriseUser.Count() != 0)
+                    {
+                        var result = await repositoryWrapper.Item.GetBy(x =>
+                        (x.EntrepriseId == entrepriseId)
+                        && x.Date.Date >= start && x.Date <= end && x.Annulée == false);
+
+                        var charts = new List<ChartData>();
+                        foreach (var item in result.OrderBy(x => x.Date).GroupBy(x => x.Date.Date))
+                        {
+                            charts.Add(new ChartData()
+                            {
+                                Date = item.Key.Date,
+                                Montant = item.Sum(x => x.Prix_Unité),
+                            });
+                        }
+                        return Ok(charts);
+                    }
+                    else return null;
+                }
+                else return NotFound("User not indentified");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
 
         [HttpGet("{entrepriseId:Guid}/{search}/{start:DateTime}/{end:DateTime}")]
         [Authorize]
@@ -252,10 +293,10 @@ namespace Controllers
                     {
                         var result = await repositoryWrapper.Item.GetByInclude(x =>
                         (x.EntrepriseId == entrepriseId)
-                        && x.Date.Date >= start && x.Date <= end,
+                        && x.Date.Date >= start && x.Date <= end && x.Annulée == false,
                         x => x.Offre, x => x.Offre.Gamme,
                         x => x.Offre.Gamme.Marque, x => x.Offre.Taille,
-                        x => x.Offre.Model, x => x.Offre.Gamme.Categorie);
+                        x => x.Offre.Model, x => x.Offre.Gamme.Categorie) ;
 
                         return Ok(result);
                     }

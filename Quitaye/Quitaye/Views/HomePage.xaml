@@ -4,7 +4,12 @@
              xmlns:pancake="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" 
              xmlns:local="clr-namespace:Models;assembly=Models" 
              xmlns:viewmodel1="clr-namespace:Quitaye.ViewModels" 
-             xmlns:viewmodel="clr-namespace:Quitaye" xmlns:controls="clr-namespace:Quitaye.Controls"
+             xmlns:viewmodel="clr-namespace:Quitaye" 
+             xmlns:controls="clr-namespace:Quitaye.Controls" 
+             xmlns:control="clr-namespace:ProgressRingControl.Forms.Plugin;assembly=ProgressRing.Forms.Plugin" 
+             xmlns:converters="clr-namespace:Quitaye.Converters" 
+             xmlns:Charts="clr-namespace:Microcharts.Forms;assembly=Microcharts.Forms"
+             xmlns:views="clr-namespace:Quitaye.Views" xmlns:home="clr-namespace:Quitaye.Views.Home"
              x:Class="Quitaye.Views.HomePage" NavigationPage.HasNavigationBar="False">
     <ContentPage.Resources>
         <Style TargetType="pancake:PancakeView" x:Key="StyledPancake">
@@ -25,6 +30,7 @@
                 </VisualStateGroupList>
             </Setter>
         </Style>
+        
     </ContentPage.Resources>
 
     <ContentPage.BindingContext>
@@ -110,57 +116,17 @@
                                                 FontSize="16" FontAttributes="Bold" 
                                                 Margin="0,20,0,0"/>
                                 </StackLayout>
-                            <Frame BorderColor="{DynamicResource Secondary}" 
-                                   BackgroundColor="{DynamicResource Primary}" 
-                                   CornerRadius="20">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="auto"/>
-                                        <ColumnDefinition />
-                                    </Grid.ColumnDefinitions>
-                                    
-                                    <controls:CircleProgress 
-                                            VerticalOptions="FillAndExpand"
-                                            HorizontalOptions="FillAndExpand"
-                                            Progress="1"
-                                            ProgressStartColor="{DynamicResource ThirdColor}"
-                                            ProgressEndColor="{DynamicResource Secondary}"
-                                            StrokeWidth="10"/>
-                                    <Label Text="{Binding Vente_Progress, StringFormat='{0}%'}" TextColor="{DynamicResource Secondary}" />
-                                    <Label Text="Vente(s) : " Grid.Column="1" 
-                                           FontAttributes="Bold" 
-                                           TextColor="{DynamicResource Secondary}"/>
-                                </Grid>
-                                
-                            </Frame>
-                            <pancake:PancakeView x:Name="myPancakeView" CornerRadius="30" 
-                                                         Padding="0,10" Margin="0,0"
-                                                         BackgroundColor="{DynamicResource Primary}" >
-                                <pancake:PancakeView.Border>
-                                    <pancake:Border Color="{DynamicResource Secondary}" Thickness="3"/>
-                                </pancake:PancakeView.Border>
-                                <pancake:PancakeView.Shadow>
-                                    <pancake:DropShadow Color="{DynamicResource Secondary}" Offset="10,10"/>
-                                </pancake:PancakeView.Shadow>
-                                <StackLayout Orientation="Horizontal" 
-                                                     HorizontalOptions="StartAndExpand"
-                                                     BackgroundColor="Transparent">
-                                    <Image  Source="{Binding Gamme.Url}"
-                                                    Margin="0,5,0,5"
-                                                    HorizontalOptions="Center"
-                                                    VerticalOptions="Center"
-                                                    WidthRequest="70"
-                                                    HeightRequest="50"
-                                                    Aspect="AspectFill"/>
 
-                                </StackLayout>
-                            </pancake:PancakeView>
+                            <home:Acceuil IsVisible="{Binding HomeVisible}"/>
+                            <!--<home:Ventes_Infos IsVisible="{Binding VenteVisible}" />
+                            <home:Payement_Infos IsVisible="{Binding PayementVisible}" />
+                            <home:Production_Infos IsVisible="{Binding ProductionVisible}" />
+                            <home:Livraison_Infos IsVisible="{Binding LivraisonVisible}" />-->
                             <pancake:PancakeView CornerRadius="40" Padding="0, -10">
                                     <CollectionView x:Name="Show_Details_CollectionView" 
                                             BackgroundColor="{DynamicResource VeryLight}"
                                             ItemsSource="{Binding Gammes}"
                                             SelectionMode="Single"
-                                            
                                             Margin="0,10" >
                                         <CollectionView.ItemsLayout>
                                             <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
@@ -330,7 +296,7 @@
                                 <Label Text="Acceuil" 
                                        Grid.Row="1" FontSize="12" 
                                        HorizontalOptions="Center" 
-                                       VerticalOptions="End" IsVisible="{Binding HomeTextVisible}"
+                                       VerticalOptions="End" IsVisible="{Binding HomeVisible}"
                                        TextColor="{DynamicResource Secondary}" />
                                 <!--</Frame>-->
                                 </Grid>
@@ -371,7 +337,7 @@
                                 <Label Text="Vente(s)" 
                                        Grid.Row="1" FontSize="12" 
                                        HorizontalOptions="Center" 
-                                       VerticalOptions="End" IsVisible="{Binding SalesTextVisible}"
+                                       VerticalOptions="End" IsVisible="{Binding VenteVisible}"
                                        TextColor="{DynamicResource Secondary}" />
                                 <!--</Frame>-->
                             </Grid>
@@ -412,7 +378,7 @@
                                 <Label Text="Payement" 
                                        Grid.Row="1" FontSize="12" 
                                        HorizontalOptions="Center" 
-                                       VerticalOptions="End" IsVisible="{Binding PayementTextVisible}"
+                                       VerticalOptions="End" IsVisible="{Binding PayementVisible}"
                                        TextColor="{DynamicResource Secondary}" />
                                 <!--</Frame>-->
                             </Grid>
@@ -453,7 +419,7 @@
                                 <Label Text="Livraison" 
                                        Grid.Row="1" FontSize="12" 
                                        HorizontalOptions="Center" 
-                                       VerticalOptions="End" IsVisible="{Binding LivraisonTextVisible}"
+                                       VerticalOptions="End" IsVisible="{Binding LivraisonVisible}"
                                        TextColor="{DynamicResource Secondary}" />
                                 <!--</Frame>-->
                             </Grid>
@@ -494,7 +460,7 @@
                                 <Label Text="Production" 
                                        Grid.Row="1" FontSize="12" 
                                        HorizontalOptions="Center" 
-                                       VerticalOptions="End" IsVisible="{Binding ProductionTextVisible}"
+                                       VerticalOptions="End" IsVisible="{Binding ProductionVisible}"
                                        TextColor="{DynamicResource Secondary}" />
                                 <!--</Frame>-->
                             </Grid>

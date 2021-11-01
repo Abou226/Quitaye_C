@@ -161,11 +161,11 @@ namespace Quitaye.Server.Controllers
         }
 
         [AllowAnonymous]
-        public override async Task<ActionResult<User>> AddAsync([FromBody] User value)
+        public override async Task<ActionResult<IEnumerable<User>>> AddAsync([FromBody] List<User> values)
         {
             try
             {
-                if (value == null)
+                if (values == null)
                     return NotFound();
 
                 //var identity = await repositoryWrapper.ItemA.GetBy(x => x.Id.ToString().
@@ -173,28 +173,33 @@ namespace Quitaye.Server.Controllers
 
                 //if (identity.Count() != 0)
 
-                if (!string.IsNullOrWhiteSpace(value.Username))
+                foreach (var value in values)
                 {
-                    var u = await repositoryWrapper.ItemA.GetBy(x => x.Username == value.Username);
-                    if (u.Count() != 0)
-                        return BadRequest("Nom d'utilisateur deja existant, veiller choisir un nom d'utilisateur unique");
+                    if (!string.IsNullOrWhiteSpace(value.Username))
                     {
-                        await Add(value);
+                        var u = await repositoryWrapper.ItemA.GetBy(x => x.Username == value.Username);
+                        if (u.Count() != 0)
+                            return BadRequest("Nom d'utilisateur deja existant, veiller choisir un nom d'utilisateur unique");
+                        {
+                            await Add(value);
+                        }
+                    }
+                    else
+                    {
+                        var u = await repositoryWrapper.ItemA.GetBy(x => x.Email == value.Email);
+                        if (u.Count() != 0)
+                            return BadRequest("Nom d'utilisateur deja existant, veiller choisir un nom d'utilisateur unique");
+                        {
+                            await Add(value);
+                        }
                     }
                 }
-                else
-                {
-                    var u = await repositoryWrapper.ItemA.GetBy(x => x.Email == value.Email);
-                    if (u.Count() != 0)
-                        return BadRequest("Nom d'utilisateur deja existant, veiller choisir un nom d'utilisateur unique");
-                    {
-                        await Add(value);
-                    }
-                }
+
+                
                 
                 //else return NotFound();
 
-                return Ok(value);
+                return Ok(values);
             }
             catch (Exception ex)
             {

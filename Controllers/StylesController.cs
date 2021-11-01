@@ -128,7 +128,7 @@ namespace Controllers
         }
 
         [HttpGet("{id:Guid}")]
-        public async Task<ActionResult<IEnumerable<Model>>> GetBy(Guid id)
+        public async Task<ActionResult<IEnumerable<Style>>> GetBy(Guid id)
         {
             try
             {
@@ -163,7 +163,7 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Style>> AddAsync([FromForm] Style value)
+        public override async Task<ActionResult<IEnumerable<Style>>> AddAsync([FromForm] Style value)
         {
             try
             {
@@ -176,17 +176,20 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    if (value.Image != null)
+                    //foreach (var value in values)
                     {
-                        var result = await _fileManager.Upload(_settings.AccessKey, _settings.SecretKey, _settings.BucketName, Amazon.RegionEndpoint.USEast1, value.Image);
-                        value.Url = result.Url;
-                    }
+                        if (value.Image != null)
+                        {
+                            var result = await _fileManager.Upload(_settings.AccessKey, _settings.SecretKey, _settings.BucketName, Amazon.RegionEndpoint.USEast1, value.Image);
+                            value.Url = result.Url;
+                        }
 
-                    value.Id = Guid.NewGuid();
-                    value.UserId = identity.First().Id;
-                    value.EntrepriseId = value.EntrepriseId;
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
+                        value.Id = Guid.NewGuid();
+                        value.UserId = identity.First().Id;
+                        value.EntrepriseId = value.EntrepriseId;
+                        await repositoryWrapper.ItemA.AddAsync(value);
+                        await repositoryWrapper.SaveAsync();
+                    }
                     return Ok(value);
                 }
                 else return NotFound("User not identified");

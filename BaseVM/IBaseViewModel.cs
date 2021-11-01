@@ -12,6 +12,7 @@ namespace BaseVM
         int InternetCheckTime { get; set; }
         bool RefreshCatégorie { get; set; }
         bool RefreshTaille { get; set; }
+        bool RefreshGamme { get; set; }
         bool RefreshModel { get; set; }
         bool RefreshProduit { get; set; }
         bool RefreshMarque { get; set; }

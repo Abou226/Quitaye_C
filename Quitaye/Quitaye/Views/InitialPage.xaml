@@ -13,8 +13,10 @@
     <ContentPage.Content>
         <ScrollView Orientation="Vertical">
             <Grid>
-                <Image Source="PhoneBackground.png" HeightRequest="600" Aspect="Fill"/>
-                <Grid RowDefinitions="Auto, *" BackgroundColor="Transparent">
+                <Image Source="PhoneBackground.png" 
+                       HeightRequest="600" Aspect="Fill"/>
+                <Grid RowDefinitions="Auto, *" 
+                      BackgroundColor="Transparent">
 
                     <pancake:PancakeView Grid.Row="1" CornerRadius="20" 
                                          BackgroundColor="{DynamicResource VeryLight}" Margin="25,35,25,65">
@@ -59,8 +61,12 @@
                                                 </VisualStateGroup>
                                             </VisualStateManager.VisualStateGroups>
 
-                                            <pancake:PancakeView CornerRadius="30" Margin="20,10,20,10"
-                                                         Padding="5,5,10,5" Grid.Row="1" BackgroundColor="{DynamicResource Primary}" >
+                                            <pancake:PancakeView 
+                                                                CornerRadius="30" 
+                                                                Margin="20,10,20,10"
+                                                                Padding="5,5,10,5" 
+                                                                Grid.Row="1" 
+                                                                BackgroundColor="{DynamicResource Primary}" >
                                                 <pancake:PancakeView.Border>
                                                     <pancake:Border Color="{DynamicResource Secondary}" Thickness="3"/>
                                                 </pancake:PancakeView.Border>
@@ -103,11 +109,17 @@
                                     <pancake:Border Color="{DynamicResource Secondary}" Thickness="3"/>
                                 </pancake:PancakeView.Border>
                                 <StackLayout  
-                                                 Margin="8,0,8,0" Grid.Row="0" 
-                                                 Orientation="Horizontal">
-                                    <Image  Source="add.png" BackgroundColor="Transparent" WidthRequest="30"/>
-                                    <Label Text="Créer un project" TextColor="{DynamicResource Secondary}" 
-                                               HorizontalOptions="Center" VerticalOptions="Center" FontSize="14" />
+                                            Margin="8,0,8,0" 
+                                            Grid.Row="0" 
+                                            Orientation="Horizontal">
+                                    <Image  Source="add.png" 
+                                            BackgroundColor="Transparent" 
+                                            WidthRequest="30"/>
+                                    <Label  Text="Créer un project" 
+                                            TextColor="{DynamicResource Secondary}" 
+                                            HorizontalOptions="Center" 
+                                            VerticalOptions="Center" 
+                                            FontSize="14" />
                                     <StackLayout.GestureRecognizers>
                                         <TapGestureRecognizer 
                                                         NumberOfTapsRequired="1"

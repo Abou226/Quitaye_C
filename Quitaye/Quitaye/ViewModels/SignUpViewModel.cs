@@ -17,7 +17,6 @@ namespace Quitaye.ViewModels
     {
         private ICommand _loginCommand;
         private ICommand _signupCommand;
-
         public ISecure Secure { get; }
         private string _username;
         public IMessage Toast { get; }

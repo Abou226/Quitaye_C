@@ -12,6 +12,7 @@ namespace Services
 {
     public class DataService<T, D> : BaseViewModel, IDataService<T, D> where T : class
     {
+        public string ProjectId { get; set; }
         public virtual async Task<T> AddAsync(T value, string token, string url = null)
         {
             try
@@ -22,27 +23,19 @@ namespace Services
                 Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 string jsons = JsonConvert.SerializeObject(value);
-
-                HttpContent httpContent = new StringContent(jsons);
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 var type = value.GetType().ToString();
                 var a = type.Split('.');
                 foreach (var item in a)
                 {
                     type = item;
                 }
-                var response = new HttpResponseMessage();
-                if (url == null)
-                    response = await Client.PostAsync("api/" + type + "s", httpContent);
-                else response = await Client.PostAsync("api/" + type + "s/" + url, httpContent);
+                HttpContent httpContent = new StringContent(jsons);
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                var response = await Client.PostAsync("api/"+type+"s" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return value;
                 else
-                {
-                    var message = await response.Content.ReadAsStringAsync();
-                    var mes = response.ReasonPhrase.ToString();
                     return null;
-                }
             }
             catch (Exception ex)
             {
@@ -63,9 +56,15 @@ namespace Services
 
                 string jsons = JsonConvert.SerializeObject(values);
 
+                var type = values.First().GetType().ToString();
+                var a = type.Split('.');
+                foreach (var item in a)
+                {
+                    type = item;
+                }
                 HttpContent httpContent = new StringContent(jsons);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var response = await Client.PostAsync(baseurl + values.FirstOrDefault().GetType().ToString() + "s" + url, httpContent);
+                var response = await Client.PostAsync("api/"+ type+"s" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return values;
                 else
@@ -90,10 +89,15 @@ namespace Services
                 Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 string jsons = JsonConvert.SerializeObject(values);
-
+                var type = values.First().GetType().ToString();
+                var a = type.Split('.');
+                foreach (var item in a)
+                {
+                    type = item;
+                }
                 HttpContent httpContent = new StringContent(jsons);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var response = await Client.PatchAsync("api/" + url, httpContent);
+                var response = await Client.PatchAsync("api/"+type+"s" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return values;
                 else
@@ -184,9 +188,15 @@ namespace Services
 
                 string jsons = JsonConvert.SerializeObject(values);
 
+                var type = values.First().GetType().ToString();
+                var a = type.Split('.');
+                foreach (var item in a)
+                {
+                    type = item;
+                }
                 HttpContent httpContent = new StringContent(jsons);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var response = await Client.PatchAsync("api/" + values.FirstOrDefault().GetType().ToString() + "s" + url, httpContent);
+                var response = await Client.PatchAsync("api/" + type + "s" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return values;
                 else
@@ -204,18 +214,17 @@ namespace Services
         {
             try
             {
-                var authHeader = new AuthenticationHeaderValue("bearer", token);
-                Client.DefaultRequestHeaders.Authorization = authHeader;
-                Client.DefaultRequestHeaders.Accept.Clear();
-                Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                string jsons = JsonConvert.SerializeObject(value);
-
-                HttpContent httpContent = new StringContent(jsons);
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
                 var response = new HttpResponseMessage();
-                response = await Client.PostAsync("api/" + url, httpContent);
+
+                var type = value.GetType().ToString();
+                var a = type.Split('.');
+                foreach (var item in a)
+                {
+                    type = item;
+                }
+                var values = new List<object>();
+                values.Add(value);
+                response = await Client.PostFormDataAsync("api/" + type + "s" + url, token, values);
                 if (response.IsSuccessStatusCode)
                     return value;
                 else
@@ -252,6 +261,7 @@ namespace Services
             {
                 type = item;
             }
+            
             response = await Client.PostFormDataAsync("api/" + type+"s" + url, token, value);
             if (response.IsSuccessStatusCode)
                 return value;
@@ -262,11 +272,46 @@ namespace Services
                 return null;
             }
         }
+
+        public async Task<IEnumerable<T>> GetIListtemsAsync(string token, string url = null)
+        {
+            var authHeader = new AuthenticationHeaderValue("bearer", token);
+            Client.DefaultRequestHeaders.Authorization = authHeader;
+            var json = await Client.GetStringAsync("api/" + url);
+            var all = Convert<T>.FromJson(json);
+            return all;
+        }
+
+        public async Task<IEnumerable<T>> AddFormDataAsync(List<T> value, string token, string url = null)
+        {
+            var response = new HttpResponseMessage();
+
+            var type = value.First().GetType().ToString();
+            var a = type.Split('.');
+            foreach (var item in a)
+            {
+                type = item;
+            }
+            response = await Client.PostFormDataAsync("api/" + type + "s" + url, token, value);
+            if (response.IsSuccessStatusCode)
+                return value;
+            else
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                var mes = response.ReasonPhrase.ToString();
+                return null;
+            }
+        }
+
+        public Task<string> GetProjectSourcesAsync(string url = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class DataService<T> : BaseVM.BaseViewModel, IDataService<T> where T : class
     {
-
+        public string ProjectId { get; set; }
         public virtual async Task<T> AddAsync(T value, string token, string url = null)
         {
             try
@@ -278,26 +323,20 @@ namespace Services
 
                 string jsons = JsonConvert.SerializeObject(value);
 
-                HttpContent httpContent = new StringContent(jsons);
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 var type = value.GetType().ToString();
                 var a = type.Split('.');
                 foreach (var item in a)
                 {
                     type = item;
                 }
-                var response = new HttpResponseMessage();
-                if (url == null)
-                    response = await Client.PostAsync("api/" + type + "s", httpContent);
-                else response = await Client.PostAsync("api/" + type + "s/" + url, httpContent);
+
+                HttpContent httpContent = new StringContent(jsons);
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                var response = await Client.PostAsync("api/"+ type+"s" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return value;
                 else
-                {
-                    var message = await response.Content.ReadAsStringAsync();
-                    var mes = response.ReasonPhrase.ToString();
                     return null;
-                }
             }
             catch (Exception ex)
             {
@@ -317,23 +356,23 @@ namespace Services
                 Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 string jsons = JsonConvert.SerializeObject(values);
-
-                HttpContent httpContent = new StringContent(jsons);
-                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 var type = values.First().GetType().ToString();
                 var a = type.Split('.');
                 foreach (var item in a)
                 {
                     type = item;
                 }
-                var response = new HttpResponseMessage();
-                if (url == null)
-                    response = await Client.PostAsync("api/" + type + "s", httpContent);
-                else response = await Client.PostAsync("api/" + type + "s/" + url, httpContent);
+                HttpContent httpContent = new StringContent(jsons);
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                var response = await Client.PostAsync("api/"+ type +"s" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return values;
                 else
+                {
+                    var message = await response.Content.ReadAsStringAsync();
+                    var phrase = response.ReasonPhrase;
                     return null;
+                }
             }
             catch (Exception ex)
             {
@@ -422,9 +461,15 @@ namespace Services
 
                 string jsons = JsonConvert.SerializeObject(values);
 
+                var type = values.First().GetType().ToString();
+                var a = type.Split('.');
+                foreach (var item in a)
+                {
+                    type = item;
+                }
                 HttpContent httpContent = new StringContent(jsons);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var response = await Client.PatchAsync("api/" + values.FirstOrDefault().GetType().ToString() + "s" + url, httpContent);
+                var response = await Client.PatchAsync("api/" + type + "s" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return values;
                 else
@@ -454,7 +499,13 @@ namespace Services
 
                 var response = new HttpResponseMessage();
 
-                response = await Client.PostAsync("api/" + url, httpContent);
+                var type = value.GetType().ToString();
+                var a = type.Split('.');
+                foreach (var item in a)
+                {
+                    type = item;
+                }
+                response = await Client.PostAsync("api/" +type+"s" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                 {
                     var all = ConvertSingle<T>.FromJson( await response.Content.ReadAsStringAsync());
@@ -493,7 +544,8 @@ namespace Services
             {
                 type = item;
             }
-            response = await Client.PostFormDataAsync("api/"+ type+"s" + url, token, value);
+            
+            response = await Client.PostFormDataAsync("api/"+ type+"s/" + url, token, value);
             if (response.IsSuccessStatusCode)
                 return value;
             else
@@ -502,6 +554,41 @@ namespace Services
                 var mes = response.ReasonPhrase.ToString();
                 return null;
             }
+        }
+
+        public async Task<IEnumerable<T>> GetIListtemsAsync(string token, string url = null)
+        {
+            var authHeader = new AuthenticationHeaderValue("bearer", token);
+            Client.DefaultRequestHeaders.Authorization = authHeader;
+            var json = await Client.GetStringAsync("api/" + url);
+            var all = Convert<T>.FromJson(json);
+            return all;
+        }
+
+        public async Task<IEnumerable<T>> AddFormDataAsync(List<T> value, string token, string url = null)
+        {
+            var response = new HttpResponseMessage();
+
+            var type = value.First().GetType().ToString();
+            var a = type.Split('.');
+            foreach (var item in a)
+            {
+                type = item;
+            }
+            response = await Client.PostFormDataAsync("api/" + type + "s" + url, token, value);
+            if (response.IsSuccessStatusCode)
+                return value;
+            else
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                var mes = response.ReasonPhrase.ToString();
+                return null;
+            }
+        }
+
+        public Task<string> GetProjectSourcesAsync(string url = null)
+        {
+            throw new NotImplementedException();
         }
     }
 }

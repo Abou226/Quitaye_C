@@ -135,11 +135,11 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Livraison>> AddAsync([FromBody] Livraison value)
+        public override async Task<ActionResult<IEnumerable<Livraison>>> AddAsync([FromBody] List<Livraison> values)
         {
             try
             {
-                if (value == null)
+                if (values == null)
                     return NotFound();
 
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
@@ -148,15 +148,18 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    if (value.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
-                        value.Date = DateTime.Now;
-                    //value.ServerTime = DateTime.Now;
-                    value.Id = Guid.NewGuid();
-                    
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
+                    foreach (var value in values)
+                    {
+                        if (value.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
+                            value.Date = DateTime.Now;
+                        //value.ServerTime = DateTime.Now;
+                        value.Id = Guid.NewGuid();
 
-                    return Ok(value);
+                        await repositoryWrapper.ItemA.AddAsync(value);
+                        await repositoryWrapper.SaveAsync();
+                    }
+
+                    return Ok(values);
                 }
                 else return NotFound("User not identified");
             }

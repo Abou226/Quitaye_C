@@ -25,8 +25,11 @@ namespace Controllers
         private readonly IMapper _mapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
         private readonly IFileManager _fileManager;
-        public GammesController(IGenericRepositoryWrapper<Gamme, User, Marque, Style, Categorie> wrapper,
-            IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, IFileManager fileManager,
+        public GammesController(IGenericRepositoryWrapper<Gamme, User, 
+            Marque, Style, Categorie> wrapper,
+            IConfigSettings settings, 
+            IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, 
+            IFileManager fileManager,
             IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
@@ -91,7 +94,7 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetAll();
+                    var result = await repositoryWrapper.Item.GetByInclude(x => x.Marque, x => x.Style, x => x.Categorie);
 
                     return Ok(result);
                 }
@@ -112,8 +115,8 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetBy(x =>
-                    (x.EntrepriseId.ToString() == search) && (x.Categorie.Name.Contains(search) ));
+                    var result = await repositoryWrapper.Item.GetByInclude(x =>
+                    (x.EntrepriseId.ToString() == search) && (x.Categorie.Name.Contains(search) ), x => x.Marque, x => x.Style, x => x.Categorie);
 
                     return Ok(result);
                 }
@@ -146,7 +149,8 @@ namespace Controllers
 
                         if (list.Contains(identity.First().Id))
                         {
-                            var result = await repositoryWrapper.Item.GetBy(x => (x.EntrepriseId == id));
+                            var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id), 
+                                x => x.Marque, x => x.Style, x => x.Categorie);
                             return Ok(result);
                         }
                         else
@@ -162,7 +166,7 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Gamme>> AddAsync([FromForm] Gamme value)
+        public override async Task<ActionResult<IEnumerable<Gamme>>> AddAsync([FromForm] Gamme value)
         {
             try
             {
@@ -175,19 +179,23 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    if (value.Image != null)
+                    //foreach (var value in values)
                     {
-                        var result = await _fileManager.Upload(_settings.AccessKey, 
-                            _settings.SecretKey, _settings.BucketName, 
-                            Amazon.RegionEndpoint.USEast1, value.Image);
-                        value.Url = result.Url;
-                    }
+                        if (value.Image != null)
+                        {
+                            var result = await _fileManager.Upload(_settings.AccessKey,
+                                _settings.SecretKey, _settings.BucketName,
+                                Amazon.RegionEndpoint.USEast1, value.Image);
+                            value.Url = result.Url;
+                        }
 
-                    value.Id = Guid.NewGuid();
-                    value.UserId = identity.First().Id;
-                    value.EntrepriseId = value.EntrepriseId;
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
+                        value.Id = Guid.NewGuid();
+                        value.UserId = identity.First().Id;
+                        value.EntrepriseId = value.EntrepriseId;
+                        await repositoryWrapper.ItemA.AddAsync(value);
+                        await repositoryWrapper.SaveAsync();
+                    }
+                    
                     return Ok(value);
                 }
                 else return NotFound("User not identified");
@@ -233,7 +241,7 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetAll();
+                    var result = await repositoryWrapper.Item.GetByInclude( x => x.Marque, x => x.Style, x => x.Categorie);
 
                     return Ok(result);
                 }

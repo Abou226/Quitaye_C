@@ -34,5 +34,9 @@ namespace Models
         [ForeignKey(nameof(User))]
         public Guid? UserId { get; set; }
         public User User { get; set; }
+
+        [ForeignKey(nameof(Client))]
+        public Guid? ClientId { get; set; }
+        public Client Client { get; set; }
     }
 }

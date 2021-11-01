@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+             xmlns:Charts="clr-namespace:Microcharts.Forms;assembly=Microcharts.Forms" 
+             xmlns:pancake="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" 
+             xmlns:control="clr-namespace:ProgressRingControl.Forms.Plugin;assembly=ProgressRing.Forms.Plugin" 
+             xmlns:converters="clr-namespace:Quitaye.Converters"
+             x:Class="Quitaye.Views.Home.Acceuil">
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <converters:ValueProgressBarConverter x:Key="ValueProgressBar" />
+        </ResourceDictionary>
+    </ContentView.Resources>
+    <Grid>
+        <StackLayout>
+            <pancake:PancakeView    CornerRadius="20" 
+                                    Padding="0,0" Margin="0,0"
+                                    BackgroundColor="{DynamicResource Primary}" >
+                <pancake:PancakeView.Border>
+                    <pancake:Border Color="{DynamicResource Secondary}" Thickness="3"/>
+                </pancake:PancakeView.Border>
+                <pancake:PancakeView.Shadow>
+                    <pancake:DropShadow Color="{DynamicResource Secondary}" Offset="10,10"/>
+                </pancake:PancakeView.Shadow>
+                <Frame BorderColor="{DynamicResource Secondary}" HeightRequest="200"
+                                       BackgroundColor="{DynamicResource Primary}" 
+                                       CornerRadius="20">
+
+                    <Charts:ChartView 
+                                        Chart="{Binding MultiBarChart}"
+                                        HeightRequest="300"
+                                        VerticalOptions="Start"
+                                        HorizontalOptions="Fill"/>
+
+                </Frame>
+            </pancake:PancakeView>
+            <pancake:PancakeView x:Name="myPancakeView" CornerRadius="20" 
+                                                         Padding="0,0" Margin="0,0"
+                                                         BackgroundColor="{DynamicResource Primary}" >
+                <pancake:PancakeView.Border>
+                    <pancake:Border Color="{DynamicResource Secondary}" Thickness="3"/>
+                </pancake:PancakeView.Border>
+                <pancake:PancakeView.Shadow>
+                    <pancake:DropShadow Color="{DynamicResource Secondary}" Offset="10,10"/>
+                </pancake:PancakeView.Shadow>
+                <Frame BorderColor="{DynamicResource Secondary}" HeightRequest="50"
+                                       BackgroundColor="{DynamicResource Primary}" 
+                                       CornerRadius="20">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="40"/>
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <control:ProgressRing HeightRequest="30"  RingProgressColor="{DynamicResource Secondary}" 
+                                                              RingBaseColor="{DynamicResource ThirdColor}"
+                                                              Scale="1.5"  RingThickness="3"  
+                                                              Progress="{Binding Vente_Progress, Converter={StaticResource ValueProgressBar}}" />
+                        <Label Text="{Binding Vente_Progress, StringFormat='{0}%'}" 
+                                               HorizontalOptions="Center" 
+                                               VerticalOptions="Center" 
+                                               FontSize="10" 
+                                               TextColor="{DynamicResource Secondary}" />
+                        <Grid Grid.Column="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Label  Text="Montant Vente(s) : "  
+                                                        TextColor="{DynamicResource Secondary}" 
+                                                        HorizontalOptions="Center" FontSize="14" 
+                                                        VerticalOptions="Center"/>
+                                <Label  Text="{Binding Montant_Vente, StringFormat='{0:#,##0} FCFA'}" 
+                                                        Grid.Row="1" 
+                                                        FontAttributes="Bold"
+                                                        TextColor="{DynamicResource Secondary}"
+                                                        HorizontalOptions="Center" FontSize="23"
+                                                        VerticalOptions="Start" />
+                            </Grid>
+                            <Grid Grid.Column="1">
+
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Frame>
+            </pancake:PancakeView>
+        </StackLayout>
+        
+        
+    </Grid>
+</ContentView>

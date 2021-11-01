@@ -14,10 +14,19 @@ namespace Models
         [Key]
         public Guid Id { get; set; }
 
-        [ForeignKey(nameof(Offre))]
-        public Guid? OffreId { get; set; }
-        public Offre Offre { get; set; }
+        [ForeignKey(nameof(Gamme))]
+        public Guid? GammeId { get; set; }
+        public Gamme Gamme { get; set; }
+
+        [ForeignKey(nameof(Taille))]
+        public Guid TailleId { get; set; }
+        public Taille Taille { get; set; }
+
+        [ForeignKey(nameof(Model))]
+        public Guid ModelId { get; set; }
+        public Model Model { get; set; }
         public DateTime DateOfCreation { get; set; }
+        public Guid EntrepriseId { get; set; }
 
         [ForeignKey(nameof(User))]
         public Guid? UserId { get; set; }
@@ -64,7 +73,6 @@ namespace Models
         public Guid? ClientId { get; set; }
         public Client Client { get; set; }
 
-        [Required(ErrorMessage = "Le contact du client est requis")]
         [StringLength(15, ErrorMessage = "La taille du contact client ne peut dépasser 15 charaters")]
         public string Contact_Client { get; set; }
 
@@ -74,5 +82,9 @@ namespace Models
         public Guid? PanierId { get; set; }
 
         public bool Annulée { get; set; }
+
+        [ForeignKey(nameof(Marque))]
+        public Guid? MarqueId { get; set; }
+        public Marque Marque { get; set; }
     }
 }

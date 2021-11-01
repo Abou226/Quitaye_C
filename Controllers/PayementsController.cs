@@ -88,7 +88,7 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.ItemA.GetAll();
+                    var result = await repositoryWrapper.Item.GetByInclude(x => x.Num_Payement);
 
                     return Ok(result);
                 }
@@ -111,10 +111,28 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetByInclude(x =>
-                    (x.EntrepriseId.ToString() == search) && (x.Nature.Contains(search) || x.Type.Contains(search)), x => x.Num_Payement);
+                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.UserId == identity.First().Id);
+                    if (entreprise.Count() != 0)
+                    {
+                        List<Guid> list = new List<Guid>();
+                        foreach (var item in entreprise)
+                        {
+                            list.Add((Guid)item.UserId);
+                        }
 
-                    return Ok(result);
+                        if (list.Contains(identity.First().Id))
+                        {
+                            var result = await repositoryWrapper.Item.GetByInclude(x =>
+                                        (x.EntrepriseId.ToString() == search) 
+                                        && (x.Nature.Contains(search) 
+                                        || x.Type.Contains(search)), 
+                                        x => x.Num_Payement);
+                            return Ok(result);
+                        }
+                        else return NotFound("Non membre cette entreprise");
+                    }
+                    else return NotFound("Non membre de cette entreprise");
+
                 }
                 else return NotFound("User not indentified");
             }
@@ -150,11 +168,11 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Payement>> AddAsync([FromBody] Payement value)
+        public override async Task<ActionResult<IEnumerable<Payement>>> AddAsync([FromBody] List<Payement> values)
         {
             try
             {
-                if (value == null)
+                if (values == null)
                     return NotFound();
 
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
@@ -163,14 +181,17 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    if (value.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
-                        value.Date = DateTime.Now;
-                    value.EntrepriseId = value.EntrepriseId;
-                    value.UserId = identity.First().Id;
-                    value.Id = Guid.NewGuid();
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
-                    return Ok(value);
+                    foreach (var value in values)
+                    {
+                        if (value.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
+                            value.Date = DateTime.Now;
+                        value.EntrepriseId = value.EntrepriseId;
+                        value.UserId = identity.First().Id;
+                        value.Id = Guid.NewGuid();
+                        await repositoryWrapper.ItemA.AddAsync(value);
+                        await repositoryWrapper.SaveAsync();
+                    }
+                    return Ok(values);
                 }
                 else return NotFound("User not identified");
             }
@@ -182,7 +203,6 @@ namespace Controllers
 
         [HttpGet("{search}/{entrepriseId:Guid}/{start:DateTime}/{end:DateTime}")]
         [Authorize]
-
         public async Task<ActionResult<IEnumerable<Payement>>> GetBy([FromRoute] string search, Guid entrepriseId, DateTime start, DateTime end)
         {
             try
@@ -193,15 +213,30 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    var entrepriseUser = await _entrepriseUser.Item.GetBy(x => x.UserId == identity.First().Id);
-                    if (entrepriseUser.Count() != 0)
+                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.UserId == identity.First().Id);
+                    if (entreprise.Count() != 0)
                     {
-                        var result = await repositoryWrapper.Item.GetByInclude(x =>
-                        (x.EntrepriseId == entrepriseId)
-                        && (x.Nature.Contains(search) || x.Type.Contains(search)) && (x.Date.Date >= start && x.Date.Date <= end), x => x.Num_Payement);
+                        List<Guid> list = new List<Guid>();
+                        foreach (var item in entreprise)
+                        {
+                            list.Add((Guid)item.UserId);
+                        }
 
-                        return Ok(result);
-                    }else return null;
+                        if (list.Contains(identity.First().Id))
+                        {
+                            var result = await repositoryWrapper.Item.GetByInclude(x =>
+                            (x.EntrepriseId == entrepriseId)
+                            && (x.Nature.Contains(search) 
+                            || x.Type.Contains(search)) 
+                            && x.Date.Date >= start 
+                            && x.Date.Date <= end, 
+                            x => x.Num_Payement);
+
+                            return Ok(result);
+                        }
+                        else return NotFound("Non membre cette entreprise");
+                    }
+                    else return NotFound("Non membre de cette entreprise");
                 }
                 else return NotFound("User not indentified");
             }
@@ -228,6 +263,46 @@ namespace Controllers
                     && x.Date_Payement.Date >= start && x.Date_Payement.Date <= end);
 
                     return Ok(result);
+                }
+                else return NotFound("User not indentified");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet("interval/{entrepriseId:Guid}/{start:DateTime}/{end:DateTime}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<Payement>>> GetForChart([FromRoute] Guid entrepriseId, DateTime start, DateTime end)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+
+                if (identity.Count() != 0)
+                {
+                    var entrepriseUser = await _entrepriseUser.Item.GetBy(x => x.UserId == identity.First().Id);
+                    if (entrepriseUser.Count() != 0)
+                    {
+                        var result = await repositoryWrapper.Item.GetBy(x =>
+                        (x.EntrepriseId == entrepriseId)
+                        && x.Date.Date >= start && x.Date <= end);
+
+                        var charts = new List<ChartData>();
+                        foreach (var item in result.OrderBy(x => x.Date).GroupBy(x => x.Date.Date))
+                        {
+                            charts.Add(new ChartData()
+                            {
+                                Date = item.Key.Date,
+                                Montant = item.Sum(x => x.Montant),
+                            });
+                        }
+                        return Ok(charts);
+                    }
+                    else return null;
                 }
                 else return NotFound("User not indentified");
             }

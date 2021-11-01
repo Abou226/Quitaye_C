@@ -56,7 +56,7 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Avarier>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        public override async Task<ActionResult<Avarier>> PatchUpdateAsync([FromForm] JsonPatchDocument value, [FromHeader] Guid id)
         {
             try
             {
@@ -128,11 +128,11 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Avarier>> AddAsync([FromBody] Avarier value)
+        public override async Task<ActionResult<IEnumerable<Avarier>>> AddAsync([FromForm] List<Avarier> values)
         {
             try
             {
-                if (value == null)
+                if (values == null)
                     return NotFound();
 
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
@@ -141,15 +141,18 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    if (value.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
-                        value.Date = DateTime.Now;
-                    //value.ServerTime = DateTime.Now;
-                    value.UserId = identity.First().Id;
-                    value.Id = Guid.NewGuid();
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
-
-                    return Ok(value);
+                    foreach (var value in values)
+                    {
+                        if (value.Date == Convert.ToDateTime("0001-01-01T00:00:00"))
+                            value.Date = DateTime.Now;
+                        //value.ServerTime = DateTime.Now;
+                        value.UserId = identity.First().Id;
+                        value.Id = Guid.NewGuid();
+                        await repositoryWrapper.ItemA.AddAsync(value);
+                        await repositoryWrapper.SaveAsync();
+                    }
+                    
+                    return Ok(values);
                 }
                 else return NotFound("User not identified");
             }

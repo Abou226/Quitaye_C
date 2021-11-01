@@ -12,7 +12,8 @@ namespace Services
 {
     public class CheckInternetService<T, D> : BaseViewModel, IDataService<T, D> where T : class
     {
-        public virtual async Task<T> AddAsync(T value, string token, string url = null)
+        public string ProjectId { get; set; }
+        public virtual async Task<T> AddAsync(T value, string token, string url= null)
         {
             try
             {
@@ -52,6 +53,26 @@ namespace Services
             }
         }
 
+        public async Task<T> AddFormDataAsync(T value, string token, string url = null)
+        {
+            var response = new HttpResponseMessage();
+            var type = value.GetType().ToString();
+            var a = type.Split('.');
+            foreach (var item in a)
+            {
+                type = item;
+            }
+
+            response = await Client.PostFormDataAsync("api/" + type + "s" + url, token, value);
+            if (response.IsSuccessStatusCode)
+                return value;
+            else
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                var mes = response.ReasonPhrase.ToString();
+                return null;
+            }
+        }
         public virtual async Task<IEnumerable<T>> AddListAsync(List<T> values, string token, string url = null)
         {
             try
@@ -62,10 +83,15 @@ namespace Services
                 Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 string jsons = JsonConvert.SerializeObject(values);
-
+                var type = values.First().GetType().ToString();
+                var a = type.Split('.');
+                foreach (var item in a)
+                {
+                    type = item;
+                }
                 HttpContent httpContent = new StringContent(jsons);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var response = await Client.PostAsync(baseurl + values.FirstOrDefault().GetType().ToString() + "s" + url, httpContent);
+                var response = await Client.PostAsync("api/" + type + "s" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return values;
                 else
@@ -242,11 +268,35 @@ namespace Services
             return all;
         }
 
-        public async Task<T> AddFormDataAsync(T value, string token, string url = null)
+        public async Task<IEnumerable<List<T>>> GetIListstemsAsync(string token, string url = null)
+        {
+            var authHeader = new AuthenticationHeaderValue("bearer", token);
+            Client.DefaultRequestHeaders.Authorization = authHeader;
+            var json = await Client.GetStringAsync("api/" + url);
+            var all = Convert<List<T>>.FromJson(json);
+            return all;
+        }
+
+        public async Task<IEnumerable<T>> GetIListtemsAsync(string token, string url = null)
+        {
+            var authHeader = new AuthenticationHeaderValue("bearer", token);
+            Client.DefaultRequestHeaders.Authorization = authHeader;
+            var json = await Client.GetStringAsync("api/" + url);
+            var all = Convert<T>.FromJson(json);
+            return all;
+        }
+
+        public async Task<IEnumerable<T>> AddFormDataAsync(List<T> value, string token, string url = null)
         {
             var response = new HttpResponseMessage();
 
-            response = await Client.PostFormDataAsync("api/" + url, token, value);
+            var type = value.First().GetType().ToString();
+            var a = type.Split('.');
+            foreach (var item in a)
+            {
+                type = item;
+            }
+            response = await Client.PostFormDataAsync("api/client" + type + "s" + url, token, value);
             if (response.IsSuccessStatusCode)
                 return value;
             else
@@ -256,11 +306,16 @@ namespace Services
                 return null;
             }
         }
+
+        public Task<string> GetProjectSourcesAsync(string url = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class CheckInternetService<T> : BaseVM.BaseViewModel, IDataService<T> where T : class
     {
-
+        public string ProjectId { get; set; }
         public virtual async Task<T> AddAsync(T value, string token, string url = null)
         {
             try
@@ -301,6 +356,26 @@ namespace Services
             }
         }
 
+        public async Task<T> AddFormDataAsync(T value, string token, string url = null)
+        {
+            var response = new HttpResponseMessage();
+            var type = value.GetType().ToString();
+            var a = type.Split('.');
+            foreach (var item in a)
+            {
+                type = item;
+            }
+
+            response = await Client.PostFormDataAsync("api/" + type + "s" + url, token, value);
+            if (response.IsSuccessStatusCode)
+                return value;
+            else
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                var mes = response.ReasonPhrase.ToString();
+                return null;
+            }
+        }
         public virtual async Task<IEnumerable<T>> AddListAsync(List<T> values, string token, string url = null)
         {
             try
@@ -311,10 +386,15 @@ namespace Services
                 Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 string jsons = JsonConvert.SerializeObject(values);
-
+                var type = values.First().GetType().ToString();
+                var a = type.Split('.');
+                foreach (var item in a)
+                {
+                    type = item;
+                }
                 HttpContent httpContent = new StringContent(jsons);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var response = await Client.PostAsync("api/" + values.FirstOrDefault().GetType().ToString() + "s" + url, httpContent);
+                var response = await Client.PostAsync("api/" + type + "s" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return values;
                 else
@@ -466,21 +546,6 @@ namespace Services
             return all;
         }
 
-        public async Task<T> AddFormDataAsync(T value, string token, string url = null)
-        {
-            var response = new HttpResponseMessage();
-
-            response = await Client.PostFormDataAsync("api/" + url, token, value);
-            if (response.IsSuccessStatusCode)
-                return value;
-            else
-            {
-                var message = await response.Content.ReadAsStringAsync();
-                var mes = response.ReasonPhrase.ToString();
-                return null;
-            }
-        }
-
         async Task<T> IDataService<T>.PostAsync(object value, string token, string url)
         {
             try
@@ -516,6 +581,50 @@ namespace Services
                 var phrase = ex.InnerException;
                 return null;
             }
+        }
+
+        public async Task<IEnumerable<List<T>>> GetIListstemsAsync(string token, string url = null)
+        {
+            var authHeader = new AuthenticationHeaderValue("bearer", token);
+            Client.DefaultRequestHeaders.Authorization = authHeader;
+            var json = await Client.GetStringAsync("api/" + url);
+            var all = Convert<List<T>>.FromJson(json);
+            return all;
+        }
+
+        public async Task<IEnumerable<T>> GetIListtemsAsync(string token, string url = null)
+        {
+            var authHeader = new AuthenticationHeaderValue("bearer", token);
+            Client.DefaultRequestHeaders.Authorization = authHeader;
+            var json = await Client.GetStringAsync("api/" + url);
+            var all = Convert<T>.FromJson(json);
+            return all;
+        }
+
+        public async Task<IEnumerable<T>> AddFormDataAsync(List<T> value, string token, string url = null)
+        {
+            var response = new HttpResponseMessage();
+
+            var type = value.First().GetType().ToString();
+            var a = type.Split('.');
+            foreach (var item in a)
+            {
+                type = item;
+            }
+            response = await Client.PostFormDataAsync("api/client" + type + "s" + url, token, value);
+            if (response.IsSuccessStatusCode)
+                return value;
+            else
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                var mes = response.ReasonPhrase.ToString();
+                return null;
+            }
+        }
+
+        public Task<string> GetProjectSourcesAsync(string url = null)
+        {
+            throw new NotImplementedException();
         }
     }
 }

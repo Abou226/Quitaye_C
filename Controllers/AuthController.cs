@@ -271,7 +271,7 @@ namespace Quitaye.Server.Controllers
                 if (jwtSecurityToken != null && jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
                 {
                     var Id = principle.FindFirst(ClaimTypes.Name)?.Value;
-                    var user = await _refreshTokenRepository.Item.GetBy(x => x.Token == accessToken.Token);
+                    var user = await _refreshTokenRepository.Item.GetBy(x => x.Token == accessToken.Token && x.DateOfExpiry >= DateTime.Now);
                     if (user.Count() != 0)
                     {
                         return user.First();

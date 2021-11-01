@@ -21,7 +21,13 @@ namespace Repository
         }
 
         [HttpPost]
-        public virtual Task<ActionResult<A>> AddAsync([FromBody] A value)
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
         {
             return null;
         }
@@ -93,7 +99,13 @@ namespace Repository
         }
 
         [HttpPost]
-        public virtual Task<ActionResult<A>> AddAsync([FromBody] A value)
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
         {
             return null;
         }
@@ -164,7 +176,13 @@ namespace Repository
         }
 
         [HttpPost]
-        public virtual Task<ActionResult<A>> AddAsync([FromBody] A value)
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
         {
             return null;
         }
@@ -235,7 +253,13 @@ namespace Repository
         }
 
         [HttpPost]
-        public virtual Task<ActionResult<A>> AddAsync([FromBody] A value)
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
         {
             return null;
         }
@@ -307,7 +331,13 @@ namespace Repository
         }
 
         [HttpPost]
-        public virtual Task<ActionResult<A>> AddAsync([FromBody] A value)
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
         {
             return null;
         }
@@ -380,7 +410,13 @@ namespace Repository
         }
 
         [HttpPost]
-        public virtual Task<ActionResult<A>> AddAsync([FromBody] A value)
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
         {
             return null;
         }
@@ -451,7 +487,13 @@ namespace Repository
         }
 
         [HttpPost]
-        public virtual Task<ActionResult<A>> AddAsync([FromBody] A value)
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
         {
             return null;
         }
@@ -522,7 +564,14 @@ namespace Repository
         }
 
         [HttpPost]
-        public virtual Task<ActionResult<A>> AddAsync([FromBody] A value)
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
         {
             return null;
         }
@@ -593,7 +642,13 @@ namespace Repository
         }
 
         [HttpPost]
-        public virtual Task<ActionResult<A>> AddAsync([FromBody] A value)
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
         {
             return null;
         }
@@ -664,7 +719,14 @@ namespace Repository
         }
 
         [HttpPost]
-        public virtual Task<ActionResult<A>> AddAsync([FromBody] A value)
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
         {
             return null;
         }
@@ -735,7 +797,13 @@ namespace Repository
         }
 
         [HttpPost]
-        public virtual Task<ActionResult<A>> AddAsync([FromBody] A value)
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
         {
             return null;
         }
@@ -806,7 +874,14 @@ namespace Repository
         }
 
         [HttpPost]
-        public virtual Task<ActionResult<A>> AddAsync([FromBody] A value)
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
         {
             return null;
         }

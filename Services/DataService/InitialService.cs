@@ -37,6 +37,8 @@ namespace Services
                 }
                 else
                 {
+                    var message = await response.Content.ReadAsStringAsync();
+                    var phrase = response.ReasonPhrase;
                     return null;
                 }
                 //var response = await Client.PostAsync("api/Tests", httpContent);

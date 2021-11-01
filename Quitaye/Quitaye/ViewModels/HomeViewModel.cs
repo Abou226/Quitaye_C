@@ -1,9 +1,13 @@
 ﻿using Acr.UserDialogs;
 using BaseVM;
+using Microcharts;
 using Models;
 using Plugin.Connectivity;
+using Quitaye.Helpers;
 using Quitaye.Views;
+using Quitaye.Views.Home;
 using Services;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,6 +21,7 @@ using Xamarin.Forms;
 
 [assembly: Dependency(typeof(DataService<Entreprise>))]
 [assembly: Dependency(typeof(DataService<Test>))]
+[assembly: Dependency(typeof(DataService<ChartData>))]
 [assembly: Dependency(typeof(BaseViewModel))]
 [assembly: Dependency(typeof(InitialService))]
 
@@ -45,7 +50,7 @@ namespace Quitaye
 
         private bool _homeTextVisible;
 
-        public bool HomeTextVisible
+        public bool HomeVisible
         {
             get { return _homeTextVisible; }
             set 
@@ -60,7 +65,7 @@ namespace Quitaye
 
         private bool _salesTextVisible;
 
-        public bool SalesTextVisible
+        public bool VenteVisible
         {
             get { return _salesTextVisible; }
             set 
@@ -74,7 +79,7 @@ namespace Quitaye
 
         private bool _payementTextVisible;
 
-        public bool PayementTextVisible
+        public bool PayementVisible
         {
             get { return _payementTextVisible; }
             set 
@@ -87,9 +92,11 @@ namespace Quitaye
             }
         }
 
+        public static Entreprise Project;
+
         private bool _livraisonTextVisible;
 
-        public bool LivraisonTextVisible
+        public bool LivraisonVisible
         {
             get { return _livraisonTextVisible; }
             set 
@@ -104,7 +111,7 @@ namespace Quitaye
 
         private bool _productionTextVisible;
 
-        public bool ProductionTextVisible
+        public bool ProductionVisible
         {
             get { return _productionTextVisible; }
             set 
@@ -122,22 +129,22 @@ namespace Quitaye
             {
                 SalesImage = "sales.png";
                 HomeImage = "home_black.png";
-                SalesTextVisible = true;
-                HomeTextVisible = false;
-                LivraisonTextVisible = false;
-                ProductionTextVisible = false;
-                PayementTextVisible = false;
+                VenteVisible = true;
+                HomeVisible = false;
+                LivraisonVisible = false;
+                ProductionVisible = false;
+                PayementVisible = false;
                 PayementImage = "hand_black.png";
                 LivraisonImage = "shipped_black.png";
                 ProductionImage = "production_black.png";
             }else if(icon == "Home")
             {
                 HomeImage = "home.png";
-                SalesTextVisible = false;
-                HomeTextVisible = true;
-                LivraisonTextVisible = false;
-                ProductionTextVisible = false;
-                PayementTextVisible = false;
+                VenteVisible = false;
+                HomeVisible = true;
+                LivraisonVisible = false;
+                ProductionVisible = false;
+                PayementVisible = false;
                 SalesImage = "sales_black.png";
                 PayementImage = "hand_black.png";
                 LivraisonImage = "shipped_black.png";
@@ -145,11 +152,11 @@ namespace Quitaye
             }else if(icon == "Payement")
             {
                 PayementImage = "hand.png";
-                SalesTextVisible = false;
-                HomeTextVisible = false;
-                LivraisonTextVisible = false;
-                ProductionTextVisible = false;
-                PayementTextVisible = true;
+                VenteVisible = false;
+                HomeVisible = false;
+                LivraisonVisible = false;
+                ProductionVisible = false;
+                PayementVisible = true;
                 SalesImage = "sales_black.png";
                 HomeImage = "home_black.png";
                 LivraisonImage = "shipped_black.png";
@@ -157,22 +164,22 @@ namespace Quitaye
             }else if(icon == "Production")
             {
                 SalesImage = "sales_black.png";
-                SalesTextVisible = false;
-                HomeTextVisible = false;
-                LivraisonTextVisible = false;
-                ProductionTextVisible = true;
-                PayementTextVisible = false;
+                VenteVisible = false;
+                HomeVisible = false;
+                LivraisonVisible = false;
+                ProductionVisible = true;
+                PayementVisible = false;
                 PayementImage = "hand_black.png";
                 LivraisonImage = "shipped_black.png";
                 ProductionImage = "production.png";
             }else if(icon == "Livraison")
             {
                 HomeImage = "home_black.png";
-                SalesTextVisible = false;
-                HomeTextVisible = false;
-                LivraisonTextVisible = true;
-                ProductionTextVisible = false;
-                PayementTextVisible = false;
+                VenteVisible = false;
+                HomeVisible = false;
+                LivraisonVisible = true;
+                ProductionVisible = false;
+                PayementVisible = false;
                 SalesImage = "sales_black.png";
                 PayementImage = "hand_black.png";
                 LivraisonImage = "shipped.png";
@@ -184,6 +191,8 @@ namespace Quitaye
 
         public IDataService<Test> Test { get; }
         public IDataService<Entreprise> EntrepriseService { get; }
+        public ObservableCollection<ChartData> ChartDatas { get; }
+        public IDataService<ChartData> ChartService { get; }
 
         #region Images Icons
 
@@ -304,7 +313,7 @@ namespace Quitaye
         public ICommand RefreshCommand { get; }
         #endregion
 
-        private decimal _vente_progresse = 74;
+        private decimal _vente_progresse = 44;
 
         public decimal Vente_Progress
         {
@@ -312,6 +321,68 @@ namespace Quitaye
             set { _vente_progresse = value; }
         }
 
+        private bool firstLunch = true;
+
+        public bool FirstLunch
+        {
+            get { return firstLunch; }
+            set 
+            {
+                if (firstLunch == value)
+                    return;
+                firstLunch = value;
+                OnPropertyChanged();
+            }
+        }
+
+
+        private decimal _montant_Vente;
+
+        public decimal Montant_Vente
+        {
+            get { return _montant_Vente; }
+            set 
+            {
+                if (_montant_Vente == value)
+                    return;
+
+                _montant_Vente = value;
+                OnPropertyChanged();
+            }
+        }
+
+        
+        private MultiLinesChart multiLinesChart;
+
+        public MultiLinesChart MultiLinesChart
+        {
+            get { return multiLinesChart; }
+            set 
+            {
+                if (multiLinesChart == value)
+                    return;
+
+                multiLinesChart = value;
+                OnPropertyChanged();
+            }
+        }
+
+
+
+        private MultiBarChart multiBarChart;
+
+        public MultiBarChart MultiBarChart
+        {
+            get { return multiBarChart; }
+            set 
+            {
+                if (multiBarChart == value)
+                    return;
+
+                multiBarChart = value;
+                OnPropertyChanged();
+            }
+        }
 
         private Entreprise entreprise;
 
@@ -346,7 +417,11 @@ namespace Quitaye
             ProductionCommand = new Command(OnProductionCommand);
             SalesCommand = new Command(OnSalesCommand);
             Initial();
+            HomeVisible = true;
             GetProjects();
+            //InitData();
+            //Task.Run(async () => await GetProjects());
+            //Task.Run(async () => await InitData());
         }
 
         private async void OnRefreshCommand(object obj)
@@ -384,60 +459,130 @@ namespace Quitaye
             }
         }
 
+        private SKColor blueColor = SKColor.Parse("#09C");
+        private SKColor redColor = SKColor.Parse("#CC0000");
+
+        private async Task InitData()
+        {
+            if(Entreprise != null)
+            {
+                if (BaseVM.IsInternetOn)
+                    return;
+
+                var entries = new List<List<ChartEntry>>();
+                var turnoverEntries = new List<ChartEntry>();
+                var donutChartEntries = new List<ChartEntry>();
+                var chargesEntries = new List<ChartEntry>();
+
+                try
+                {
+                    var ventes = await ChartService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Reservations/interval/" + Entreprise.Id.ToString() + "/" + DateTime.Today.AddDays(-6).Date.ToString("MM-dd-yyyy") + "/" + DateTime.Today.Date.ToString("MM-dd-yyyy"));
+                    foreach (var item in ventes)
+                    {
+                        turnoverEntries.Add(new ChartEntry((float)item.Montant)
+                        {
+                            Color = blueColor,
+                            ValueLabel = $"{(float)item.Montant / 1000} k",
+                            Label = item.Date.ToString("ddd")
+                        });
+                    }
+
+                    var payements = await ChartService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Payements/interval/" + Entreprise.Id.ToString() + "/" + DateTime.Today.AddDays(-6).Date.ToString("MM-dd-yyyy") + "/" + DateTime.Today.Date.ToString("MM-dd-yyyy"));
+                    foreach (var item in payements)
+                    {
+                        chargesEntries.Add(new ChartEntry((float)item.Montant)
+                        {
+                            Color = redColor,
+                            ValueLabel = $"{(float)item.Montant / 1000} k",
+                            Label = item.Date.ToString("ddd")
+                        });
+                    }
+
+                    MultiLinesChart = new MultiLinesChart
+                    {
+                        MultiLineEntires = entries,
+                        LabelTextSize = 20f,
+                        LabelOrientation = Orientation.Horizontal,
+                        LineAreaAlpha = 50,
+                        PointAreaAlpha = 50,
+                        LegendNames = new List<string> { "Vente(s)", "Payement(s)" },
+                        IsAnimated = false
+                    };
+
+                    MultiBarChart = new MultiBarChart
+                    {
+                        MultiBarEntries = entries,
+                        LabelTextSize = 20f,
+                        LabelOrientation = Orientation.Horizontal,
+                        PointAreaAlpha = 0,
+                        LegendNames = new List<string> { "Vente(s)", "Payement(s)" },
+                        IsAnimated = false
+                    };
+                }
+                catch (Exception ex)
+                {
+
+                }
+                finally
+                {
+                    IsNotBusy = true;
+                    UserDialogs.Instance.HideLoading();
+                }
+            }
+        }
+
         private async Task GetProjects()
         {
             await CheckConnection();
-            do
+           
+            if (BaseVM.IsInternetOn || FirstLunch)
             {
-                if (BaseVM.IsInternetOn)
-                {
-                    if (IsNotBusy)
-                        return;
 
-                    try
+                try
+                {
+                    IsNotBusy = false;
+                    UserDialogs.Instance.ShowLoading("Chargement....");
+                    var pays = await EntrepriseService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Entreprises/");
+                    Entreprises.Clear();
+                    if (pays.Count() != 0)
                     {
-                        IsNotBusy = false;
-                        UserDialogs.Instance.ShowLoading("Chargement....");
-                        var pays = await EntrepriseService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Entreprises/");
-                        Entreprises.Clear();
-                        if (pays.Count() != 0)
+                        foreach (var item in pays)
                         {
-                            foreach (var item in pays)
-                            {
-                                Entreprises.Add(item);
-                            }
-                            var entrepriseId = await SecureStorage.GetAsync("LastEntreprise");
-                            var entre = from d in pays where d.Id.ToString().Equals(entrepriseId) select d;
-                            Entreprise = entre.First();
+                            Entreprises.Add(item);
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"Echec operation: {ex.Message}");
-                        if (ex.Message.Contains("Unauthorize"))
-                        {
-                            var result = await Init.Get(new LogInModel() { Token = await SecureStorage.GetAsync("Token"), Password = "d", Username = "d" });
-                            await SecureStorage.SetAsync("Token", result.Token);
-                            await SecureStorage.SetAsync("Prenom", result.Prenom);
-                            await SecureStorage.SetAsync("Nom", result.Nom);
-                            await SecureStorage.SetAsync("ProfilePic", result.ProfilePic);
-                            await GetProjects();
-                        }
-                        else if (ex.Message.Contains("host"))
-                        {
-                            await GetProjects();
-                        }
-                        else MessageAlert.LongAlert("Erreur" + ex.Message);
-                    }
-                    finally
-                    {
-                        IsNotBusy = true;
-                        UserDialogs.Instance.HideLoading();
+                        var entrepriseId = await SecureStorage.GetAsync("LastEntreprise");
+                        var entre = from d in pays where d.Id.ToString().Equals(entrepriseId) select d;
+                        Entreprise = entre.First();
+                        Project = entre.First();
+                        await InitData();
                     }
                 }
-            } 
-            while (!BaseVM.IsInternetOn);
-            
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Echec operation: {ex.Message}");
+                    if (ex.Message.Contains("Unauthorize"))
+                    {
+                        var result = await Init.Get(new LogInModel() { Token = await SecureStorage.GetAsync("Token"), Password = "d", Username = "d" });
+                        await SecureStorage.SetAsync("Token", result.Token);
+                        await SecureStorage.SetAsync("Prenom", result.Prenom);
+                        await SecureStorage.SetAsync("Nom", result.Nom);
+                        await SecureStorage.SetAsync("ProfilePic", result.ProfilePic);
+                        IsNotBusy = true;
+                        await GetProjects();
+                    }
+                    else if (ex.Message.Contains("host"))
+                    {
+                        await GetProjects();
+                    }
+                    else MessageAlert.LongAlert("Erreur" + ex.Message);
+                }
+                finally
+                {
+                    IsNotBusy = true;
+                    FirstLunch = false;
+                    UserDialogs.Instance.HideLoading();
+                }
+            }
         }
 
         private void OnProductionCommand(object obj)
@@ -446,16 +591,22 @@ namespace Quitaye
             CurrentSection = "Production(s)";
         }
 
-        private void OnSalesCommand(object obj)
+        private async void OnSalesCommand(object obj)
         {
             ChangeIcon("Sales");
             CurrentSection = "Vente(s)";
+            await Navigation.PushAsync(new Ventes_Infos());
         }
 
         private async void OnSettingsCommand(object obj)
         {
             if(Entreprise != null)
-            await Navigation.PushAsync(new SettingPage(Entreprise));
+            {
+                if (Entreprise.Type.Type.Contains("production"))
+                {
+                    await Navigation.PushAsync(new ProductionSetting(Entreprise));
+                }
+            }
         }
 
         private void OnPayementCommand(object obj)
@@ -464,10 +615,11 @@ namespace Quitaye
             CurrentSection = "Payement(s)";
         }
 
-        private void OnLivraisonCommand(object obj)
+        private async void OnLivraisonCommand(object obj)
         {
             ChangeIcon("Livraison");
             CurrentSection = "Livraison(s)";
+            await Navigation.PushAsync(new Livraison_Infos());
         }
 
         private void OnHomeCommand(object obj)

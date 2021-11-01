@@ -201,6 +201,21 @@ namespace BaseVM
             }
         }
 
+        private bool _refreshGamme;
+
+        public bool RefreshGamme
+        {
+            get { return _refreshGamme; }
+            set 
+            {
+                if (_refreshGamme == value)
+                    return;
+
+                _refreshGamme = value;
+                OnPropertyChanged();
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string propertyName = "") =>
          PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

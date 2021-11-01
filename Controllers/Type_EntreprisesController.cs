@@ -147,11 +147,11 @@ namespace Controllers
         }
 
         [Consumes("multipart/form-data")]
-        public override async Task<ActionResult<Type_Entreprise>> AddAsync([FromForm] Type_Entreprise value)
+        public override async Task<ActionResult<IEnumerable<Type_Entreprise>>> AddAsync([FromBody] List<Type_Entreprise> values)
         {
             try
             {
-                if (value == null)
+                if (values == null)
                     return NotFound();
 
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
@@ -160,16 +160,20 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    if(value.Image != null)
+                    foreach (var value in values)
                     {
-                        await _fileManager.Upload(_settings.AccessKey, _settings.SecretKey, _settings.BucketName, Amazon.RegionEndpoint.USEast1, value.Image);
-                        value.Url = "https://" + _settings.BucketName + ".s3.amazonaws.com/" + value.Image.FileName;
+                        if (value.Image != null)
+                        {
+                            await _fileManager.Upload(_settings.AccessKey, _settings.SecretKey, _settings.BucketName, Amazon.RegionEndpoint.USEast1, value.Image);
+                            value.Url = "https://" + _settings.BucketName + ".s3.amazonaws.com/" + value.Image.FileName;
+                        }
+                        value.Id = Guid.NewGuid();
+
+                        await repositoryWrapper.ItemA.AddAsync(value);
+                        await repositoryWrapper.SaveAsync();
                     }
-                    value.Id = Guid.NewGuid();
                     
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
-                    return Ok(value);
+                    return Ok(values);
                 }
                 else return NotFound("User not identified");
             }

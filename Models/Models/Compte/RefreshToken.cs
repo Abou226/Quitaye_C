@@ -25,9 +25,7 @@ namespace Models
         [StringLength(60, ErrorMessage = "La taille de refreshable ne peut dépasser 60 characters")]
         public string Refreshable { get; set; }
 
-        [ForeignKey(nameof(User))]
         public Guid? UserId { get; set; }
-        public User User { get; set; }
 
         [Required(ErrorMessage = "Le temps du serveur est requis")]
         public DateTime ServerTime { get; set; }

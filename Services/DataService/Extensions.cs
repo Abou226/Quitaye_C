@@ -27,63 +27,67 @@ namespace Services
         {
             using (var content = new MultipartFormDataContent())
             {
-
-                foreach (var prop in data.GetType().GetProperties())
+                //foreach (var item in data)
                 {
-                    var value = prop.GetValue(data);
-                    if (value is Guid || value is DateTime)
+                    foreach (var prop in data.GetType().GetProperties())
                     {
-                        if (value is Guid)
+                        var value = prop.GetValue(data);
+                        if (value is Guid || value is DateTime)
                         {
-                            var d = (Guid)value;
-                            if (value == null || d == Guid.Empty)
+                            if (value is Guid)
                             {
-
-                            }
-                            else
-                            {
-                                content.Add(new StringContent(value.ToString()), prop.Name);
-                            }
-                        }
-                        else if (value is DateTime)
-                        {
-                            var d = (DateTime)value;
-                            if (value != null && d != Convert.ToDateTime("01/01/0001 00:00:00"))
-                                content.Add(new StringContent(value.ToString()), prop.Name);
-                        }
-                    }
-                    else
-                    {
-                        if (value is FormFile)
-                        {
-                            var file = value as FormFile;
-                            content.Add(new StreamContent(file.OpenReadStream()), prop.Name, file.FileName);
-                            content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") { Name = prop.Name, FileName = file.FileName };
-                        }
-                        else
-                        {
-                            if (prop.Name.Equals("Image") || prop.Name.Equals("File"))
-                            {
-                                var v = prop.GetValue(data);
-                                if (v is FormFile)
-                                {
-                                    var file = v as FormFile;
-                                    content.Add(new StreamContent(file.OpenReadStream()), prop.Name, file.FileName);
-                                    content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") { Name = prop.Name, FileName = file.FileName };
-                                }
-                            }
-                            else
-                            {
-                                if (value is null)
+                                var d = (Guid)value;
+                                if (value == null || d == Guid.Empty)
                                 {
 
                                 }
                                 else
+                                {
+                                    content.Add(new StringContent(value.ToString()), prop.Name);
+                                }
+                            }
+                            else if (value is DateTime)
+                            {
+                                var d = (DateTime)value;
+                                if (value != null && d != Convert.ToDateTime("01/01/0001 00:00:00"))
                                     content.Add(new StringContent(value.ToString()), prop.Name);
                             }
                         }
+                        else
+                        {
+                            if (value is FormFile)
+                            {
+                                var file = value as FormFile;
+                                content.Add(new StreamContent(file.OpenReadStream()), prop.Name, file.FileName);
+                                content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") { Name = prop.Name, FileName = file.FileName };
+                            }
+                            else
+                            {
+                                if (prop.Name.Equals("Image") || prop.Name.Equals("File"))
+                                {
+                                    var v = prop.GetValue(data);
+                                    if (v is FormFile)
+                                    {
+                                        var file = v as FormFile;
+                                        content.Add(new StreamContent(file.OpenReadStream()), prop.Name, file.FileName);
+                                        content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data") { Name = prop.Name, FileName = file.FileName };
+                                    }
+                                }
+                                else
+                                {
+                                    if (value is null)
+                                    {
+
+                                    }
+                                    else
+                                        content.Add(new StringContent(value.ToString()), prop.Name);
+                                }
+                            }
+                        }
                     }
+
                 }
+
 
                 if (!string.IsNullOrWhiteSpace(token))
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);

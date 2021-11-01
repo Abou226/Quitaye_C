@@ -18,14 +18,14 @@ namespace Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class PanierReservationsController : GenericController<PanierReservation, User, Offre, Gamme, Marque, Style, Categorie, Taille, Model>
+    public class PanierReservationsController : GenericController<PanierReservation, User, Gamme, Marque, Style, Categorie, Taille, Model>
     {
-        private readonly IGenericRepositoryWrapper<PanierReservation, User, Offre, Gamme, Marque, Style, Categorie, Taille, Model> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<PanierReservation, User, Gamme, Marque, Style, Categorie, Taille, Model> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
 
-        public PanierReservationsController(IGenericRepositoryWrapper<PanierReservation, User, Offre, Gamme, Marque, Style, Categorie, Taille, Model> wrapper,
+        public PanierReservationsController(IGenericRepositoryWrapper<PanierReservation, User, Gamme, Marque, Style, Categorie, Taille, Model> wrapper,
             IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser,
             IMapper mapper) : base(wrapper)
         {
@@ -111,9 +111,13 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x =>
-                    (x.EntrepriseId.ToString() == search) && (x.Offre.Gamme.Categorie.Name.Contains(search)), x => x.Offre,
-                    x => x.Offre.Gamme, x => x.Offre.Gamme.Marque, x => x.Offre.Gamme.Style,
-                    x => x.Offre.Gamme.Categorie, x => x.Offre.Taille, x => x.Offre.Model);
+                    (x.EntrepriseId.ToString() == search) && (x.Gamme.Categorie.Name.Contains(search)),
+                    x => x.Gamme, 
+                    x => x.Gamme.Marque, 
+                    x => x.Gamme.Style,
+                    x => x.Gamme.Categorie, 
+                    x => x.Taille, 
+                    x => x.Model);
 
                     return Ok(result);
                 }
@@ -140,9 +144,12 @@ namespace Controllers
                     if (entreprise.Count() != 0)
                     {
                         var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id),
-                            x => x.Offre, x => x.Offre.Gamme,
-                            x => x.Offre.Gamme.Marque, x => x.Offre.Gamme.Style,
-                            x => x.Offre.Gamme.Categorie, x => x.Offre.Taille, x => x.Offre.Model);
+                            x => x.Gamme, 
+                            x => x.Gamme.Marque, 
+                            x => x.Gamme.Style,
+                            x => x.Gamme.Categorie, 
+                            x => x.Taille, 
+                            x => x.Model);
                         return Ok(result);
                     }
                     else return NotFound("Non membre de cette entreprise");
@@ -155,11 +162,11 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<PanierReservation>> AddAsync([FromBody] PanierReservation value)
+        public override async Task<ActionResult<IEnumerable<PanierReservation>>> AddAsync([FromBody] List<PanierReservation> values)
         {
             try
             {
-                if (value == null)
+                if (values == null)
                     return NotFound();
 
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
@@ -168,14 +175,18 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    value.EntrepriseId = value.EntrepriseId;
-                    value.UserId = identity.First().Id;
-                    value.Id = Guid.NewGuid();
-                    if (value.DateOfCreation == Convert.ToDateTime("0001-01-01T00:00:00"))
-                        value.DateOfCreation = DateTime.Now;
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
-                    return Ok(value);
+                    foreach (var value in values)
+                    {
+                        value.EntrepriseId = value.EntrepriseId;
+                        value.UserId = identity.First().Id;
+                        value.Id = Guid.NewGuid();
+                        if (value.DateOfCreation == Convert.ToDateTime("0001-01-01T00:00:00"))
+                            value.DateOfCreation = DateTime.Now;
+                        await repositoryWrapper.ItemA.AddAsync(value);
+                        await repositoryWrapper.SaveAsync();
+                    }
+                    
+                    return Ok(values);
                 }
                 else return NotFound("User not identified");
             }
@@ -196,9 +207,14 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId.ToString() == search) &&
-                    (x.Offre.Gamme.Marque.Name.Contains(search) && x.DateOfCreation.Date >= start && x.DateOfCreation.Date <= end),
-                    x => x.Offre, x => x.Offre.Gamme, x => x.Offre.Gamme.Marque, x => x.Offre.Gamme.Style,
-                    x => x.Offre.Gamme.Categorie, x => x.Offre.Taille, x => x.Offre.Model);
+                    (x.Gamme.Marque.Name.Contains(search) 
+                    && x.DateOfCreation.Date >= start && x.DateOfCreation.Date <= end),
+                    x => x.Gamme, 
+                    x => x.Gamme.Marque, 
+                    x => x.Gamme.Style,
+                    x => x.Gamme.Categorie, 
+                    x => x.Taille, 
+                    x => x.Model);
 
                     return Ok(result);
                 }
@@ -224,10 +240,12 @@ namespace Controllers
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x => x.EntrepriseId == entrepriseId &&
                     x.DateOfCreation >= start && x.DateOfCreation <= end,
-                    x => x.Offre, x => x.Offre.Gamme,
-                    x => x.Offre.Gamme.Marque, x => x.Offre.Gamme.Style,
-                    x => x.Offre.Gamme.Categorie,
-                    x => x.Offre.Taille, x => x.Offre.Model);
+                    x => x.Gamme, 
+                    x => x.Gamme.Marque, 
+                    x => x.Gamme.Style,
+                    x => x.Gamme.Categorie,
+                    x => x.Taille, 
+                    x => x.Model);
 
                     return Ok(result);
                 }

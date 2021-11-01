@@ -185,11 +185,11 @@ namespace Controllers
         }
 
         
-        public override async Task<ActionResult<Entreprise>> AddAsync([FromBody] Entreprise value)
+        public override async Task<ActionResult<IEnumerable<Entreprise>>> AddAsync([FromBody] List<Entreprise> values)
         {
             try
             {
-                if (value == null)
+                if (values == null)
                     return NotFound();
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
                 var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
@@ -197,23 +197,25 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    if (value.DateOfCreation == Convert.ToDateTime("0001-01-01T00:00:00"))
-                        value.DateOfCreation = DateTime.Now;
-                    //value.ServerTime = DateTime.Now;
-                    value.Id = Guid.NewGuid();
-                    value.OwnerId = identity.First().Id;
-                    await repositoryWrapper.ItemA.AddAsync(value);
-                    await repositoryWrapper.SaveAsync();
+                    foreach (var value in values)
+                    {
+                        if (value.DateOfCreation == Convert.ToDateTime("0001-01-01T00:00:00"))
+                            value.DateOfCreation = DateTime.Now;
+                        //value.ServerTime = DateTime.Now;
+                        value.Id = Guid.NewGuid();
+                        value.OwnerId = identity.First().Id;
+                        await repositoryWrapper.ItemA.AddAsync(value);
+                        await repositoryWrapper.SaveAsync();
 
-                    EntrepriseUser use = new EntrepriseUser();
-                    use.Id = Guid.NewGuid();
-                    use.EntrepriseId = value.Id;
-                    use.DateOfAdd = DateTime.Now;
-                    use.UserId = identity.First().Id;
-                    await repositoryWrapper.ItemE.AddAsync(use);
-                    await repositoryWrapper.SaveAsync();
-
-                    return Ok(value);
+                        EntrepriseUser use = new EntrepriseUser();
+                        use.Id = Guid.NewGuid();
+                        use.EntrepriseId = value.Id;
+                        use.DateOfAdd = DateTime.Now;
+                        use.UserId = identity.First().Id;
+                        await repositoryWrapper.ItemE.AddAsync(use);
+                        await repositoryWrapper.SaveAsync();
+                    }
+                    return Ok(values);
                 }
                 else return NotFound("User not identified");
             }

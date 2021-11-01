@@ -52,7 +52,8 @@ namespace Quitaye.Server.Controllers
                 {
                     var resultUser = await RefreshToken(logIn);
                     if (string.IsNullOrWhiteSpace(resultUser.Value.Username.ToString())
-                        && (!string.IsNullOrWhiteSpace(logIn.Username) && !string.IsNullOrWhiteSpace(logIn.Password)))
+                        && (!string.IsNullOrWhiteSpace(logIn.Username) 
+                        && !string.IsNullOrWhiteSpace(logIn.Password)))
                     {
                         var result = await _userRepository.Item.GetBy(x => x.Username == logIn.Username 
                         && x.EntrepriseId == logIn.EntrepriseId 
@@ -265,7 +266,7 @@ namespace Quitaye.Server.Controllers
                 if (jwtSecurityToken != null && jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
                 {
                     var Id = principle.FindFirst(ClaimTypes.Name)?.Value;
-                    var user = await _refreshTokenRepository.Item.GetBy(x => x.Token == accessToken.Token);
+                    var user = await _refreshTokenRepository.Item.GetBy(x => x.Token == accessToken.Token && x.DateOfExpiry >= DateTime.Now);
                     if (user.Count() != 0)
                     {
                         return user.First();

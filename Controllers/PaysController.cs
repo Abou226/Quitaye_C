@@ -144,11 +144,11 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Pays>> AddAsync([FromForm] Pays value)
+        public override async Task<ActionResult<IEnumerable<Pays>>> AddAsync([FromBody] List<Pays> values)
         {
             try
             {
-                if (value == null)
+                if (values == null)
                     return NotFound();
 
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
@@ -157,6 +157,7 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
+                    
                     var lines = System.IO.File.ReadAllLines("stri", System.Text.Encoding.UTF7);
                     foreach (var item in lines)
                     {
@@ -175,7 +176,7 @@ namespace Controllers
                             await repositoryWrapper.SaveAsync();
                         }
                     }
-                    return Ok(value);
+                    return Ok(values);
                 }
                 else return NotFound("User not identified");
             }
