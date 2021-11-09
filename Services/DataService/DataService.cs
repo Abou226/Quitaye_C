@@ -460,16 +460,9 @@ namespace Services
                 Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 string jsons = JsonConvert.SerializeObject(values);
-
-                var type = values.First().GetType().ToString();
-                var a = type.Split('.');
-                foreach (var item in a)
-                {
-                    type = item;
-                }
                 HttpContent httpContent = new StringContent(jsons);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var response = await Client.PatchAsync("api/" + type + "s" + url, httpContent);
+                var response = await Client.PatchAsync("api/" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return values;
                 else

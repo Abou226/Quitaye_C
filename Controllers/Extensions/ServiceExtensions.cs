@@ -53,6 +53,7 @@ namespace Quitaye.Controllers.Extensions
             services.Configure<ConfigSettings>(config.GetSection("ConfigSettings"));
             services.AddScoped<IConfigSettings, ConfigSettings>();
             services.AddScoped<IFacebook, FacebookService>();
+            services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IFileManager, FileManager>();
             services.AddAWSService<IAmazonS3>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -64,6 +65,9 @@ namespace Quitaye.Controllers.Extensions
             services.AddScoped(typeof(IGenericRepository<,,,,,,>), typeof(GenericRepository<,,,,,,>));
             services.AddScoped(typeof(IGenericRepository<,,,,,,,>), typeof(GenericRepository<,,,,,,,>));
             services.AddScoped(typeof(IGenericRepository<,,,,,,,,>), typeof(GenericRepository<,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepository<,,,,,,,,,>), typeof(GenericRepository<,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepository<,,,,,,,,,,>), typeof(GenericRepository<,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepository<,,,,,,,,,,,>), typeof(GenericRepository<,,,,,,,,,,,>));
             services.AddScoped(typeof(IGenericController<>), typeof(GenericController<>));
             services.AddScoped(typeof(IGenericController<,>), typeof(GenericController<,>));
             services.AddScoped(typeof(IGenericController<,,>), typeof(GenericController<,,>));
@@ -73,6 +77,9 @@ namespace Quitaye.Controllers.Extensions
             services.AddScoped(typeof(IGenericController<,,,,,,>), typeof(GenericController<,,,,,,>));
             services.AddScoped(typeof(IGenericController<,,,,,,,>), typeof(GenericController<,,,,,,,>));
             services.AddScoped(typeof(IGenericController<,,,,,,,,>), typeof(GenericController<,,,,,,,,>));
+            services.AddScoped(typeof(IGenericController<,,,,,,,,,>), typeof(GenericController<,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericController<,,,,,,,,,,>), typeof(GenericController<,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericController<,,,,,,,,,,,>), typeof(GenericController<,,,,,,,,,,,>));
             services.AddScoped(typeof(IGenericRepositoryWrapper<>), typeof(GenericRepositoryWrapper<>));
             services.AddScoped(typeof(IGenericRepositoryWrapper<,>), typeof(GenericRepositoryWrapper<,>));
             services.AddScoped(typeof(IGenericRepositoryWrapper<,,>), typeof(GenericRepositoryWrapper<,,>));
@@ -82,6 +89,9 @@ namespace Quitaye.Controllers.Extensions
             services.AddScoped(typeof(IGenericRepositoryWrapper<,,,,,,>), typeof(GenericRepositoryWrapper<,,,,,,>));
             services.AddScoped(typeof(IGenericRepositoryWrapper<,,,,,,,>), typeof(GenericRepositoryWrapper<,,,,,,,>));
             services.AddScoped(typeof(IGenericRepositoryWrapper<,,,,,,,,>), typeof(GenericRepositoryWrapper<,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepositoryWrapper<,,,,,,,,,>), typeof(GenericRepositoryWrapper<,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepositoryWrapper<,,,,,,,,,,>), typeof(GenericRepositoryWrapper<,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepositoryWrapper<,,,,,,,,,,,>), typeof(GenericRepositoryWrapper<,,,,,,,,,,,>));
         }
 
         public static void ConfigureAuthentication(this IServiceCollection services)

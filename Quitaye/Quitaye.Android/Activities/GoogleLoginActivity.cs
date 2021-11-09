@@ -164,9 +164,6 @@ namespace Quitaye.Droid.Activities
                                     if (token != null)
                                     {
                                         await SecureStorage.SetAsync("Token", token.First().Token);
-                                        await SecureStorage.SetAsync("AwsAccessKey", token.First().AwsAccessKey);
-                                        await SecureStorage.SetAsync("AwsSecretKey", token.First().AwsSecretKey);
-                                        await SecureStorage.SetAsync("BucketName", token.First().BucketName);
                                         await SecureStorage.SetAsync("Prenom", token.First().Prenom);
                                         await SecureStorage.SetAsync("Nom", token.First().Nom);
                                         await SecureStorage.SetAsync("ProfilePic", token.First().ProfilePic);
@@ -178,9 +175,6 @@ namespace Quitaye.Droid.Activities
                                     if (token != null)
                                     {
                                         await SecureStorage.SetAsync("Token", token.First().Token);
-                                        await SecureStorage.SetAsync("AwsAccessKey", token.First().AwsAccessKey);
-                                        await SecureStorage.SetAsync("AwsSecretKey", token.First().AwsSecretKey);
-                                        await SecureStorage.SetAsync("BucketName", token.First().BucketName);
                                         await SecureStorage.SetAsync("ProfilePic", token.First().ProfilePic);
                                         await SecureStorage.SetAsync("Prenom", token.First().Prenom);
                                         await SecureStorage.SetAsync("Nom", token.First().Nom);
@@ -193,9 +187,6 @@ namespace Quitaye.Droid.Activities
                                 if (token != null)
                                 {
                                     await SecureStorage.SetAsync("Token", token.Token);
-                                    await SecureStorage.SetAsync("AwsAccessKey", token.AwsAccessKey);
-                                    await SecureStorage.SetAsync("AwsSecretKey", token.AwsSecretKey);
-                                    await SecureStorage.SetAsync("BucketName", token.BucketName);
                                     await SecureStorage.SetAsync("ProfilePic", token.ProfilePic);
                                     await SecureStorage.SetAsync("Prenom", token.Prenom);
                                     await SecureStorage.SetAsync("Nom", token.Nom);

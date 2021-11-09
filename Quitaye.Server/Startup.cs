@@ -36,6 +36,7 @@ namespace Quitaye.Server
             services.ConfigureRepositoryWrapper(Configuration);
             services.AddAuthentication();
             services.AddControllers();
+            services.AddSignalR();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Quitaye.Server", Version = "v1" });
@@ -65,8 +66,5 @@ namespace Quitaye.Server
                 endpoints.MapControllers();
             });
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        
     }
 }

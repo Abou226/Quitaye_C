@@ -3,6 +3,7 @@ using BaseVM;
 using Microcharts;
 using Models;
 using Plugin.Connectivity;
+using Plugin.FirebasePushNotification;
 using Quitaye.Helpers;
 using Quitaye.Views;
 using Quitaye.Views.Home;
@@ -419,6 +420,7 @@ namespace Quitaye
             Initial();
             HomeVisible = true;
             GetProjects();
+            
             //InitData();
             //Task.Run(async () => await GetProjects());
             //Task.Run(async () => await InitData());
@@ -554,6 +556,11 @@ namespace Quitaye
                         var entre = from d in pays where d.Id.ToString().Equals(entrepriseId) select d;
                         Entreprise = entre.First();
                         Project = entre.First();
+                        CrossFirebasePushNotification.Current.Subscribe(Project.Id.ToString());
+                        CrossFirebasePushNotification.Current.Subscribe($"{Project.Id.ToString()}_vente");
+                        CrossFirebasePushNotification.Current.Subscribe($"{Project.Id.ToString()}_production");
+                        CrossFirebasePushNotification.Current.Subscribe($"{Project.Id.ToString()}_livraison");
+                        CrossFirebasePushNotification.Current.Subscribe($"{Project.Id.ToString()}_payement");
                         await InitData();
                     }
                 }

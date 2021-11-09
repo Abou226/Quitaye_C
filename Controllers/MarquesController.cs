@@ -27,7 +27,9 @@ namespace Controllers
         private readonly IFileManager _fileManager;
 
         public MarquesController(IGenericRepositoryWrapper<Marque, User> wrapper,
-            IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, IFileManager fileManager, IMapper mapper) : base(wrapper)
+            IConfigSettings settings, 
+            IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, 
+            IFileManager fileManager, IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
             _entrepriseUser = entrepriseUser;

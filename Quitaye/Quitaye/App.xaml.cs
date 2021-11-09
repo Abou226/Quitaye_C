@@ -9,6 +9,7 @@ using Xamarin.Forms.Xaml;
 using Xamarin.Essentials;
 using Microsoft.Extensions.DependencyInjection;
 using Quitaye.Views;
+using Plugin.FirebasePushNotification;
 
 [assembly: Dependency(typeof(BaseViewModel))]
 [assembly: Dependency(typeof(CheckInternetService<Test>))]
@@ -40,8 +41,20 @@ namespace Quitaye
                 Resources["Primary"] = Resources["Primary"];
                 Resources["ThirdColor"] = Resources["ThirdColor"];
             }
+            CrossFirebasePushNotification.Current.Subscribe("all");
+            CrossFirebasePushNotification.Current.OnTokenRefresh += Current_OnTokenRefresh;
+            CrossFirebasePushNotification.Current.OnNotificationReceived += Current_OnNotificationReceived;
         }
 
+        private void Current_OnNotificationReceived(object source, FirebasePushNotificationDataEventArgs e)
+        {
+            
+        }
+
+        private void Current_OnTokenRefresh(object source, FirebasePushNotificationTokenEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine($"Token: {e.Token}");
+        }
         private async void CheckConnection()
         {
             if (CrossConnectivity.Current.IsConnected)

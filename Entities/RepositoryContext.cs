@@ -15,7 +15,9 @@ namespace Entities
 
         }
 
+        public DbSet<Notification> Notifications { get; set; }
         public DbSet<Occasion> Occasions { get; set; }
+        public DbSet<Sms> Sms { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Entreprise> Entreprises { get; set; }
         public DbSet<Telephone> Telephones { get; set; }

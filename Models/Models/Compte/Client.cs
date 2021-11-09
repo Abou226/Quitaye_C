@@ -30,6 +30,9 @@ namespace Models
         [StringLength(100, ErrorMessage = "L'email ne peut dépasser 100 characters")]
         public string Email { get; set; }
 
+        [StringLength(15, ErrorMessage = "Le numero de telephone ne peut dépasser 15 characters")]
+        public string Telephone { get; set; }
+
         public DateTime DateOfCreation { get; set; }
 
         [ForeignKey(nameof(Entreprise))]

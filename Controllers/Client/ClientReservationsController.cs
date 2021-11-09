@@ -18,18 +18,20 @@ namespace Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class ClientReservationsController : GenericController<Reservation, Client, Gamme, Marque, Taille, Model, Categorie, Style>
+    public class ClientReservationsController : GenericController<Reservation, Client, Gamme, Marque, Taille, Model, Categorie, Style, Marque>
     {
-        private readonly IGenericRepositoryWrapper<Reservation, Client, Gamme, Marque, Taille, Model, Categorie, Style> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<Reservation, Client, Gamme, Marque, Taille, Model, Categorie, Style, Marque> repositoryWrapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUserRepository;
         private readonly IConfigSettings _settings;
+        private readonly INotificationService notificationService;
+        private readonly IGenericRepositoryWrapper<Notification> notifRepository;
         private readonly IGenericRepositoryWrapper<PanierReservation> panierRepository;
         private readonly IGenericRepositoryWrapper<Num_Vente> num_vente_repository;
         private readonly IMapper _mapper;
 
         public ClientReservationsController(IGenericRepositoryWrapper<Reservation, Client, Gamme,
-            Marque, Taille, Model, Categorie, Style> wrapper,
-            IGenericRepositoryWrapper<EntrepriseUser> entrepriseUserRepository,
+            Marque, Taille, Model, Categorie, Style, Marque> wrapper, INotificationService _notification,
+            IGenericRepositoryWrapper<EntrepriseUser> entrepriseUserRepository, IGenericRepositoryWrapper<Notification> _notifRepository,
             IGenericRepositoryWrapper<PanierReservation> _panierRepository, IGenericRepositoryWrapper<Num_Vente> _num_vente_repository,
             IConfigSettings settings, IMapper mapper) : base(wrapper)
         {
@@ -38,6 +40,7 @@ namespace Controllers
             num_vente_repository = _num_vente_repository;
             _entrepriseUserRepository = entrepriseUserRepository;
             panierRepository = _panierRepository;
+            notificationService = _notification;
             _mapper = mapper;
         }
 
@@ -220,12 +223,49 @@ namespace Controllers
                         item.Id = Guid.NewGuid();
                         item.NumVenteId = numss.Id;
                         item.ClientId = identity.First().Id;
-                        item.Gamme.MarqueId = item.Gamme.MarqueId;
                         await repositoryWrapper.ItemA.AddAsync(item);
                         await repositoryWrapper.SaveAsync();
+                        
                         var pan = await panierRepository.Item.GetBy(x => x.Id == item.PanierId);
-                        panierRepository.Item.Delete(pan.First());
-                        await panierRepository.SaveAsync();
+                        if(pan.Count() != 0)
+                        {
+                            panierRepository.Item.Delete(pan.First());
+                            await panierRepository.SaveAsync();
+                        }
+                    }
+
+                    if(value.Count == 1)
+                    {
+                        Notification notification = new Notification();
+                        notification.Title = "Nouvelle Commande";
+                        var marque = "";
+                        if (value.First().Gamme.Marque != null)
+                            marque = value.First().Gamme.Marque.Name;
+                        else marque = value.First().Marque.Name;
+
+                        notification.Message = $"{marque}-{value.First().Taille.Name}, {value.First().Model.Name}. Client(e): {identity.First().Prenom} {identity.First().Nom}";
+                        var notif = await notificationService.SendToTopic($"{value.First().EntrepriseId.ToString()}_vente", notification);
+                        notification.AuthorId = identity.First().Id;
+                        notification.SendDate = DateTime.Now;
+                        notification.Url = value.First().Gamme.Url;
+                        var result = await notifRepository.Item.AddAsync(notification);
+                        await notifRepository.SaveAsync();
+                    }else
+                    {
+                        Notification notification = new Notification();
+                        notification.Title = $"{value.Count} Nouvelles Commandes";
+                        var marque = "";
+                        if (value.First().Gamme.Marque != null)
+                            marque = value.First().Gamme.Marque.Name;
+                        else marque = value.First().Marque.Name;
+
+                        notification.Message = $"Client(e): {identity.First().Prenom} {identity.First().Nom} Montant: {Convert.ToDecimal(value.Sum(x => x.Prix_Vente_Unité)).ToString("N0")}";
+                        var notif = await notificationService.SendToTopic($"{value.First().EntrepriseId.ToString()}_vente", notification);
+                        notification.AuthorId = identity.First().Id;
+                        notification.SendDate = DateTime.Now;
+                        notification.Url = value.First().Gamme.Url;
+                        var result = await notifRepository.Item.AddAsync(notification);
+                        await notifRepository.SaveAsync();
                     }
                     return Ok(value);
                 }
@@ -260,7 +300,8 @@ namespace Controllers
                                 x => x.Taille,
                                 x => x.Model, 
                                 x => x.Gamme.Categorie, 
-                                x => x.Gamme.Style);
+                                x => x.Gamme.Style,
+                                x => x.Marque);
                     return Ok(result.OrderByDescending(x => x.DateOfCreation));
                 }
                 else return NotFound("User not indentified");
@@ -333,7 +374,8 @@ namespace Controllers
                                 x => x.Taille,
                                 x => x.Model, 
                                 x => x.Gamme.Categorie, 
-                                x => x.Gamme.Style);
+                                x => x.Gamme.Style,
+                                x => x.Marque);
 
                     return Ok(result.OrderByDescending(x => x.Date_Livraison));
                 }

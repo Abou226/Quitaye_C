@@ -18,9 +18,9 @@ namespace Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class ReservationsController : GenericController<Reservation, User, Gamme, Marque, Taille, Model, Categorie, Style, Client>
+    public class ReservationsController : GenericController<Reservation, User, Gamme, Marque, Taille, Model, Categorie, Style, Client, Marque>
     {
-        private readonly IGenericRepositoryWrapper<Reservation, User, Gamme, Marque, Taille, Model, Categorie, Style, Client> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<Reservation, User, Gamme, Marque, Taille, Model, Categorie, Style, Client, Marque> repositoryWrapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUserRepository;
         private readonly IConfigSettings _settings;
         private readonly IGenericRepositoryWrapper<PanierReservation> panierRepository;
@@ -28,7 +28,7 @@ namespace Controllers
         private readonly IMapper _mapper;
 
         public ReservationsController(IGenericRepositoryWrapper<Reservation, User, Gamme,
-            Marque, Taille, Model, Categorie, Style, Client> wrapper,
+            Marque, Taille, Model, Categorie, Style, Client, Marque> wrapper,
             IGenericRepositoryWrapper<EntrepriseUser> entrepriseUserRepository,
             IGenericRepositoryWrapper<PanierReservation> _panierRepository, 
             IGenericRepositoryWrapper<Num_Vente> _num_vente_repository,
@@ -38,7 +38,7 @@ namespace Controllers
             _settings = settings;
             num_vente_repository = _num_vente_repository;
             _entrepriseUserRepository = entrepriseUserRepository;
-            _panierRepository = panierRepository;
+            panierRepository = _panierRepository;
             _mapper = mapper;
         }
 
@@ -130,7 +130,8 @@ namespace Controllers
                     x => x.Model, 
                     x => x.Gamme.Categorie, 
                     x => x.Gamme.Style, 
-                    x => x.Client);
+                    x => x.Client,
+                    x => x.Marque);
 
                     return Ok(result.OrderByDescending(x => x.DateOfCreation));
                 }
@@ -247,17 +248,18 @@ namespace Controllers
                         if (list.Contains(identity.First().Id))
                         {
                             var result = await repositoryWrapper.Item.GetByInclude(x =>
-                        (x.EntrepriseId == entrepriseId)
-                        && x.DateOfCreation.Date >= start 
-                        && x.DateOfCreation <= end 
-                        && x.EntrepriseId == entrepriseId,
-                        x => x.Gamme,
-                        x => x.Gamme.Marque, 
-                        x => x.Taille,
-                        x => x.Model, 
-                        x => x.Gamme.Categorie,
-                        x => x.Gamme.Style,
-                        x => x.Client);
+                                        (x.EntrepriseId == entrepriseId)
+                                        && x.DateOfCreation.Date >= start.Date 
+                                        && x.DateOfCreation.Date <= end.Date 
+                                        && x.Annulée == false,
+                                        x => x.Gamme,
+                                        x => x.Gamme.Marque, 
+                                        x => x.Taille,
+                                        x => x.Model, 
+                                        x => x.Gamme.Categorie,
+                                        x => x.Gamme.Style,
+                                        x => x.Client,
+                                        x => x.Marque);
                             return Ok(result.OrderByDescending(x => x.DateOfCreation));
                         }
                         else return NotFound("Non membre cette entreprise");
@@ -297,8 +299,8 @@ namespace Controllers
                         {
                             var result = await repositoryWrapper.Item.GetBy(x =>
                                 (x.EntrepriseId == entrepriseId)
-                                && x.DateOfCreation.Date >= start 
-                                && x.DateOfCreation <= end && x.Annulée == false);
+                                && x.DateOfCreation.Date >= start.Date.AddDays(-6) 
+                                && x.DateOfCreation.Date <= end.Date && x.Annulée == false);
 
                             var charts = new List<ChartData>();
                             foreach (var item in result.OrderBy(x => x.DateOfCreation).GroupBy(x => x.DateOfCreation.Date))
@@ -336,8 +338,8 @@ namespace Controllers
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x =>
                                 (x.EntrepriseId == entrepriseId)
-                                && x.Date_Livraison.Date >= start
-                                && x.Date_Livraison.Date <= end
+                                && x.Date_Livraison.Date >= start.Date
+                                && x.Date_Livraison.Date <= end.Date
                                 && x.Annulée == false,
                                 x => x.Gamme,
                                 x => x.Gamme.Marque,
@@ -345,7 +347,8 @@ namespace Controllers
                                 x => x.Model,
                                 x => x.Gamme.Categorie,
                                 x => x.Gamme.Style,
-                                x => x.Client);
+                                x => x.Client, 
+                                x => x.Marque);
 
                     return Ok(result.OrderByDescending(x => x.Date_Livraison));
                 }

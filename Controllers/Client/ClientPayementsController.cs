@@ -218,8 +218,8 @@ namespace Controllers
                     && x.ClientId == identity.First().Id)
                     && (x.Nature.Contains(search)
                     || x.Type.Contains(search))
-                    && x.Date.Date >= start
-                    && x.Date.Date <= end,
+                    && x.Date.Date >= start.Date
+                    && x.Date.Date <= end.Date,
                     x => x.Num_Payement);
 
                     return Ok(result.OrderByDescending(x => x.Date));
@@ -248,8 +248,8 @@ namespace Controllers
                     var result = await repositoryWrapper.Item.GetBy(x =>
                     (x.EntrepriseId == entrepriseId 
                     && x.ClientId == identity.First().Id)
-                    && x.Date_Payement.Date >= start 
-                    && x.Date_Payement.Date <= end);
+                    && x.Date_Payement.Date >= start.Date 
+                    && x.Date_Payement.Date <= end.Date);
 
                     return Ok(result);
                 }
@@ -279,7 +279,7 @@ namespace Controllers
                         var result = await repositoryWrapper.Item.GetBy(x =>
                         (x.EntrepriseId == entrepriseId 
                         && x.ClientId == identity.First().Id)
-                        && x.Date.Date >= start && x.Date <= end);
+                        && x.Date.Date >= start && x.Date.Date <= end.Date);
 
                         var charts = new List<ChartData>();
                         foreach (var item in result.OrderBy(x => x.Date).GroupBy(x => x.Date.Date))

@@ -479,15 +479,9 @@ namespace Services
 
                 string jsons = JsonConvert.SerializeObject(values);
 
-                var type = values.First().GetType().ToString();
-                var a = type.Split('.');
-                foreach (var item in a)
-                {
-                    type = item;
-                }
                 HttpContent httpContent = new StringContent(jsons);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var response = await Client.PatchAsync("api/client" + type + "s" + url+"/"+ProjectId, httpContent);
+                var response = await Client.PatchAsync("api/client" + url+"/"+ProjectId, httpContent);
                 if (response.IsSuccessStatusCode)
                     return values;
                 else

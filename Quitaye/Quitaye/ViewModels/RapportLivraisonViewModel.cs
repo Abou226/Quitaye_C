@@ -298,7 +298,12 @@ namespace Quitaye
                             Total += item.Prix_Vente_Unité;
                             if (item.Gamme.Url == null)
                                 item.Gamme.Url = item.Gamme.Marque.Url;
-                            item.Designation = item.Gamme.Marque.Name + "-" + item.Taille.Name + ", " + item.Model.Name;
+                            string marque = "";
+                            if (item.Gamme.Marque != null)
+                                marque = item.Gamme.Marque.Name;
+                            else if (item.Marque != null)
+                                marque = item.Marque.Name;
+                            item.Designation = marque + "-" + item.Gamme.Style.Name + ", " + item.Model.Name;
                             item.Autres_Info = item.Taille.Name + " parts, " + item.Model.Name;
                             Items.Add(item);
                             InitialItems.Add(item);

@@ -61,11 +61,9 @@ namespace Quitaye.Server.Controllers
                             var token = await GenerateAccessToken(result.First().Id);
                             Secrets user = new Secrets();
                             user.Username = result.First().Username;
-                            user.BucketName = _settings.BucketName;
-                            user.AwsSecretKey = _settings.SecretKey;
-                            user.AwsAccessKey = _settings.AccessKey;
                             user.ProfilePic = result.First().PhotoUrl;
                             user.Prenom = result.First().Prenom;
+                            user.Email = result.First().Email;
                             user.Nom = result.First().Nom;
                             user.Token = token.Token;
                             user.Success = true;
@@ -88,10 +86,8 @@ namespace Quitaye.Server.Controllers
                             var token = await GenerateAccessToken(result.First().Id);
                             Secrets user = new Secrets();
                             user.Username = result.First().Username;
-                            user.BucketName = _settings.BucketName;
-                            user.AwsSecretKey = _settings.SecretKey;
-                            user.AwsAccessKey = _settings.AccessKey;
                             user.ProfilePic = result.First().PhotoUrl;
+                            user.Email = result.First().Email;
                             user.Prenom = result.First().Prenom;
                             user.Nom = result.First().Nom;
                             user.Token = token.Token;
@@ -120,9 +116,7 @@ namespace Quitaye.Server.Controllers
                 Secrets userWithToken = new Secrets();
                 userWithToken.Username = user.Username;
                 userWithToken.Token = result.Token;
-                userWithToken.AwsAccessKey = _settings.AccessKey;
-                userWithToken.AwsSecretKey = _settings.SecretKey;
-                userWithToken.BucketName = _settings.BucketName;
+                userWithToken.Email = user.Email;
                 userWithToken.Prenom = result.Prenom;
                 userWithToken.Nom = result.Nom;
                 userWithToken.ProfilePic = user.PhotoUrl;
@@ -304,9 +298,6 @@ namespace Quitaye.Server.Controllers
                     return new UserProfile()
                     {
                         UserId = u.First().Id,
-                        AwsAccessKey = _settings.AccessKey,
-                        AwsSecretKey = _settings.SecretKey,
-                        BucketName = _settings.BucketName,
                         Url = u.First().PhotoUrl,
                         Email = u.First().Email,
                         Nom = u.First().Nom,
@@ -330,9 +321,7 @@ namespace Quitaye.Server.Controllers
                     return new Secrets()
                     {
                         Token = token.Token,
-                        AwsAccessKey = _settings.AccessKey,
-                        AwsSecretKey = _settings.SecretKey,
-                        BucketName = _settings.BucketName,
+                        Email = email,
                         Prenom = token.Prenom,
                         Nom = token.Nom,
                         ProfilePic = user.First().PhotoUrl,
@@ -387,10 +376,11 @@ namespace Quitaye.Server.Controllers
                     var Id = principle.FindFirst(ClaimTypes.Name)?.Value;
 
                     var user = await _refreshTokenRepository.Item.GetBy(x => x.Token == accessToken);
-
+                    var u = await _userRepository.Item.GetBy(x => x.Id == user.First().UserId);
                     LogInModel model = new LogInModel();
                     model.Token = accessToken;
                     model.Id = (Guid)(user.First().UserId);
+                    model.Email = u.First().Email;
                     return model;
                 }
             }
@@ -401,9 +391,11 @@ namespace Quitaye.Server.Controllers
                     if (ex.Message.Contains("expir"))
                     {
                         var user = await _refreshTokenRepository.Item.GetBy(x => x.Token == accessToken);
+                        var u = await _userRepository.Item.GetBy(x => x.Id == user.First().UserId);
                         LogInModel model = new LogInModel();
                         model.Token = accessToken;
                         model.Id = (Guid)(user.First().UserId);
+                        model.Email = u.First().Email;
                         return model;
                     }
                     else return new LogInModel();

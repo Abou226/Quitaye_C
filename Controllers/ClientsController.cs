@@ -81,6 +81,29 @@ namespace Controllers
             }
         }
 
+        [HttpPatch("base")]
+        public async Task<ActionResult<Client>> PatchUpdateAsync([FromBody] JsonPatchDocument value)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemA.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    var single = identity.First();
+                    value.ApplyTo(single);
+                    await repositoryWrapper.SaveAsync();
+                    return Ok(value);
+                }
+                else return NotFound("Client not indentified");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
         [AllowAnonymous]
         [HttpGet("Email/{email}")]
         public async Task<ActionResult<Client>> GetUser([FromRoute] string email)
@@ -95,7 +118,9 @@ namespace Controllers
                     var result = await repositoryWrapper.ItemA.GetBy(x => (x.Email == email));
                     if (result.Count() != 0)
                     {
-                        return Ok(result.First());
+                        Client client = new Client();
+                        client.Email = result.First().Email;
+                        return Ok(client);
                     }
                     else return null;
                 }
@@ -106,6 +131,34 @@ namespace Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
+       
+        [HttpGet("baseinfo")]
+        public async Task<ActionResult<Client>> GetUserBaseInfo()
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemA.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    Client client = new Client();
+                    client.Email = identity.First().Email;
+                    client.Prenom = identity.First().Prenom;
+                    client.Nom = identity.First().Nom;
+                    client.Telephone = identity.First().Telephone;
+                    client.PhotoUrl = identity.First().PhotoUrl;
+                    return Ok(client);
+                }
+                else return NotFound("Client not indentified");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
 
         public override async Task<ActionResult<IEnumerable<Client>>> GetAll()
         {

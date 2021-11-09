@@ -65,6 +65,7 @@ namespace Quitaye.Server.Controllers
                             user.Username = result.First().Username;
                             user.ProfilePic = result.First().PhotoUrl;
                             user.Prenom = result.First().Prenom;
+                            user.Email = result.First().Email;
                             user.Nom = result.First().Nom;
                             user.Token = token.Token;
                             user.Success = true;
@@ -91,6 +92,7 @@ namespace Quitaye.Server.Controllers
                             user.Username = result.First().Username;
                             user.ProfilePic = result.First().PhotoUrl;
                             user.Prenom = result.First().Prenom;
+                            user.Email = result.First().Email;
                             user.Nom = result.First().Nom;
                             user.Token = token.Token;
 
@@ -120,6 +122,7 @@ namespace Quitaye.Server.Controllers
                 userWithToken.Token = result.Token;
                 userWithToken.Prenom = result.Prenom;
                 userWithToken.Nom = result.Nom;
+                userWithToken.Email = user.Email;
                 userWithToken.ProfilePic = user.PhotoUrl;
                 userWithToken.Success = true;
                 return userWithToken;
@@ -301,6 +304,7 @@ namespace Quitaye.Server.Controllers
                         UserId = u.First().Id,
                         Url = u.First().PhotoUrl,
                         Email = u.First().Email,
+                        
                         Nom = u.First().Nom,
                         Prenom = u.First().Prenom,
                         Token = user.Token,
@@ -324,6 +328,7 @@ namespace Quitaye.Server.Controllers
                         Token = token.Token,
                         Prenom = token.Prenom,
                         Nom = token.Nom,
+                        Email = user.First().Email,
                         ProfilePic = user.First().PhotoUrl,
                     };
                 }
@@ -334,7 +339,6 @@ namespace Quitaye.Server.Controllers
                 return null;
             }
         }
-
 
         [HttpGet("UserEmail/{email}")]
         public async Task<ActionResult<Secrets>> GetUserEmail([FromRoute] string email)
@@ -349,6 +353,7 @@ namespace Quitaye.Server.Controllers
                     {
                         Token = token.Token,
                         Prenom = token.Prenom,
+                        Email = user.First().Email,
                         Nom = token.Nom,
                         ProfilePic = user.First().PhotoUrl,
                     };

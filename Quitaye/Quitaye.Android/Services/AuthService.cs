@@ -47,9 +47,6 @@ namespace Quitaye.Droid.Services
                     if (result != null)
                     {
                         await SecureStorage.SetAsync("Token", result.Token);
-                        await SecureStorage.SetAsync("AwsAccessKey", result.AwsAccessKey);
-                        await SecureStorage.SetAsync("AwsSecretKey", result.AwsSecretKey);
-                        await SecureStorage.SetAsync("BucketName", result.BucketName);
                         await SecureStorage.SetAsync("ProfilePic", result.ProfilePic);
                         await SecureStorage.SetAsync("Prenom", result.Prenom);
                         await SecureStorage.SetAsync("Nom", result.Nom);
@@ -91,9 +88,6 @@ namespace Quitaye.Droid.Services
                 {
                     var result = responses;
                     await SecureStorage.SetAsync("Token", result.Token);
-                    await SecureStorage.SetAsync("AwsAccessKey", result.AwsAccessKey);
-                    await SecureStorage.SetAsync("AwsSecretKey", result.AwsSecretKey);
-                    await SecureStorage.SetAsync("BucketName", result.BucketName);
                     await SecureStorage.SetAsync("ProfilePic", result.ProfilePic);
                     await SecureStorage.SetAsync("Prenom", result.Prenom);
                     await SecureStorage.SetAsync("Nom", result.Nom);

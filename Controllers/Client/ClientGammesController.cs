@@ -99,7 +99,7 @@ namespace Controllers
                         x => x.Categorie,
                         x => x.Entreprise);
 
-                    return Ok(result.Where(x => x.Id == id));
+                    return Ok(result);
                 }
                 else return NotFound("User not indentified");
             }
@@ -109,6 +109,32 @@ namespace Controllers
             }
         }
 
+        [HttpGet("by_style/{id:Guid}/{entrepriseId:Guid}")]
+        public async Task<ActionResult<IEnumerable<Gamme>>> GetByStyle([FromRoute] Guid id, Guid entrepriseId)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    var result = await repositoryWrapper.Item.GetByInclude(x =>
+                    (x.StyleId.Equals(id)),
+                        x => x.Marque,
+                        x => x.Style,
+                        x => x.Categorie,
+                        x => x.Entreprise);
+
+                    return Ok(result);
+                }
+                else return NotFound("User not indentified");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
 
         [HttpGet("group/{id:Guid}")]
         public async Task<ActionResult<IEnumerable<List<Gamme>>>> GetByGroup([FromRoute] Guid id)
