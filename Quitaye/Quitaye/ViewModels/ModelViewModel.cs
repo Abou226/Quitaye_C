@@ -85,6 +85,7 @@ namespace Quitaye.ViewModels
         {
             Entreprise = entreprise;
             Navigation = navigation;
+            Title = "Model(s)";
             BaseVM = DependencyService.Get<IBaseViewModel>();
             DataService = DependencyService.Get<IDataService<Model>>();
             Items = new ObservableCollection<Model>();

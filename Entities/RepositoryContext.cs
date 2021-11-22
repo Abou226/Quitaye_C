@@ -15,7 +15,10 @@ namespace Entities
 
         }
 
+        public DbSet<OccasionList> OccasionLists { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Departement> Departements { get; set; }
+        public DbSet<Niveau> Niveaus { get; set; }
         public DbSet<Occasion> Occasions { get; set; }
         public DbSet<Sms> Sms { get; set; }
         public DbSet<User> Users { get; set; }

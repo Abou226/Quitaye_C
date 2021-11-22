@@ -18,19 +18,22 @@ namespace Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class VentesController : GenericController<Vente, User, Offre, Gamme, Marque, Taille, Model, Categorie>
+    public class VentesController : GenericController<Vente, User, 
+        Offre, Marque, Taille, Model, Style, Categorie, Niveau, List<OccasionList>>
     {
-        private readonly IGenericRepositoryWrapper<Vente, User, Offre, Gamme, Marque, Taille, Model, Categorie> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<Vente, User, 
+            Offre, Marque, Taille, Model, Style, Categorie, Niveau, List<OccasionList>> repositoryWrapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUserRepository;
         private readonly IConfigSettings _settings;
         private readonly IGenericRepositoryWrapper<PanierVente> panierRepository;
         private readonly IGenericRepositoryWrapper<Num_Vente> num_vente_repository;
         private readonly IMapper _mapper;
 
-        public VentesController(IGenericRepositoryWrapper<Vente, User, Offre, Gamme, 
-            Marque, Taille, Model, Categorie> wrapper,
+        public VentesController(IGenericRepositoryWrapper<Vente, User, Offre, 
+            Marque, Taille, Model, Style, Categorie, Niveau, List<OccasionList>> wrapper,
             IGenericRepositoryWrapper<EntrepriseUser> entrepriseUserRepository, 
-            IGenericRepositoryWrapper<PanierVente> _panierRepository, IGenericRepositoryWrapper<Num_Vente> _num_vente_repository,
+            IGenericRepositoryWrapper<PanierVente> _panierRepository, 
+            IGenericRepositoryWrapper<Num_Vente> _num_vente_repository,
             IConfigSettings settings, IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
@@ -120,9 +123,16 @@ namespace Controllers
                     (x.EntrepriseId == identity.FirstOrDefault().EntrperiseId)
                     && (x.Client.Prenom.Contains(search) || x.Client.Nom.Contains(search)
                     || x.Contact_Livraison.Contains(search) || x.Heure_Livraison.Contains(search)
-                    || x.Offre.Gamme.Marque.Name.Contains(search) || x.Offre.Gamme.Style.Name.Contains(search)
-                    || x.Offre.Gamme.Categorie.Name.Contains(search)) && x.Annulée == false, x => x.Offre, x => x.Offre.Gamme, 
-                    x => x.Offre.Gamme.Marque, x => x.Offre.Taille, x => x.Offre.Model, x => x.Offre.Gamme.Categorie);
+                    || x.Offre.Marque.Name.Contains(search) || x.Offre.Style.Name.Contains(search)
+                    || x.Offre.Categorie.Name.Contains(search)) && x.Annulée == false, 
+                    x => x.Offre,
+                    x => x.Offre.Marque, 
+                    x => x.Offre.Taille, 
+                    x => x.Offre.Model, 
+                    x => x.Offre.Style,
+                    x => x.Offre.Categorie, 
+                    x => x.Offre.Niveau, 
+                    x => x.Offre.Occasionss);
 
                     return Ok(result);
                 }
@@ -218,10 +228,15 @@ namespace Controllers
                     {
                         var result = await repositoryWrapper.Item.GetByInclude(x =>
                         (x.EntrepriseId == entrepriseId)
-                        && x.Date.Date >= start && x.Date <= end,
-                        x => x.Offre, x => x.Offre.Gamme,
-                        x => x.Offre.Gamme.Marque, x => x.Offre.Taille,
-                        x => x.Offre.Model, x => x.Offre.Gamme.Categorie);
+                        && x.Date.Date >= start.Date && x.Date.Date <= end.Date,
+                        x => x.Offre,
+                        x => x.Offre.Marque, 
+                        x => x.Offre.Taille,
+                        x => x.Offre.Model, 
+                        x => x.Offre.Style, 
+                        x => x.Offre.Categorie, 
+                        x => x.Offre.Niveau, 
+                        x => x.Offre.Occasionss);
 
                         return Ok(result);
                     }
@@ -293,10 +308,15 @@ namespace Controllers
                     {
                         var result = await repositoryWrapper.Item.GetByInclude(x =>
                         (x.EntrepriseId == entrepriseId)
-                        && x.Date.Date >= start && x.Date <= end && x.Annulée == false,
-                        x => x.Offre, x => x.Offre.Gamme,
-                        x => x.Offre.Gamme.Marque, x => x.Offre.Taille,
-                        x => x.Offre.Model, x => x.Offre.Gamme.Categorie) ;
+                        && x.Date.Date >= start.Date && x.Date.Date <= end.Date && x.Annulée == false,
+                        x => x.Offre,
+                        x => x.Offre.Marque, 
+                        x => x.Offre.Taille,
+                        x => x.Offre.Model, 
+                        x => x.Offre.Style, 
+                        x => x.Offre.Categorie,
+                        x => x.Offre.Niveau, 
+                        x => x.Offre.Occasionss) ;
 
                         return Ok(result);
                     }

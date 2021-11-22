@@ -16,6 +16,7 @@ namespace Services
         Task<T> GetItemAsync(string token, string url = null);
         Task<T> AddAsync(T value, string token, string url = null);
         Task<T> PostAsync(object value, string token, string url = null);
+        Task<object> SimplePostAsync(List<T> value, string token, string url = null);
         Task<T> AddFormDataAsync(T value, string token, string url = null);
         Task<IEnumerable<T>> AddFormDataAsync(List<T> value, string token, string url = null);
         Task<IEnumerable<T>> AddListAsync(List<T> values, string token, string url = null);
@@ -34,6 +35,7 @@ namespace Services
         Task<T> GetItemAsync(string token, string url = null);
         Task<T> AddAsync(T value, string token, string url = null);
         Task<object> PostAsync(object value, string token, string url = null);
+        Task<object> SimplePostAsync(List<T> value, string token, string url = null);
         Task<T> AddFormDataAsync(T value, string token, string url = null);
         Task<IEnumerable<T>> AddFormDataAsync(List<T> value, string token, string url = null);
         Task<IEnumerable<T>> AddListAsync(List<T> values, string token, string url = null);

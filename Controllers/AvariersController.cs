@@ -18,13 +18,16 @@ namespace Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class AvariersController : GenericController<Avarier, User, Offre, Gamme, Marque, Taille, Model, Style, Categorie>
+    public class AvariersController : GenericController<Avarier, User, Offre, Marque, 
+        Taille, Model, Style, Categorie, Niveau, List<OccasionList>>
     {
-        private readonly IGenericRepositoryWrapper<Avarier, User, Offre, Gamme, Marque, Taille, Model, Style, Categorie> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<Avarier, User, Offre, Marque, 
+            Taille, Model, Style, Categorie, Niveau, List<OccasionList>> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
 
-        public AvariersController(IGenericRepositoryWrapper<Avarier, User, Offre, Gamme, Marque, Taille, Model, Style, Categorie> wrapper,
+        public AvariersController(IGenericRepositoryWrapper<Avarier, User, Offre, Marque, 
+            Taille, Model, Style, Categorie, Niveau, List<OccasionList>> wrapper,
             IConfigSettings settings, IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
@@ -112,11 +115,15 @@ namespace Controllers
                     var result = await repositoryWrapper.Item.GetByInclude(x =>
                     (x.EntrepriseId == entrepriseId) 
                     && (x.Offre.Model.Name.Contains(search)
-                    || x.Offre.Gamme.Marque.Name.Contains(search)),
-                    x => x.Offre,
-                    x => x.Offre.Gamme, x => x.Offre.Gamme.Marque,
-                    x => x.Offre.Taille, x => x.Offre.Model,
-                    x => x.Offre.Gamme.Style, x => x.Offre.Gamme.Categorie);
+                    || x.Offre.Marque.Name.Contains(search)),
+                    x => x.Offre, 
+                    x => x.Offre.Marque,
+                    x => x.Offre.Taille, 
+                    x => x.Offre.Model,
+                    x => x.Offre.Style, 
+                    x => x.Offre.Categorie, 
+                    x => x.Offre.Niveau, 
+                    x => x.Offre.Occasionss);
 
                     return Ok(result);
                 }
@@ -178,10 +185,15 @@ namespace Controllers
                     (x.EntrepriseId == entrepriseId)
                     && x.Date.Date >= start && x.Date <= end
                     && (x.Offre.Model.Name.Contains(search) 
-                    || x.Offre.Gamme.Marque.Name.Contains(search)), x => x.Offre, 
-                    x => x.Offre.Gamme, x => x.Offre.Gamme.Marque, 
-                    x => x.Offre.Taille, x => x.Offre.Model, 
-                    x => x.Offre.Gamme.Style, x => x.Offre.Gamme.Categorie);
+                    || x.Offre.Marque.Name.Contains(search)), 
+                    x => x.Offre,
+                    x => x.Offre.Marque, 
+                    x => x.Offre.Taille, 
+                    x => x.Offre.Model, 
+                    x => x.Offre.Style, 
+                    x => x.Offre.Categorie, 
+                    x => x.Offre.Niveau, 
+                    x => x.Offre.Occasionss);
 
                     return Ok(result);
                 }
@@ -209,10 +221,13 @@ namespace Controllers
                     (x.EntrepriseId == entrepriseId)
                     && x.Date.Date >= start && x.Date <= end,
                     x => x.Offre,
-                    x => x.Offre.Gamme, x => x.Offre.Gamme.Marque,
-                    x => x.Offre.Taille, x => x.Offre.Model,
-                    x => x.Offre.Gamme.Style, 
-                    x => x.Offre.Gamme.Categorie);
+                    x => x.Offre.Marque,
+                    x => x.Offre.Taille,
+                    x => x.Offre.Model,
+                    x => x.Offre.Style,
+                    x => x.Offre.Categorie,
+                    x => x.Offre.Niveau,
+                    x => x.Offre.Occasionss);
 
                     return Ok(result);
                 }

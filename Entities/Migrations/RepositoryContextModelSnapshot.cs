@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
+#nullable disable
+
 namespace Entities.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
@@ -15,9 +17,10 @@ namespace Entities.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.11")
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
             modelBuilder.Entity("Models.Achat_Matiere", b =>
                 {
@@ -250,6 +253,25 @@ namespace Entities.Migrations
                     b.ToTable("Continent");
                 });
 
+            modelBuilder.Entity("Models.Departement", b =>
+                {
+                    b.Property<Guid?>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Departements");
+                });
+
             modelBuilder.Entity("Models.Email", b =>
                 {
                     b.Property<Guid>("Id")
@@ -328,13 +350,21 @@ namespace Entities.Migrations
                     b.Property<DateTime>("DateOfAdd")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("DepartementId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("EntrepriseId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
 
                     b.Property<Guid?>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DepartementId");
 
                     b.HasIndex("EntrepriseId");
 
@@ -597,6 +627,36 @@ namespace Entities.Migrations
                     b.ToTable("Models");
                 });
 
+            modelBuilder.Entity("Models.Niveau", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntrepriseId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Niveaus");
+                });
+
             modelBuilder.Entity("Models.Notification", b =>
                 {
                     b.Property<Guid>("Id")
@@ -716,22 +776,25 @@ namespace Entities.Migrations
                     b.ToTable("Occasions");
                 });
 
-            modelBuilder.Entity("Models.Offre", b =>
+            modelBuilder.Entity("Models.OccasionList", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
                     b.Property<Guid?>("EntrepriseId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("GammeId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
 
-                    b.Property<Guid?>("ModelId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("TailleId")
+                    b.Property<Guid?>("OffreId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("UserId")
@@ -741,11 +804,69 @@ namespace Entities.Migrations
 
                     b.HasIndex("EntrepriseId");
 
-                    b.HasIndex("GammeId");
+                    b.HasIndex("OffreId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("OccasionLists");
+                });
+
+            modelBuilder.Entity("Models.Offre", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CategorieId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("EntrepriseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("MarqueId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ModelId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("NiveauId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Nom")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<decimal>("Prix_Unité")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid?>("StyleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("TailleMinId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Url")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategorieId");
+
+                    b.HasIndex("EntrepriseId");
+
+                    b.HasIndex("MarqueId");
 
                     b.HasIndex("ModelId");
 
-                    b.HasIndex("TailleId");
+                    b.HasIndex("NiveauId");
+
+                    b.HasIndex("StyleId");
+
+                    b.HasIndex("TailleMinId");
 
                     b.HasIndex("UserId");
 
@@ -1290,6 +1411,10 @@ namespace Entities.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("Type")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Sms");
@@ -1762,6 +1887,10 @@ namespace Entities.Migrations
 
             modelBuilder.Entity("Models.EntrepriseUser", b =>
                 {
+                    b.HasOne("Models.Departement", "Departement")
+                        .WithMany()
+                        .HasForeignKey("DepartementId");
+
                     b.HasOne("Models.Entreprise", "Entreprise")
                         .WithMany()
                         .HasForeignKey("EntrepriseId");
@@ -1769,6 +1898,8 @@ namespace Entities.Migrations
                     b.HasOne("Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
+
+                    b.Navigation("Departement");
 
                     b.Navigation("Entreprise");
 
@@ -1877,6 +2008,21 @@ namespace Entities.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Models.Niveau", b =>
+                {
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Entreprise");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Models.Notification", b =>
                 {
                     b.HasOne("Models.Entreprise", "Entreprise")
@@ -1919,23 +2065,15 @@ namespace Entities.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Models.Offre", b =>
+            modelBuilder.Entity("Models.OccasionList", b =>
                 {
                     b.HasOne("Models.Entreprise", "Entreprise")
                         .WithMany()
                         .HasForeignKey("EntrepriseId");
 
-                    b.HasOne("Models.Gamme", "Gamme")
-                        .WithMany()
-                        .HasForeignKey("GammeId");
-
-                    b.HasOne("Models.Model", "Model")
-                        .WithMany()
-                        .HasForeignKey("ModelId");
-
-                    b.HasOne("Models.Taille", "Taille")
-                        .WithMany()
-                        .HasForeignKey("TailleId");
+                    b.HasOne("Models.Offre", null)
+                        .WithMany("Occasionss")
+                        .HasForeignKey("OffreId");
 
                     b.HasOne("Models.User", "User")
                         .WithMany()
@@ -1943,9 +2081,54 @@ namespace Entities.Migrations
 
                     b.Navigation("Entreprise");
 
-                    b.Navigation("Gamme");
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Models.Offre", b =>
+                {
+                    b.HasOne("Models.Categorie", "Categorie")
+                        .WithMany()
+                        .HasForeignKey("CategorieId");
+
+                    b.HasOne("Models.Entreprise", "Entreprise")
+                        .WithMany()
+                        .HasForeignKey("EntrepriseId");
+
+                    b.HasOne("Models.Marque", "Marque")
+                        .WithMany()
+                        .HasForeignKey("MarqueId");
+
+                    b.HasOne("Models.Model", "Model")
+                        .WithMany()
+                        .HasForeignKey("ModelId");
+
+                    b.HasOne("Models.Niveau", "Niveau")
+                        .WithMany()
+                        .HasForeignKey("NiveauId");
+
+                    b.HasOne("Models.Style", "Style")
+                        .WithMany()
+                        .HasForeignKey("StyleId");
+
+                    b.HasOne("Models.Taille", "Taille")
+                        .WithMany()
+                        .HasForeignKey("TailleMinId");
+
+                    b.HasOne("Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Categorie");
+
+                    b.Navigation("Entreprise");
+
+                    b.Navigation("Marque");
 
                     b.Navigation("Model");
+
+                    b.Navigation("Niveau");
+
+                    b.Navigation("Style");
 
                     b.Navigation("Taille");
 
@@ -2313,6 +2496,11 @@ namespace Entities.Migrations
                     b.Navigation("Entreprise");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Models.Offre", b =>
+                {
+                    b.Navigation("Occasionss");
                 });
 
             modelBuilder.Entity("Models.User", b =>

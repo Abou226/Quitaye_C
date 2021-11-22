@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Quitaye.Views.InitialPage" 
              xmlns:pancake="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" 
-             xmlns:local="clr-namespace:Quitaye.ViewModels" xmlns:models="clr-namespace:Models;assembly=Models"
+             xmlns:local="clr-namespace:Quitaye.ViewModels" 
+             xmlns:models="clr-namespace:Models;assembly=Models"
              NavigationPage.HasNavigationBar="False">
 
     <ContentPage.BindingContext>
@@ -18,10 +19,13 @@
                 <Grid RowDefinitions="Auto, *" 
                       BackgroundColor="Transparent">
 
-                    <pancake:PancakeView Grid.Row="1" CornerRadius="20" 
-                                         BackgroundColor="{DynamicResource VeryLight}" Margin="25,35,25,65">
+                    <pancake:PancakeView Grid.Row="1" 
+                                         CornerRadius="20" 
+                                         BackgroundColor="{DynamicResource VeryLight}" 
+                                         Margin="25,35,25,65">
                         <pancake:PancakeView.Border>
-                            <pancake:Border Color="Transparent" Thickness="2"/>
+                            <pancake:Border Color="Transparent" 
+                                            Thickness="2"/>
                         </pancake:PancakeView.Border>
                         <pancake:PancakeView.Shadow>
                             <pancake:DropShadow Color="{DynamicResource FourthColor}" 
@@ -33,16 +37,20 @@
                             <Label  HorizontalOptions="Center"
                                     VerticalOptions="Center"
                                     TextColor="{DynamicResource Secondary}" 
-                                    FontSize="{Binding FontSize}" FontAttributes="Bold" 
+                                    FontSize="{Binding FontSize}" 
+                                    FontAttributes="Bold" 
                                     Text="{Binding HeaderText}"
                                     IsVisible="{Binding MakeHeaderVisible}" >
                             </Label>
 
                             <CollectionView ItemsSource="{Binding Entreprises}" 
+                                            IsVisible="{Binding NoEntreprise}"
                                             SelectionMode="Single"
-                                            Margin="0,10" HeightRequest="200">
+                                            Margin="0,10" 
+                                            HeightRequest="200">
                                 <CollectionView.ItemsLayout>
-                                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
+                                    <LinearItemsLayout Orientation="Vertical" 
+                                                       ItemSpacing="5" />
                                 </CollectionView.ItemsLayout>
                                 <CollectionView.ItemTemplate>
                                     <DataTemplate>
@@ -54,8 +62,8 @@
                                                     <VisualState x:Name="Selected">
                                                         <VisualState.Setters>
                                                             <Setter TargetName="myPancakeView" 
-                                                                            Property="pancake:PancakeView.BackgroundColor" 
-                                                                Value="Azure"/>
+                                                                    Property="pancake:PancakeView.BackgroundColor" 
+                                                                    Value="Azure"/>
                                                         </VisualState.Setters>
                                                     </VisualState>
                                                 </VisualStateGroup>
@@ -68,23 +76,28 @@
                                                                 Grid.Row="1" 
                                                                 BackgroundColor="{DynamicResource Primary}" >
                                                 <pancake:PancakeView.Border>
-                                                    <pancake:Border Color="{DynamicResource Secondary}" Thickness="3"/>
+                                                    <pancake:Border Color="{DynamicResource Secondary}" 
+                                                                    Thickness="3"/>
                                                 </pancake:PancakeView.Border>
                                                 <StackLayout>
                                                     <Label  TextColor="{DynamicResource Secondary}" 
                                                             Text="{Binding Name}"
                                                             HorizontalOptions="Center" 
-                                                            VerticalOptions="Center" FontAttributes="Bold" >
+                                                            VerticalOptions="Center" 
+                                                            FontAttributes="Bold" >
                                                     </Label>
                                                     <Label Text="{Binding Type.Type}" 
                                                            TextColor="{DynamicResource FourthColor}" 
-                                                           FontSize="14" HorizontalOptions="Center" />
+                                                           FontSize="14" 
+                                                           HorizontalOptions="Center" />
                                                     <Label 
-                                                           TextColor="{DynamicResource FourthColor}" HorizontalOptions="Center"
-                                                           FontSize="14">
+                                                            TextColor="{DynamicResource FourthColor}" 
+                                                            HorizontalOptions="Center"
+                                                            FontSize="14">
                                                         <Label.FormattedText>
                                                             <FormattedString >
-                                                                <Span Text="Adresse : " FontAttributes="Bold"/>
+                                                                <Span Text="Adresse : " 
+                                                                      FontAttributes="Bold"/>
                                                                 <Span Text="{Binding Quartier.Name}"/>
                                                             </FormattedString>
                                                         </Label.FormattedText>
@@ -103,10 +116,14 @@
                                 </CollectionView.ItemTemplate>
                             </CollectionView>
 
-                            <pancake:PancakeView CornerRadius="30" Margin="20,60,20,30"
-                                                         Padding="5,5,10,5" Grid.Row="1" BackgroundColor="{DynamicResource ThirdColor}" >
+                            <pancake:PancakeView    CornerRadius="30" 
+                                                    Margin="20,60,20,30"
+                                                    Padding="5,5,10,5" 
+                                                    Grid.Row="1" 
+                                                    BackgroundColor="{DynamicResource ThirdColor}" >
                                 <pancake:PancakeView.Border>
-                                    <pancake:Border Color="{DynamicResource Secondary}" Thickness="3"/>
+                                    <pancake:Border Color="{DynamicResource Secondary}" 
+                                                    Thickness="3"/>
                                 </pancake:PancakeView.Border>
                                 <StackLayout  
                                             Margin="8,0,8,0" 

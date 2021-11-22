@@ -13,8 +13,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using AutoMapper;
 using Amazon.S3;
+using Repository.Quitaye;
 
 namespace Quitaye.Controllers.Extensions
 {
@@ -56,6 +58,7 @@ namespace Quitaye.Controllers.Extensions
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IFileManager, FileManager>();
             services.AddAWSService<IAmazonS3>();
+            //services.AddNewtonsoftJson();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
             services.AddScoped(typeof(IGenericRepository<,,>), typeof(GenericRepository<,,>));

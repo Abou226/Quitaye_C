@@ -32,7 +32,8 @@ namespace Controllers
         public ClientPanierReservationsController(IGenericRepositoryWrapper<PanierReservation, Client, Gamme,
             Marque, Taille, Model, Categorie, Style> wrapper,
             IGenericRepositoryWrapper<EntrepriseUser> entrepriseUserRepository,
-            IGenericRepositoryWrapper<PanierReservation> _panierRepository, IGenericRepositoryWrapper<Num_Vente> _num_vente_repository,
+            IGenericRepositoryWrapper<PanierReservation> _panierRepository, 
+            IGenericRepositoryWrapper<Num_Vente> _num_vente_repository,
             IConfigSettings settings, IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;

@@ -20,5 +20,8 @@ namespace Models
         public string Message { get; set; }
         public Guid? AuthorId { get; set; }
         public DateTime SendDate { get; set; }
+
+        [StringLength(20, ErrorMessage = "La taille du numero de telephone ne peut dépaser 20 characters")]
+        public string Type { get; set; }
     }
 }

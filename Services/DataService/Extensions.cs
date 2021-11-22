@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Services
 {
@@ -80,12 +81,21 @@ namespace Services
 
                                     }
                                     else
-                                        content.Add(new StringContent(value.ToString()), prop.Name);
+                                    {
+                                        var type = value.GetType().ToString();
+                                        //var t = type.BaseType;
+                                        if(type.Contains("System.Collections.Generic.List"))
+                                        {
+                                            var da = JsonConvert.SerializeObject(value);
+                                            content.Add(new StringContent(da.ToString()), prop.Name);
+                                        }
+                                        else 
+                                            content.Add(new StringContent(value.ToString()), prop.Name);
+                                    }
                                 }
                             }
                         }
                     }
-
                 }
 
 

@@ -18,15 +18,18 @@ namespace Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class Produit_FinisController : GenericController<Produit_Fini, User, Offre, Gamme, Marque, Style, Categorie, Taille, Model>
+    public class Produit_FinisController : GenericController<Produit_Fini, User, Offre, 
+        Marque, Style, Categorie, Taille, Model, Niveau, List<OccasionList>>
     {
-        private readonly IGenericRepositoryWrapper<Produit_Fini, User, Offre, Gamme, Marque, Style, Categorie, Taille, Model> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<Produit_Fini, User, Offre, 
+            Marque, Style, Categorie, Taille, Model, Niveau, List<OccasionList>> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
         private readonly IFileManager _fileManager;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
 
-        public Produit_FinisController(IGenericRepositoryWrapper<Produit_Fini, User, Offre, Gamme, Marque, Style, Categorie, Taille, Model> wrapper,
+        public Produit_FinisController(IGenericRepositoryWrapper<Produit_Fini, User, Offre,
+            Marque, Style, Categorie, Taille, Model, Niveau, List<OccasionList>> wrapper,
             IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, IFileManager fileManager,
             IMapper mapper) : base(wrapper)
         {
@@ -114,9 +117,16 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x =>
-                    (x.EntrepriseId.ToString() == search) && (x.Offre.Gamme.Categorie.Name.Contains(search)), x => x.Offre,
-                    x => x.Offre.Gamme, x => x.Offre.Gamme.Marque, x => x.Offre.Gamme.Style, 
-                    x => x.Offre.Gamme.Categorie, x => x.Offre.Taille, x => x.Offre.Model);
+                    (x.EntrepriseId.ToString() == search) 
+                    && (x.Offre.Categorie.Name.Contains(search)),
+                    x => x.Offre,
+                    x => x.Offre.Marque,
+                    x => x.Offre.Style,
+                    x => x.Offre.Categorie,
+                    x => x.Offre.Taille,
+                    x => x.Offre.Model,
+                    x => x.Offre.Niveau,
+                    x => x.Offre.Occasionss);
 
                     return Ok(result);
                 }
@@ -150,15 +160,19 @@ namespace Controllers
                         if (list.Contains(identity.First().Id))
                         {
                             var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id),
-                            x => x.Offre, x => x.Offre.Gamme,
-                            x => x.Offre.Gamme.Marque, x => x.Offre.Gamme.Style,
-                            x => x.Offre.Gamme.Categorie, x => x.Offre.Taille, x => x.Offre.Model);
-                            return Ok(result.OrderByDescending(x => x.Quantité));
+                            x => x.Offre,
+                            x => x.Offre.Marque,
+                            x => x.Offre.Style,
+                            x => x.Offre.Categorie,
+                            x => x.Offre.Taille,
+                            x => x.Offre.Model,
+                            x => x.Offre.Niveau,
+                            x => x.Offre.Occasionss);
+                            return Ok(result);
                         }
                         else return NotFound("Non membre cette entreprise");
                     }
                     else return NotFound("Non membre de cette entreprise");
-                    
                 }
                 else return NotFound("User not indentified");
             }
@@ -217,9 +231,15 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId.ToString() == search) && 
-                    (x.Offre.Gamme.Marque.Name.Contains(search) && x.Date.Date >= start && x.Date.Date <= end), 
-                    x => x.Offre, x => x.Offre.Gamme, x => x.Offre.Gamme.Marque,  x => x.Offre.Gamme.Style, 
-                    x => x.Offre.Gamme.Categorie, x=> x.Offre.Taille, x => x.Offre.Model);
+                    (x.Offre.Marque.Name.Contains(search) && x.Date.Date >= start.Date && x.Date.Date <= end.Date),
+                    x => x.Offre,
+                    x => x.Offre.Marque,
+                    x => x.Offre.Style,
+                    x => x.Offre.Categorie,
+                    x => x.Offre.Taille,
+                    x => x.Offre.Model,
+                    x => x.Offre.Niveau,
+                    x => x.Offre.Occasionss);
 
                     return Ok(result);
                 }
@@ -244,11 +264,15 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x => x.EntrepriseId == entrepriseId &&
-                    x.Date.Date >= start && x.Date.Date <= end,
-                    x => x.Offre, x => x.Offre.Gamme, 
-                    x => x.Offre.Gamme.Marque, x => x.Offre.Gamme.Style,
-                    x => x.Offre.Gamme.Categorie, 
-                    x => x.Offre.Taille, x => x.Offre.Model);
+                    x.Date.Date >= start.Date && x.Date.Date <= end.Date,
+                    x => x.Offre,
+                    x => x.Offre.Marque,
+                    x => x.Offre.Style,
+                    x => x.Offre.Categorie,
+                    x => x.Offre.Taille,
+                    x => x.Offre.Model,
+                    x => x.Offre.Niveau,
+                    x => x.Offre.Occasionss);
 
                     return Ok(result);
                 }

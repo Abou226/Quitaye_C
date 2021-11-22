@@ -30,9 +30,9 @@ namespace Controllers
         }
 
         [HttpPost("otp_send")]
-        public async Task<ActionResult<PublishResponse>> SendAsync([FromBody] Sms value)
+        public async Task<ActionResult<PublishResponse>> SendAsync([FromBody] List<Sms> values)
         {
-            if (value != null)
+            if (values == null)
                 return NotFound();
 
             try
@@ -42,37 +42,43 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    Random rdn = new Random();
-                    var code = rdn.Next(100000, 999999);
-
-                    value.Message = $"{code} est votre code de verification";
-
-                    var awsCredentials = new Amazon.Runtime.BasicAWSCredentials(_settings.AccessKey, _settings.SecretKey);
-                    var client = new Amazon.SimpleNotificationService.AmazonSimpleNotificationSer‌​viceClient(
-                                                  awsCreden‌​tials, Amazon.RegionEndpoint.EUWest2);
-
-                    var smsAttributes = new Dictionary<string, MessageAttributeValue>();
-
-                    CancellationTokenSource source = new CancellationTokenSource();
-                    CancellationToken token = source.Token;
-
-                    PublishRequest publishRequest = new PublishRequest();
-                    publishRequest.Message = value.Message;
-                    publishRequest.MessageAttributes = smsAttributes;
-                    publishRequest.PhoneNumber = value.Telephone;
-                    publishRequest.Subject = value.SenderId;
-
-                    var result = await client.PublishAsync(publishRequest, token);
-                    if (result != null)
+                    foreach (var value in values)
                     {
-                        value.AuthorId = identity.First().Id;
-                        value.Id = Guid.NewGuid();
-                        value.SendDate = DateTime.Now;
-                        var sms = await repositoryWrapper.ItemB.AddAsync(value);
-                        await repositoryWrapper.SaveAsync();
-                        return Ok(value);
+                        Random rdn = new Random();
+                        var code = rdn.Next(100000, 999999);
+
+                        value.Message = $"{code} code de verification {value.SenderId}";
+
+                        var awsCredentials = new Amazon.Runtime.BasicAWSCredentials(_settings.AccessKey, _settings.SecretKey);
+                        var client = new Amazon.SimpleNotificationService.AmazonSimpleNotificationSer‌​viceClient(
+                                                      awsCreden‌​tials, Amazon.RegionEndpoint.EUWest2);
+
+                        var smsAttributes = new Dictionary<string, MessageAttributeValue>();
+
+                        CancellationTokenSource source = new CancellationTokenSource();
+                        CancellationToken token = source.Token;
+
+                        PublishRequest publishRequest = new PublishRequest();
+                        publishRequest.Message = value.Message;
+                        publishRequest.MessageAttributes.Add("AWS.SNS.SMS.SenderID", new MessageAttributeValue
+                        { StringValue = value.SenderId, DataType = "String" });
+                        publishRequest.PhoneNumber = value.Telephone;
+                        publishRequest.Subject = value.SenderId;
+                        //publishRequest.MessageAttributes.Add("AWS.SNS.SMS.SMSType", new MessageAttributeValue
+                        //{ StringValue = value.Type, DataType = "String" });
+
+                        var result = await client.PublishAsync(publishRequest, token);
+                        if (result != null)
+                        {
+                            value.AuthorId = identity.First().Id;
+                            value.Id = Guid.NewGuid();
+                            value.SendDate = DateTime.Now;
+                            var sms = await repositoryWrapper.ItemB.AddAsync(value);
+                            await repositoryWrapper.SaveAsync();
+                        }
+                        else return null;
                     }
-                    else return null;
+                    return Ok(values);
                 }
                 else return null;
             }
@@ -85,7 +91,7 @@ namespace Controllers
         [HttpPatch("otp_check/{code}")]
         public async Task<ActionResult<PublishResponse>> CheckAsync([FromBody] JsonPatchDocument value, [FromRoute] string code)
         {
-            if (value != null && !string.IsNullOrWhiteSpace(code))
+            if (value == null || string.IsNullOrWhiteSpace(code))
                 return NotFound();
 
             try

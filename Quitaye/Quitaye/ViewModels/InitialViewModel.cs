@@ -16,6 +16,8 @@ using Xamarin.Essentials;
 using Xamarin.Forms;
 
 [assembly: Dependency(typeof(DataService<Entreprise>))]
+[assembly: Dependency(typeof(DataService<RefreshToken>))]
+[assembly: Dependency(typeof(DataService<Secrets>))]
 [assembly: Dependency(typeof(CheckInternetService<Test>))]
 [assembly: Dependency(typeof(BaseViewModel))]
 [assembly: Dependency(typeof(InitialService))]
@@ -63,6 +65,22 @@ namespace Quitaye.ViewModels
             }
         }
 
+        private bool noEntreprise = true;
+
+        public bool NoEntreprise
+        {
+            get { return noEntreprise; }
+            set 
+            {
+                if (noEntreprise == value)
+                    return;
+
+                noEntreprise = value;
+                OnPropertyChanged();
+            }
+        }
+
+
         private int _fontSize = 40;
 
         public int FontSize
@@ -80,12 +98,16 @@ namespace Quitaye.ViewModels
         public ICommand EntrepriseTapped { get; }
         public IDataService<Entreprise> EntrepriseService { get; }
         public ObservableCollection<Entreprise> Entreprises { get; }
+        public IDataService<RefreshToken> Token { get; }
+        public IDataService<Secrets> Secret { get; }
         public InitialViewModel()
         {
             _authService = DependencyService.Get<IAuthService>();
             Entreprises = new ObservableCollection<Entreprise>();
             EntrepriseTapped = new Command(OnEntrepriseTapped);
             EntrepriseService = DependencyService.Get<IDataService<Entreprise>>();
+            Token = DependencyService.Get<IDataService<RefreshToken>>();
+            Secret = DependencyService.Get<IDataService<Secrets>>();
             BaseVM = DependencyService.Get<IBaseViewModel>();
             Init = DependencyService.Get<IInitialService>();
             MessageAlert = DependencyService.Get<IMessage>();
@@ -108,6 +130,42 @@ namespace Quitaye.ViewModels
                 var entreprise = (Entreprise)obj;
                 await SecureStorage.SetAsync("LastEntreprise", entreprise.Id.ToString());
                 Application.Current.MainPage = new NavigationPage(new HomePage());
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        private async Task TokenManagement()
+        {
+            try
+            {
+                var tok = await SecureStorage.GetAsync("Token");
+                if (!string.IsNullOrWhiteSpace(tok))
+                {
+                    var token = await Token.PostAsync(new LogInModel() { Token = await SecureStorage.GetAsync("Token"), Username = "d", Password = "d" },
+                    await SecureStorage.GetAsync("Token"), "auth/TokenCheck");
+                    if (token == null)
+                    {
+                        var resul = await Init.Get(new LogInModel() { Token = await SecureStorage.GetAsync("Token") });
+                        if (resul != null)
+                        {
+                            await SecureStorage.SetAsync("Token", resul.Token);
+                        }
+                    }
+                }
+                else
+                {
+                    var token = await Secret.GetItemAsync(null, "auth/useremail/" + await SecureStorage.GetAsync("Email"));
+                    if (token != null)
+                    {
+                        await SecureStorage.SetAsync("Token", token.Token);
+                        await SecureStorage.SetAsync("Prenom", token.Prenom);
+                        await SecureStorage.SetAsync("Nom", token.Nom);
+                        await SecureStorage.SetAsync("ProfilePic", token.ProfilePic);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -159,9 +217,11 @@ namespace Quitaye.ViewModels
                     {
                         IsNotBusy = false;
                         UserDialogs.Instance.ShowLoading("Chargement....");
+
+                        await TokenManagement();
                         var pays = await EntrepriseService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Entreprises/");
                         Entreprises.Clear();
-                        if (pays.Count() != 0)
+                        if (pays != null)
                         {
                             foreach (var item in pays)
                             {
@@ -172,11 +232,13 @@ namespace Quitaye.ViewModels
                         if (Entreprises.Count() != 0)
                         {
                             MakeHeaderVisible = true;
+                            NoEntreprise = true;
                             HeaderText = "Project(s) en cours...";
                             FontSize = 16;
                         }else
                         {
                             MakeHeaderVisible = true;
+                            NoEntreprise = false;
                             HeaderText = "Créer votre premier project..";
                             FontSize = 40;
                         }
@@ -197,7 +259,7 @@ namespace Quitaye.ViewModels
                         {
                             await GetEntrepriseAsync();
                         }
-                        else MessageAlert.LongAlert("Erreur" + ex.Message);
+                        //else MessageAlert.LongAlert("Erreur" + ex.Message);
                     }
                     finally
                     {

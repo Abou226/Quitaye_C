@@ -15,6 +15,7 @@ namespace Contracts
         string ApiSecret { get; set; }
         string HostName { get; set; }
         string GatoniniSource { get; set; }
+        string QuitayeSource { get; set; }
         int TokenDurationDays { get; set; }
         int TokenDurationHours { get; set; }
         string Key { get; set; }

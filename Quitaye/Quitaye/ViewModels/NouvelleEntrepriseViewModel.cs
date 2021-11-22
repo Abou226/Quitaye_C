@@ -14,7 +14,11 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+
 [assembly: Dependency(typeof(DataService<Entreprise>))]
+[assembly: Dependency(typeof(DataService<RefreshToken>))]
+[assembly: Dependency(typeof(DataService<Secrets>))]
+
 [assembly: Dependency(typeof(DataService<Ville>))]
 [assembly: Dependency(typeof(DataService<Pays>))]
 [assembly: Dependency(typeof(DataService<Type_Entreprise>))]
@@ -62,6 +66,8 @@ namespace Quitaye.ViewModels
         public string Adresse { get; set; }
         public IMessage MessageAlert { get; }
         public bool IsRunning { get; set; }
+        public IDataService<RefreshToken> Token { get; }
+        public IDataService<Secrets> Secret { get; }
 
         public NouvelleEntrepriseViewModel(INavigation navigation) : this()
         {
@@ -70,6 +76,8 @@ namespace Quitaye.ViewModels
         public NouvelleEntrepriseViewModel()
         {
             Types = new ObservableCollection<Type_Entreprise>();
+            Token = DependencyService.Get<IDataService<RefreshToken>>();
+            Secret = DependencyService.Get<IDataService<Secrets>>();
             Pays = new ObservableCollection<Pays>();
             Villes = new ObservableCollection<Ville>();
             PaysTappedCommand = new Command(OnPaysTappedCommand);
@@ -83,13 +91,49 @@ namespace Quitaye.ViewModels
             Initial = DependencyService.Get<IInitialService>();
             AddCommand = new Command(OnAddCommand);
             GetTypesAsync();
-            GetPaysAsync();
         }
 
         private async void OnPositionCommand(object obj)
         {
             //await GetAddresse();
         }
+
+        private async Task TokenManagement()
+        {
+            try
+            {
+                var tok = await SecureStorage.GetAsync("Token");
+                if (!string.IsNullOrWhiteSpace(tok))
+                {
+                    var token = await Token.PostAsync(new LogInModel() { Token = await SecureStorage.GetAsync("Token"), Username = "d", Password = "d" },
+                    await SecureStorage.GetAsync("Token"), "auth/TokenCheck");
+                    if (token == null)
+                    {
+                        var resul = await Initial.Get(new LogInModel() { Token = await SecureStorage.GetAsync("Token") });
+                        if (resul != null)
+                        {
+                            await SecureStorage.SetAsync("Token", resul.Token);
+                        }
+                    }
+                }
+                else
+                {
+                    var token = await Secret.GetItemAsync(null, "auth/useremail/" + await SecureStorage.GetAsync("Email"));
+                    if (token != null)
+                    {
+                        await SecureStorage.SetAsync("Token", token.Token);
+                        await SecureStorage.SetAsync("Prenom", token.Prenom);
+                        await SecureStorage.SetAsync("Nom", token.Nom);
+                        await SecureStorage.SetAsync("ProfilePic", token.ProfilePic);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
 
         private async void OnPaysTappedCommand(object obj)
         {
@@ -234,6 +278,7 @@ namespace Quitaye.ViewModels
                     IsNotBusy = false;
                     UserDialogs.Instance.ShowLoading("Chargement.....");
 
+                    await TokenManagement();
                     var types = await TypeService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Type_Entreprises/");
                     Types.Clear();
                     if (types.Count() != 0)
@@ -243,6 +288,7 @@ namespace Quitaye.ViewModels
                             Types.Add(item);
                         }
                     }
+                    await GetPaysAsync();
                 }
                 catch (Exception ex)
                 {
@@ -275,8 +321,8 @@ namespace Quitaye.ViewModels
         {
             if (BaseVM.IsInternetOn)
             {
-                if (IsNotBusy)
-                    return;
+                //if (IsNotBusy)
+                //    return;
 
                 try
                 {

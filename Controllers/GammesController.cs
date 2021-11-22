@@ -63,7 +63,7 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Gamme>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        public override async Task<ActionResult<Gamme>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
         {
             try
             {
@@ -84,6 +84,31 @@ namespace Controllers
             }
         }
 
+
+        [HttpPatch("entreprise/{entreprise:Guid}")]
+        public async Task<ActionResult<Gamme>> ChangeEntrepriseUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid entreprise)
+        {
+            try
+            {
+                var item = await repositoryWrapper.Item.GetBy(x => x.EntrepriseId == entreprise);
+                if (item.Count() != 0)
+                {
+                    foreach (var items in item)
+                    {
+                        var single = items;
+                        value.ApplyTo(single);
+                        await repositoryWrapper.SaveAsync();
+                    }
+                }
+                else return NotFound("User not indentified");
+
+                return Ok(value);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
 
         public override async Task<ActionResult<IEnumerable<Gamme>>> GetAll()
         {

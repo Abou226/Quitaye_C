@@ -18,14 +18,17 @@ namespace Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class Stock_ProduitsController : GenericController<Stock_Produit, User, Offre, Gamme, Marque, Style, Categorie, Taille, Model>
+    public class Stock_ProduitsController : GenericController<Stock_Produit, User, 
+        Offre, Marque, Style, Categorie, Taille, Model, Niveau, List<OccasionList>>
     {
-        private readonly IGenericRepositoryWrapper<Stock_Produit, User, Offre, Gamme, Marque, Style, Categorie, Taille, Model> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<Stock_Produit, User, 
+            Offre, Marque, Style, Categorie, Taille, Model, Niveau, List<OccasionList>> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
 
-        public Stock_ProduitsController(IGenericRepositoryWrapper<Stock_Produit, User, Offre, Gamme, Marque, Style, Categorie, Taille, Model> wrapper,
+        public Stock_ProduitsController(IGenericRepositoryWrapper<Stock_Produit, User, 
+            Offre, Marque, Style, Categorie, Taille, Model, Niveau, List<OccasionList>> wrapper,
             IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser,
             IMapper mapper) : base(wrapper)
         {
@@ -111,13 +114,15 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x =>
-                    (x.EntrepriseId.ToString() == search) && (x.Offre.Gamme.Categorie.Name.Contains(search)), x => x.Offre,
-                    x => x.Offre.Gamme, 
-                    x => x.Offre.Gamme.Marque, 
-                    x => x.Offre.Gamme.Style, 
-                    x => x.Offre.Gamme.Categorie, 
-                    x => x.Offre.Taille, 
-                    x => x.Offre.Model);
+                    (x.EntrepriseId.ToString() == search) && (x.Offre.Categorie.Name.Contains(search)),
+                    x => x.Offre,
+                    x => x.Offre.Marque,
+                    x => x.Offre.Style,
+                    x => x.Offre.Categorie,
+                    x => x.Offre.Taille,
+                    x => x.Offre.Model,
+                    x => x.Offre.Niveau,
+                    x => x.Offre.Occasionss);
 
                     return Ok(result);
                 }
@@ -142,8 +147,15 @@ namespace Controllers
                     var entreprise = await _entrepriseUser.Item.GetBy(x => x.EntrepriseId == identity.First().EntrperiseId);
                     if (entreprise.Count() != 0)
                     {
-                        var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id), x => x.Offre, x => x.Offre.Gamme,
-                            x => x.Offre.Gamme.Marque, x => x.Offre.Gamme.Style, x => x.Offre.Gamme.Categorie, x => x.Offre.Taille, x => x.Offre.Model);
+                        var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id),
+                            x => x.Offre,
+                            x => x.Offre.Marque,
+                            x => x.Offre.Style,
+                            x => x.Offre.Categorie,
+                            x => x.Offre.Taille,
+                            x => x.Offre.Model,
+                            x => x.Offre.Niveau,
+                            x => x.Offre.Occasionss);
                         return Ok(result);
                     }
                     else return NotFound("Non membre de cette entreprise");
@@ -199,9 +211,15 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId.ToString() == search) &&
-                    (x.Offre.Gamme.Marque.Name.Contains(search)),
-                    x => x.Offre, x => x.Offre.Gamme, x => x.Offre.Gamme.Marque, x => x.Offre.Gamme.Style,
-                    x => x.Offre.Gamme.Categorie, x => x.Offre.Taille, x => x.Offre.Model);
+                    (x.Offre.Marque.Name.Contains(search)),
+                    x => x.Offre,
+                    x => x.Offre.Marque,
+                    x => x.Offre.Style,
+                    x => x.Offre.Categorie,
+                    x => x.Offre.Taille,
+                    x => x.Offre.Model,
+                    x => x.Offre.Niveau,
+                    x => x.Offre.Occasionss);
 
                     return Ok(result);
                 }

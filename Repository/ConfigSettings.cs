@@ -21,6 +21,7 @@ namespace Repository
         public string SecretKey { get ; set ; }
         public int TokenDurationHours { get; set; } = 12;
         public string GatoniniSource { get ; set; }
+        public string QuitayeSource { get; set; }
 
         private readonly ConfigSettings _mySettingsConfig;
         public ConfigSettings(IOptions<ConfigSettings> mySettingConfig)
@@ -28,6 +29,7 @@ namespace Repository
             _mySettingsConfig = mySettingConfig.Value;
             HostName = _mySettingsConfig.HostName;
             Key = _mySettingsConfig.Key;
+            QuitayeSource = _mySettingsConfig.QuitayeSource;
             BucketName = _mySettingsConfig.BucketName;
             AccessKey = _mySettingsConfig.AccessKey;
             GatoniniSource = _mySettingsConfig.GatoniniSource;

@@ -2,14 +2,13 @@
 using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
-using Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Repository
+namespace Repository.Quitaye
 {
     public class NotificationService : INotificationService
     {
@@ -68,7 +67,7 @@ namespace Repository
                     { "myData", "1337" },
                 },
                 //Token = registrationToken,
-                Topic = "all",
+                Topic = topicName,
                 Notification = new FirebaseAdmin.Messaging.Notification()
                 {
                     Title = value.Title,

@@ -2,12 +2,19 @@
 {
     "region" : "us-east-1",
     "configuration" : "Release",
-    "framework"     : "net5.0",
-    "self-contained" : false,
+    "framework"     : "net6.0",
+    "self-contained" : true,
     "application"    : "QuitayeServer",
     "environment"    : "QuitayeServer-dev",
     "enable-xray"    : false,
     "enhanced-health-type" : "basic",
     "additional-options"   : "",
-    "proxy-server"         : "none"
+    "proxy-server"         : "none",
+    "solution-stack"       : "64bit Amazon Linux 2 v2.2.7 running .NET Core",
+    "environment-type"     : "SingleInstance",
+    "cname"                : "quitayeserver-test",
+    "instance-type"        : "t2.micro",
+    "key-pair"             : "",
+    "instance-profile"     : "aws-elasticbeanstalk-ec2-role",
+    "service-role"         : "aws-elasticbeanstalk-service-role"
 }

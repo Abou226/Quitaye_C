@@ -21,6 +21,8 @@ using Xamarin.Essentials;
 using Xamarin.Forms;
 
 [assembly: Dependency(typeof(DataService<Entreprise>))]
+[assembly: Dependency(typeof(DataService<RefreshToken>))]
+[assembly: Dependency(typeof(DataService<Secrets>))]
 [assembly: Dependency(typeof(DataService<Test>))]
 [assembly: Dependency(typeof(DataService<ChartData>))]
 [assembly: Dependency(typeof(BaseViewModel))]
@@ -190,6 +192,7 @@ namespace Quitaye
         public IBaseViewModel BaseVM { get; }
         public IInitialService Init { get;}
 
+        public ICommand UsersCommand { get; }
         public IDataService<Test> Test { get; }
         public IDataService<Entreprise> EntrepriseService { get; }
         public ObservableCollection<ChartData> ChartDatas { get; }
@@ -401,6 +404,8 @@ namespace Quitaye
         }
 
         public ObservableCollection<Entreprise> Entreprises { get; }
+        public IDataService<RefreshToken> Token { get; }
+        public IDataService<Secrets> Secret { get; }
         public HomeViewModel()
         {
             _authService = DependencyService.Get<IAuthService>();
@@ -408,7 +413,10 @@ namespace Quitaye
             LivraisonCommand = new Command(OnLivraisonCommand);
             PayementCommand = new Command(OnPayementCommand);
             RefreshCommand = new Command(OnRefreshCommand);
+            UsersCommand = new Command(OnUsersCommand);
             Init = DependencyService.Get<IInitialService>();
+            Secret = DependencyService.Get<IDataService<Secrets>>();
+            Token = DependencyService.Get<IDataService<RefreshToken>>();
             MessageAlert = DependencyService.Get<IMessage>();
             Test = DependencyService.Get<IDataService<Test>>();
             BaseVM = DependencyService.Get<IBaseViewModel>();
@@ -424,6 +432,11 @@ namespace Quitaye
             //InitData();
             //Task.Run(async () => await GetProjects());
             //Task.Run(async () => await InitData());
+        }
+
+        private void OnUsersCommand(object obj)
+        {
+            
         }
 
         private async void OnRefreshCommand(object obj)
@@ -533,6 +546,42 @@ namespace Quitaye
             }
         }
 
+        private async Task TokenManagement()
+        {
+            try
+            {
+                var tok = await SecureStorage.GetAsync("Token");
+                if (!string.IsNullOrWhiteSpace(tok))
+                {
+                    var token = await Token.PostAsync(new LogInModel() { Token = await SecureStorage.GetAsync("Token"), Username = "d", Password = "d" },
+                    await SecureStorage.GetAsync("Token"), "auth/TokenCheck");
+                    if (token == null)
+                    {
+                        var resul = await Init.Get(new LogInModel() { Token = await SecureStorage.GetAsync("Token") });
+                        if (resul != null)
+                        {
+                            await SecureStorage.SetAsync("Token", resul.Token);
+                        }
+                    }
+                }
+                else
+                {
+                    var token = await Secret.GetItemAsync(null, "auth/useremail/" + await SecureStorage.GetAsync("Email"));
+                    if (token != null)
+                    {
+                        await SecureStorage.SetAsync("Token", token.Token);
+                        await SecureStorage.SetAsync("Prenom", token.Prenom);
+                        await SecureStorage.SetAsync("Nom", token.Nom);
+                        await SecureStorage.SetAsync("ProfilePic", token.ProfilePic);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
         private async Task GetProjects()
         {
             await CheckConnection();
@@ -544,6 +593,9 @@ namespace Quitaye
                 {
                     IsNotBusy = false;
                     UserDialogs.Instance.ShowLoading("Chargement....");
+
+                    await TokenManagement();
+
                     var pays = await EntrepriseService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Entreprises/");
                     Entreprises.Clear();
                     if (pays.Count() != 0)

@@ -18,14 +18,17 @@ namespace Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class PaniersController : GenericController<Panier, User, Offre, Gamme, Marque, Style, Categorie, Taille, Model>
+    public class PaniersController : GenericController<Panier, User, Offre, Marque, 
+        Style, Categorie, Taille, Model, Niveau, Client, List<OccasionList>>
     {
-        private readonly IGenericRepositoryWrapper<Panier, User, Offre, Gamme, Marque, Style, Categorie, Taille, Model> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<Panier, User, Offre, Marque, 
+            Style, Categorie, Taille, Model, Niveau, Client, List<OccasionList>> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
 
-        public PaniersController(IGenericRepositoryWrapper<Panier, User, Offre, Gamme, Marque, Style, Categorie, Taille, Model> wrapper,
+        public PaniersController(IGenericRepositoryWrapper<Panier, User, Offre, Marque, 
+            Style, Categorie, Taille, Model, Niveau, Client, List<OccasionList>> wrapper,
             IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser,
             IMapper mapper) : base(wrapper)
         {
@@ -59,6 +62,30 @@ namespace Controllers
             }
         }
 
+        [HttpPatch("entreprise/{entreprise:Guid}")]
+        public async Task<ActionResult<Panier>> ChangeEntrepriseUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid entreprise)
+        {
+            try
+            {
+                var item = await repositoryWrapper.Item.GetBy(x => x.EntrepriseId == entreprise);
+                if (item.Count() != 0)
+                {
+                    foreach (var items in item)
+                    {
+                        var single = items;
+                        value.ApplyTo(single);
+                        await repositoryWrapper.SaveAsync();
+                    }
+                }
+                else return NotFound("User not indentified");
+
+                return Ok(value);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
         public override async Task<ActionResult<Panier>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
         {
             try
@@ -111,9 +138,16 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x =>
-                    (x.EntrepriseId.ToString() == search) && (x.Offre.Gamme.Categorie.Name.Contains(search)), x => x.Offre,
-                    x => x.Offre.Gamme, x => x.Offre.Gamme.Marque, x => x.Offre.Gamme.Style,
-                    x => x.Offre.Gamme.Categorie, x => x.Offre.Taille, x => x.Offre.Model);
+                    (x.EntrepriseId.ToString() == search) && (x.Offre.Categorie.Name.Contains(search)),
+                    x => x.Offre,
+                    x => x.Offre.Marque,
+                    x => x.Offre.Style,
+                    x => x.Offre.Categorie,
+                    x => x.Offre.Taille,
+                    x => x.Offre.Model,
+                    x => x.Offre.Niveau,
+                    x => x.Client,
+                    x => x.Offre.Occasionss);
 
                     return Ok(result);
                 }
@@ -139,9 +173,15 @@ namespace Controllers
                     if (entreprise.Count() != 0)
                     {
                         var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id),
-                            x => x.Offre, x => x.Offre.Gamme,
-                            x => x.Offre.Gamme.Marque, x => x.Offre.Gamme.Style,
-                            x => x.Offre.Gamme.Categorie, x => x.Offre.Taille, x => x.Offre.Model);
+                            x => x.Offre,
+                            x => x.Offre.Marque,
+                            x => x.Offre.Style,
+                            x => x.Offre.Categorie,
+                            x => x.Offre.Taille,
+                            x => x.Offre.Model,
+                            x => x.Offre.Niveau,
+                            x => x.Client,
+                            x => x.Offre.Occasionss);
                         return Ok(result);
                     }
                     else return NotFound("Non membre de cette entreprise");
@@ -199,9 +239,16 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId.ToString() == search) &&
-                    (x.Offre.Gamme.Marque.Name.Contains(search) && x.Date.Date >= start && x.Date.Date <= end),
-                    x => x.Offre, x => x.Offre.Gamme, x => x.Offre.Gamme.Marque, x => x.Offre.Gamme.Style,
-                    x => x.Offre.Gamme.Categorie, x => x.Offre.Taille, x => x.Offre.Model);
+                    (x.Offre.Marque.Name.Contains(search) && x.Date.Date >= start && x.Date.Date <= end),
+                    x => x.Offre,
+                    x => x.Offre.Marque,
+                    x => x.Offre.Style,
+                    x => x.Offre.Categorie,
+                    x => x.Offre.Taille,
+                    x => x.Offre.Model,
+                    x => x.Offre.Niveau,
+                    x => x.Client,
+                    x => x.Offre.Occasionss);
 
                     return Ok(result);
                 }
@@ -226,12 +273,16 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x => x.EntrepriseId == entrepriseId &&
-                                x.Date.Date >= start && x.Date.Date <= end,
-                                x => x.Offre, x => x.Offre.Gamme,
-                                x => x.Offre.Gamme.Marque, 
-                                x => x.Offre.Gamme.Style,
-                                x => x.Offre.Gamme.Categorie,
-                                x => x.Offre.Taille, x => x.Offre.Model);
+                                x.Date.Date >= start.Date && x.Date.Date <= end.Date,
+                                x => x.Offre,
+                                x => x.Offre.Marque,
+                                x => x.Offre.Style,
+                                x => x.Offre.Categorie,
+                                x => x.Offre.Taille,
+                                x => x.Offre.Model,
+                                x => x.Offre.Niveau,
+                                x => x.Client, 
+                                x => x.Offre.Occasionss);
 
                     return Ok(result);
                 }

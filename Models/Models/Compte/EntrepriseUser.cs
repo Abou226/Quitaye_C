@@ -18,5 +18,10 @@ namespace Models
         public Guid? UserId { get; set; }
         public User User { get; set; }
         public DateTime DateOfAdd { get; set; }
+
+        [ForeignKey(nameof(Departement))]
+        public Guid? DepartementId { get; set; }
+        public Departement Departement { get; set; }
+        public UserRole Role { get; set; } = UserRole.Admin;
     }
 }

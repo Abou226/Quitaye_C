@@ -18,20 +18,28 @@ namespace Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class OffresController : GenericController<Offre, User, Gamme, Marque, Style, Categorie>
+    public class OffresController : GenericController<Offre, User, 
+        Model, Taille, Niveau, List<OccasionList>, Marque, Style, Categorie>
     {
-        private readonly IGenericRepositoryWrapper<Offre, User, Gamme, Marque, Style, Categorie> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<Offre, User, 
+            Model, Taille, Niveau, List<OccasionList>, Marque, Style, Categorie> repositoryWrapper;
         private readonly IConfigSettings _settings;
+        private readonly IFileManager _fileManager;
         private readonly IMapper _mapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
+        private readonly IGenericRepositoryWrapper<OccasionList> occasionsRepository;
 
-        public OffresController(IGenericRepositoryWrapper<Offre, User, Gamme, Marque, Style, Categorie> wrapper,
-            IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser,
+        public OffresController(IGenericRepositoryWrapper<Offre, User, 
+            Model, Taille, Niveau, List<OccasionList>, Marque, Style, Categorie> wrapper, 
+            IGenericRepositoryWrapper<OccasionList> _occasionsRepository,
+            IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, IFileManager fileManager,
             IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
             _entrepriseUser = entrepriseUser;
             _settings = settings;
+            _fileManager = fileManager;
+            occasionsRepository = _occasionsRepository;
             _mapper = mapper;
         }
 
@@ -59,7 +67,32 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Offre>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        [HttpPatch("entreprise/{entreprise:Guid}")]
+        public async Task<ActionResult<Offre>> ChangeEntrepriseUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid entreprise)
+        {
+            try
+            {
+                var item = await repositoryWrapper.Item.GetBy(x => x.EntrepriseId == entreprise);
+                if (item.Count() != 0)
+                {
+                    foreach (var items in item)
+                    {
+                        var single = items;
+                        value.ApplyTo(single);
+                        await repositoryWrapper.SaveAsync();
+                    }
+                }
+                else return NotFound("User not indentified");
+
+                return Ok(value);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        public override async Task<ActionResult<Offre>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
         {
             try
             {
@@ -111,8 +144,15 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x =>
-                    (x.EntrepriseId.ToString() == search) && (x.Gamme.Categorie.Name.Contains(search)),
-                    x => x.Gamme, x => x.Gamme.Marque, x => x.Gamme.Style, x => x.Gamme.Categorie);
+                    (x.EntrepriseId.ToString() == search) 
+                    && (x.Categorie.Name.Contains(search)),
+                    x => x.Model, 
+                    x => x.Taille, 
+                    x => x.Niveau, 
+                    x => x.Occasionss, 
+                    x => x.Marque, 
+                    x => x.Style, 
+                    x => x.Categorie);
 
                     return Ok(result);
                 }
@@ -145,8 +185,14 @@ namespace Controllers
 
                         if (list.Contains(identity.First().Id))
                         {
-                            var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id), x => x.Gamme,
-                            x => x.Gamme.Marque, x => x.Gamme.Style, x => x.Gamme.Categorie);
+                            var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id),
+                            x => x.Model,
+                            x => x.Taille,
+                            x => x.Niveau,
+                            x => x.Occasionss,
+                            x => x.Marque,
+                            x => x.Style,
+                            x => x.Categorie);
                             return Ok(result);
                         }
                         else return NotFound("Non membre de cette entreprise");
@@ -161,11 +207,11 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<IEnumerable<Offre>>> AddAsync([FromBody] List<Offre> values)
+        public override async Task<ActionResult<IEnumerable<Offre>>> AddAsync([FromForm] Offre value)
         {
             try
             {
-                if (values == null)
+                if (value == null)
                     return NotFound();
 
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
@@ -174,15 +220,35 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    foreach (var value in values)
-                    {
-                        value.UserId = identity.First().Id;
-                        value.Id = Guid.NewGuid();
-                        value.EntrepriseId = value.EntrepriseId;
-                        await repositoryWrapper.ItemA.AddAsync(value);
-                        await repositoryWrapper.SaveAsync();
-                    }
-                    return Ok(values);
+                    //foreach (var value in values)
+                    //{
+                    //    if (value.Image != null)
+                    //    {
+                    //        var result = await _fileManager.Upload(_settings.AccessKey,
+                    //            _settings.SecretKey, _settings.BucketName,
+                    //            Amazon.RegionEndpoint.USEast1, value.Image);
+                    //        value.Url = result.Url;
+                    //    }
+
+                    //    value.Id = Guid.NewGuid();
+                    //    foreach (var item in value.Occasionss)
+                    //    {
+                    //        return Ok(new Offre() { Occasionss = value.Occasionss });
+                    //        item.Id = value.Id;
+                    //        item.EntrepriseId = value.EntrepriseId;
+                    //        await occasionsRepository.Item.AddAsync(item);
+                    //        await occasionsRepository.SaveAsync();
+                    //    }
+                    //    //return Ok(new Offre() { Occasionss = value.Occasionss });
+                    //    //value.Occasionss = null;
+                    //    //value.UserId = identity.First().Id;
+                    //    //value.EntrepriseId = value.EntrepriseId;
+                    //    //await repositoryWrapper.ItemA.AddAsync(value);
+                    //    //await repositoryWrapper.SaveAsync();
+                    //}
+                    value.Image = null;
+
+                    return Ok(value);
                 }
                 else return NotFound("User not identified");
             }
@@ -203,7 +269,14 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId.ToString() == search) 
-                    && (x.Gamme.Marque.Name.Contains(search)), x => x.Gamme, x => x.Gamme.Marque);
+                                && (x.Marque.Name.Contains(search)),
+                                x => x.Model,
+                                x => x.Taille,
+                                x => x.Niveau,
+                                x => x.Occasionss,
+                                x => x.Marque,
+                                x => x.Style,
+                                x => x.Categorie);
 
                     return Ok(result);
                 }

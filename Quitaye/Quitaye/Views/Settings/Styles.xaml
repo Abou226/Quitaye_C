@@ -54,13 +54,13 @@
                         TextColor="{DynamicResource Secondary}" />
                 </StackLayout>
                 <StackLayout 
-                Orientation="Horizontal">
+                            Orientation="Horizontal">
                     <Entry  Margin="5,0" 
-                        HorizontalOptions="FillAndExpand" 
-                        Placeholder="Description..."
-                        VerticalOptions="Center" 
-                        Text="{Binding Description, Mode=TwoWay}" 
-                        TextColor="{DynamicResource Secondary}" />
+                            HorizontalOptions="FillAndExpand" 
+                            Placeholder="Description..."
+                            VerticalOptions="Center" 
+                            Text="{Binding Description, Mode=TwoWay}" 
+                            TextColor="{DynamicResource Secondary}" />
                 </StackLayout>
 
                 <StackLayout Orientation="Horizontal" >
@@ -83,19 +83,19 @@
                 </StackLayout>
 
                 <Image  Grid.Row="0" 
-                    HorizontalOptions="Center"
-                    VerticalOptions="Start" 
-                    Source="{Binding PictureSource}" 
-                    HeightRequest="250" />
+                        HorizontalOptions="Center"
+                        VerticalOptions="Start" 
+                        Source="{Binding PictureSource}" 
+                        HeightRequest="250" />
                 <Button Margin="0,20,0,0" 
-                    Command="{Binding AddCommand}" 
-                    Text="+ Ajouter"  
-                    CornerRadius="20" 
-                    BackgroundColor="{DynamicResource Secondary}" 
-                    TextColor="{DynamicResource ThirdColor}" 
-                    FontAttributes="Bold" 
-                    HorizontalOptions="Center" 
-                    Padding="30,10" />
+                        Command="{Binding AddCommand}" 
+                        Text="+ Ajouter"  
+                        CornerRadius="20" 
+                        BackgroundColor="{DynamicResource Secondary}" 
+                        TextColor="{DynamicResource ThirdColor}" 
+                        FontAttributes="Bold" 
+                        HorizontalOptions="Center" 
+                        Padding="30,10" />
 
                 <CollectionView x:Name="PanierCollectionView" 
                             ItemsSource="{Binding Items}"

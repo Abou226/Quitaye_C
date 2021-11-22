@@ -104,7 +104,7 @@ namespace Quitaye.ViewModels
         {
             Entreprise = entreprise;
             Navigation = navigation;
-            Title = "Tailles";
+            Title = "Taille(s)";
             BaseVM = DependencyService.Get<IBaseViewModel>();
             DataService = DependencyService.Get<IDataService<Taille>>();
             Items = new ObservableCollection<Taille>();

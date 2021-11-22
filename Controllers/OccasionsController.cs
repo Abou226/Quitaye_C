@@ -176,7 +176,6 @@ namespace Controllers
                     foreach (var value in values)
                     {
                         value.UserId = identity.First().Id;
-                        value.Id = Guid.NewGuid();
                         value.EntrepriseId = value.EntrepriseId;
                         await repositoryWrapper.ItemA.AddAsync(value);
                         await repositoryWrapper.SaveAsync();

@@ -50,11 +50,11 @@
                                     IsRefreshing="{Binding IsNotBusy, Mode=TwoWay}"
                                     Command="{Binding RefreshCommand}" 
                                     RefreshColor="{DynamicResource Secondary}">
-                            <StackLayout Margin="20,20">
+                            <StackLayout Margin="20,-20">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition/>
-                                    <ColumnDefinition/>
+                                    <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
                                 <StackLayout Orientation="Horizontal">
                                     <Image Source="logo.png" WidthRequest="40"/>
@@ -63,15 +63,28 @@
                                            FontSize="20" TextColor="{DynamicResource Secondary}"/>
 
                                 </StackLayout>
-                                <Image Source="settinglines.png" Grid.Column="1" HeightRequest="35" HorizontalOptions="EndAndExpand">
-                                    <Image.GestureRecognizers>
-                                        <TapGestureRecognizer 
+                                <Grid Grid.Column="1" ColumnDefinitions="*,*">
+
+                                    <Image Source="users.png" Grid.Column="0" HeightRequest="25" HorizontalOptions="EndAndExpand" Margin="4,0">
+                                        <Image.GestureRecognizers>
+                                            <TapGestureRecognizer 
                                                         NumberOfTapsRequired="1"
                                                         Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:HomeViewModel}}, Path=SettingsCommand}"		
                                                         CommandParameter="{Binding .}">
-                                        </TapGestureRecognizer>
-                                    </Image.GestureRecognizers>
-                                </Image>
+                                            </TapGestureRecognizer>
+                                        </Image.GestureRecognizers>
+                                    </Image>
+                                    <Image  Source="settinglines.png" Grid.Column="1" HeightRequest="25" HorizontalOptions="EndAndExpand">
+                                        <Image.GestureRecognizers>
+                                            <TapGestureRecognizer 
+                                                        NumberOfTapsRequired="1"
+                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:HomeViewModel}}, Path=SettingsCommand}"		
+                                                        CommandParameter="{Binding .}">
+                                            </TapGestureRecognizer>
+                                        </Image.GestureRecognizers>
+                                    </Image>
+                                </Grid>
+                                
                             </Grid>
                             <Grid>
                                     <Grid.ColumnDefinitions>

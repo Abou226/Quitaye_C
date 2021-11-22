@@ -41,8 +41,6 @@ namespace Quitaye
         
         public IBaseViewModel BaseVM { get; }
         public IDataService<Test> Test { get; }
-        
-        
         public IInitialService Init { get; }
 
         private bool _is_style = true;
@@ -589,6 +587,21 @@ namespace Quitaye
                 Black_Icon = "time_black.png",
                 CurrentIcon = "time_black.png"
             });
+            Sections.Add(new Section()
+            {
+                Nom = "Niveau",
+                Icon = "level.png",
+                Black_Icon = "level.png",
+                CurrentIcon = "level.png"
+            });
+            Sections.Add(new Section()
+            {
+                Nom = "Occasion",
+                Icon = "occasion.png",
+                Black_Icon = "occasion.png",
+                CurrentIcon = "occasion.png"
+            });
+            
         }
 
         public SettingViewModel(INavigation navigation, Entreprise entreprise) : this()

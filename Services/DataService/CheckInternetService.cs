@@ -311,6 +311,42 @@ namespace Services
         {
             throw new NotImplementedException();
         }
+
+        public async Task<object> SimplePostAsync(List<T> values, string token, string url = null)
+        {
+            try
+            {
+                var authHeader = new AuthenticationHeaderValue("bearer", token);
+                Client.DefaultRequestHeaders.Authorization = authHeader;
+                Client.DefaultRequestHeaders.Accept.Clear();
+                Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                string jsons = JsonConvert.SerializeObject(values);
+                var type = values.First().GetType().ToString();
+                var a = type.Split('.');
+                foreach (var item in a)
+                {
+                    type = item;
+                }
+                HttpContent httpContent = new StringContent(jsons);
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                var response = await Client.PostAsync("api/" + type + "s" + url, httpContent);
+                if (response.IsSuccessStatusCode)
+                    return values;
+                else
+                {
+                    var message = await response.Content.ReadAsStringAsync();
+                    var phrase = response.ReasonPhrase;
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                var message = ex.Message;
+                var phrase = ex.InnerException;
+                return null;
+            }
+        }
     }
 
     public class CheckInternetService<T> : BaseVM.BaseViewModel, IDataService<T> where T : class
@@ -625,6 +661,42 @@ namespace Services
         public Task<string> GetProjectSourcesAsync(string url = null)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<object> SimplePostAsync(List<T> values, string token, string url = null)
+        {
+            try
+            {
+                var authHeader = new AuthenticationHeaderValue("bearer", token);
+                Client.DefaultRequestHeaders.Authorization = authHeader;
+                Client.DefaultRequestHeaders.Accept.Clear();
+                Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                string jsons = JsonConvert.SerializeObject(values);
+                var type = values.First().GetType().ToString();
+                var a = type.Split('.');
+                foreach (var item in a)
+                {
+                    type = item;
+                }
+                HttpContent httpContent = new StringContent(jsons);
+                httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                var response = await Client.PostAsync("api/" + type + "s" + url, httpContent);
+                if (response.IsSuccessStatusCode)
+                    return values;
+                else
+                {
+                    var message = await response.Content.ReadAsStringAsync();
+                    var phrase = response.ReasonPhrase;
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                var message = ex.Message;
+                var phrase = ex.InnerException;
+                return null;
+            }
         }
     }
 }

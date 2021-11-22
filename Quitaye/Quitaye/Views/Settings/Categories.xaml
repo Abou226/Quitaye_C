@@ -39,7 +39,7 @@
                     <Label Text="{Binding Title}" 
                            HorizontalOptions="Center" 
                        VerticalOptions="Center" FontAttributes="Bold" 
-                       FontSize="20" TextColor="{DynamicResource ThirdColor}"/>
+                       FontSize="20" TextColor="{DynamicResource Secondary}"/>
                 </StackLayout>
             </Grid>
         </Grid>

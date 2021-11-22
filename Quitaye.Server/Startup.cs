@@ -12,14 +12,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using System.IO;
 
 namespace Quitaye.Server
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IWebHostEnvironment _environment;
+        public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
             Configuration = configuration;
+            _environment = environment;
         }
 
         public IConfiguration Configuration { get; }
@@ -31,11 +36,22 @@ namespace Quitaye.Server
             //var GoogleClient_Secret = Configuration.GetSection("ConfigSettings")["GoogleClient_Secret"].ToString();
             //var FacebookClient_Id = Configuration.GetSection("ConfigSettings")["FacebookClient_Id"].ToString();
             //var FacebookClient_Secret = Configuration.GetSection("ConfigSettings")["FacebookClient_Secret"].ToString();
+            //var googleCredential = _environment.ContentRootPath;
+            //var filePath = Configuration.GetSection("GoogleFirebase")["fileName"];
+            //googleCredential = Path.Combine(googleCredential, filePath);
+            //var credential = GoogleCredential.FromFile(googleCredential);
+            //FirebaseApp.Create(new AppOptions()
+            //{
+
+            //    Credential = credential
+            //});
             services.AddAutoMapper(typeof(Startup));
             services.ConfigureSqlContext(Configuration);
             services.ConfigureRepositoryWrapper(Configuration);
             services.AddAuthentication();
+            //services.AddNewtonsoftJson();
             services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
             services.AddSignalR();
             services.AddSwaggerGen(c =>
             {

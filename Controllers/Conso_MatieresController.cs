@@ -56,7 +56,7 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Conso_Matiere>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        public override async Task<ActionResult<Conso_Matiere>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
         {
             try
             {

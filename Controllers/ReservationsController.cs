@@ -18,9 +18,11 @@ namespace Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class ReservationsController : GenericController<Reservation, User, Gamme, Marque, Taille, Model, Categorie, Style, Client, Marque>
+    public class ReservationsController : GenericController<Reservation, User, 
+        Gamme, Marque, Taille, Model, Categorie, Style, Client, Marque>
     {
-        private readonly IGenericRepositoryWrapper<Reservation, User, Gamme, Marque, Taille, Model, Categorie, Style, Client, Marque> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<Reservation, User, 
+            Gamme, Marque, Taille, Model, Categorie, Style, Client, Marque> repositoryWrapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUserRepository;
         private readonly IConfigSettings _settings;
         private readonly IGenericRepositoryWrapper<PanierReservation> panierRepository;
@@ -66,7 +68,7 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Reservation>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        public override async Task<ActionResult<Reservation>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
         {
             try
             {
@@ -76,6 +78,31 @@ namespace Controllers
                     var single = item.First();
                     value.ApplyTo(single);
                     await repositoryWrapper.SaveAsync();
+                }
+                else return NotFound("User not indentified");
+
+                return Ok(value);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPatch("entreprise/{entreprise:Guid}")]
+        public async Task<ActionResult<Reservation>> ChangeEntrepriseUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid entreprise)
+        {
+            try
+            {
+                var item = await repositoryWrapper.Item.GetBy(x => x.EntrepriseId == entreprise);
+                if (item.Count() != 0)
+                {
+                    foreach (var items in item)
+                    {
+                        var single = items;
+                        value.ApplyTo(single);
+                        await repositoryWrapper.SaveAsync();
+                    }
                 }
                 else return NotFound("User not indentified");
 

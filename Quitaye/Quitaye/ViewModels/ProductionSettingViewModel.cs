@@ -83,6 +83,15 @@ namespace Quitaye.ViewModels
             }else if(section.Nom == "Heure")
             {
                 await Navigation.PushAsync(new Heures());
+            }else if(section.Nom == "Niveau")
+            {
+                await Navigation.PushAsync(new NiveauPage());
+            }else if(section.Nom == "Occasion")
+            {
+                await Navigation.PushAsync(new OccasionPage());
+            }else if(section.Nom == "Offre")
+            {
+                await Navigation.PushAsync(new OffrePage());
             }
         }
 
@@ -161,6 +170,30 @@ namespace Quitaye.ViewModels
                 Black_Icon = "time_black.png",
                 CurrentIcon = "time_black.png",
                 Description = "Les horaires de livraison si possible."
+            });
+            Sections.Add(new Section()
+            {
+                Nom = "Niveau",
+                Icon = "level.png",
+                Black_Icon = "level.png",
+                CurrentIcon = "level.png",
+                Description = "Les differents niveaux de l'offre"
+            });
+            Sections.Add(new Section()
+            {
+                Nom = "Occasion",
+                Icon = "occasion.png",
+                Black_Icon = "occasion.png",
+                CurrentIcon = "occasion.png",
+                Description = "Les occasions spécific à la quel vos produits / services sont solicités"
+            });
+            Sections.Add(new Section()
+            {
+                Nom = "Offre",
+                Icon = "offre.png",
+                Black_Icon = "offre.png",
+                CurrentIcon = "offre.png",
+                Description = "Vos différents variétés d'offres de produits / service"
             });
         }
     }

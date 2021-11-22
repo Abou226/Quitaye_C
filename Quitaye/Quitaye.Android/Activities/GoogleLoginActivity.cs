@@ -22,10 +22,12 @@ using Services;
 using Models;
 using Xamarin.Essentials;
 using BaseVM;
+using System.Globalization;
 
 [assembly: Dependency(typeof(DataService<User>))]
+[assembly: Dependency(typeof(DataService<EditObject>))]
 [assembly: Dependency(typeof(BaseViewModel))]
-[assembly: Dependency(typeof(DataService<object, Secrets>))]
+[assembly: Dependency(typeof(DataService<Secrets>))]
 [assembly: Dependency(typeof(DataService<RefreshToken>))]
 namespace Quitaye.Droid.Activities
 {
@@ -42,17 +44,18 @@ namespace Quitaye.Droid.Activities
         public IDataService<User> User { get; }
         public IDataService<RefreshToken> Token { get; }
         public IInitialService Initial { get; }
-        public IDataService<object, Secrets> Secret { get; }
+        public IDataService<Secrets> Secret { get; }
 
         public IBaseViewModel BaseVM { get; }
-
+        public IDataService<EditObject> EditService { get; }
         public GoogleLoginActivity()
         {
             User = DependencyService.Get<IDataService<User>>();
+            EditService = DependencyService.Get<IDataService<EditObject>>();
             Token = DependencyService.Get<IDataService<RefreshToken>>();
             BaseVM = DependencyService.Get<IBaseViewModel>();
             Initial = DependencyService.Get<IInitialService>();
-            Secret = DependencyService.Get<IDataService<object, Secrets>>();
+            Secret = DependencyService.Get<IDataService<Secrets>>();
         }
 
         static GoogleApiClient mGoogleApiClient;
@@ -155,43 +158,29 @@ namespace Quitaye.Droid.Activities
                                 user.Email = result.SignInAccount.Email;
                                 user.Prenom = result.SignInAccount.GivenName;
                                 user.Nom = result.SignInAccount.FamilyName;
-                                user.PhotoUrl = result.SignInAccount.PhotoUrl.Scheme.ToString() + "" + result.SignInAccount.PhotoUrl.EncodedSchemeSpecificPart.ToString();
+                                user.PhotoUrl = result.SignInAccount.PhotoUrl.Scheme.ToString() + ":" + result.SignInAccount.PhotoUrl.SchemeSpecificPart.ToString();
 
-                                var users = await User.AddAsync(user, null);
+                                var list = new List<User>();
+                                list.Add(user);
+                                var users = await User.AddListAsync(list, null);
+                                await SecureStorage.SetAsync("Email", user.Email);
                                 if (users != null)
                                 {
-                                    var token = await Secret.GetAsync(null, "auth/useremail/" + result.SignInAccount.Email);
-                                    if (token != null)
-                                    {
-                                        await SecureStorage.SetAsync("Token", token.First().Token);
-                                        await SecureStorage.SetAsync("Prenom", token.First().Prenom);
-                                        await SecureStorage.SetAsync("Nom", token.First().Nom);
-                                        await SecureStorage.SetAsync("ProfilePic", token.First().ProfilePic);
-                                    }
+                                    //var token = await Secret.GetAsync(null, "authclient/useremail/" + result.SignInAccount.Email);
+                                    //if(token != null)
+                                    //{
+                                    //    await SecureStorage.SetAsync("Token", token.First().Token);
+                                    //    await SecureStorage.SetAsync("Prenom", token.First().Prenom);
+                                    //    await SecureStorage.SetAsync("Nom", token.First().Nom);
+                                    //    await SecureStorage.SetAsync("ProfilePic", token.First().ProfilePic);
+                                    //}
                                 }
                                 else
                                 {
-                                    var token = await Secret.GetAsync(null, "auth/useremail/" + result.SignInAccount.Email);
-                                    if (token != null)
-                                    {
-                                        await SecureStorage.SetAsync("Token", token.First().Token);
-                                        await SecureStorage.SetAsync("ProfilePic", token.First().ProfilePic);
-                                        await SecureStorage.SetAsync("Prenom", token.First().Prenom);
-                                        await SecureStorage.SetAsync("Nom", token.First().Nom);
-                                    }
+                                    
                                 }
                             }
-                            else
-                            {
-                                var token = await Initial.Get(null, "api/auth/useremail/" + result.SignInAccount.Email);
-                                if (token != null)
-                                {
-                                    await SecureStorage.SetAsync("Token", token.Token);
-                                    await SecureStorage.SetAsync("ProfilePic", token.ProfilePic);
-                                    await SecureStorage.SetAsync("Prenom", token.Prenom);
-                                    await SecureStorage.SetAsync("Nom", token.Nom);
-                                }
-                            }
+                            await SecureStorage.SetAsync("Email", result.SignInAccount.Email);
                         }
                         catch (Exception ex)
                         {

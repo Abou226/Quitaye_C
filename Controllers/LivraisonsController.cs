@@ -19,16 +19,17 @@ namespace Controllers
     [ApiController]
     [Authorize]
     public class LivraisonsController : GenericController<Livraison, User, Vente, Offre,
-        Gamme, Marque, Taille, Model, Categorie>
+        Marque, Taille, Model, Style, Categorie, Niveau, List<OccasionList>, Client>
     {
         private readonly IGenericRepositoryWrapper<Livraison, User, Vente, Offre,
-            Gamme, Marque, Taille, Model, Categorie> repositoryWrapper;
+            Marque, Taille, Model, Style, Categorie, Niveau, List<OccasionList>, Client> repositoryWrapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUserRepository;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
 
         public LivraisonsController(IGenericRepositoryWrapper<Livraison, User, Vente, Offre,
-            Gamme, Marque, Taille, Model, Categorie> wrapper, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUserRepository,
+            Marque, Taille, Model, Style, Categorie, Niveau, List<OccasionList>, Client> wrapper, 
+            IGenericRepositoryWrapper<EntrepriseUser> entrepriseUserRepository,
             IConfigSettings settings, IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
@@ -118,10 +119,17 @@ namespace Controllers
                         var result = await repositoryWrapper.Item.GetByInclude(x =>
                     (x.Vente.Client.Prenom.Contains(search)
                     || x.Vente.Client.Nom.Contains(search)
-                    || x.Vente.Details_Adresse.Contains(search)), x => x.Vente,
-                    x => x.Vente.Offre, x => x.Vente.Offre.Gamme,
-                    x => x.Vente.Offre.Gamme.Marque, x => x.Vente.Offre.Taille,
-                    x => x.Vente.Offre.Model, x => x.Vente.Offre.Gamme.Categorie);
+                    || x.Vente.Details_Adresse.Contains(search)), 
+                    x => x.Vente,
+                    x => x.Vente.Offre,
+                    x => x.Vente.Offre.Marque,
+                    x => x.Vente.Offre.Taille,
+                    x => x.Vente.Offre.Model,
+                    x => x.Vente.Offre.Style,
+                    x => x.Vente.Offre.Categorie,
+                    x => x.Vente.Offre.Niveau,
+                    x => x.Vente.Offre.Occasionss, 
+                    x => x.Vente.Client);
 
                         return Ok(result);
                     }
@@ -180,11 +188,20 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x => (x.Vente.Client.Prenom.Contains(search)
-                    || x.Vente.Client.Nom.Contains(search) || x.Vente.Details_Adresse.Contains(search))
-                    && (x.Date.Date >= start && x.Date <= end), x => x.Vente,
-                    x => x.Vente.Offre, x => x.Vente.Offre.Gamme,
-                    x => x.Vente.Offre.Gamme.Marque, x => x.Vente.Offre.Taille,
-                    x => x.Vente.Offre.Model, x => x.Vente.Offre.Gamme.Categorie);
+                    || x.Vente.Client.Nom.Contains(search) 
+                    || x.Vente.Details_Adresse.Contains(search))
+                    && (x.Date.Date >= start.Date 
+                    && x.Date.Date <= end.Date),
+                    x => x.Vente,
+                    x => x.Vente.Offre,
+                    x => x.Vente.Offre.Marque,
+                    x => x.Vente.Offre.Taille,
+                    x => x.Vente.Offre.Model,
+                    x => x.Vente.Offre.Style,
+                    x => x.Vente.Offre.Categorie,
+                    x => x.Vente.Offre.Niveau,
+                    x => x.Vente.Offre.Occasionss,
+                    x => x.Vente.Client);
 
                     return Ok(result);
                 }
@@ -209,9 +226,18 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x => (x.Vente.EntrepriseId == entrepriseId)
-                    && (x.Date.Date >= start && x.Date <= end), x => x.Vente, x => x.Vente.Offre, x => x.Vente.Offre.Gamme,
-                    x => x.Vente.Offre.Gamme.Marque, x => x.Vente.Offre.Taille,
-                    x => x.Vente.Offre.Model, x => x.Vente.Offre.Gamme.Categorie);
+                    && (x.Date.Date >= start.Date 
+                    && x.Date.Date <= end.Date),
+                    x => x.Vente,
+                    x => x.Vente.Offre,
+                    x => x.Vente.Offre.Marque,
+                    x => x.Vente.Offre.Taille,
+                    x => x.Vente.Offre.Model,
+                    x => x.Vente.Offre.Style,
+                    x => x.Vente.Offre.Categorie,
+                    x => x.Vente.Offre.Niveau,
+                    x => x.Vente.Offre.Occasionss,
+                    x => x.Vente.Client);
 
                     return Ok(result);
                 }

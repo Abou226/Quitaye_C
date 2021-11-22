@@ -19,18 +19,19 @@ namespace Controllers
     [ApiController]
     [Authorize]
     public class ClientPanierController : GenericController<Panier, 
-        Client, Offre, Gamme, Marque, Style, Categorie, Taille, Model>
+        Client, Offre, Marque, Style, Categorie, Taille, Model, Style, Niveau, List<OccasionList>>
     {
         private readonly IGenericRepositoryWrapper<Panier, 
-            Client, Offre, Gamme, Marque, Style, Categorie, Taille, Model> repositoryWrapper;
+            Client, Offre, Marque, Style, Categorie, Taille, Model, Style, Niveau, List<OccasionList>> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
         private readonly IGenericRepositoryWrapper<PanierReservation> panierRepository;
 
         public ClientPanierController(IGenericRepositoryWrapper<Panier, 
-            Client, Offre, Gamme, Marque, Style, Categorie, Taille, Model> wrapper,
-            IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, IGenericRepositoryWrapper<PanierReservation> _panierRepository, 
+            Client, Offre, Marque, Style, Categorie, Taille, Model, Style, Niveau, List<OccasionList>> wrapper,
+            IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, 
+            IGenericRepositoryWrapper<PanierReservation> _panierRepository, 
             IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
@@ -72,14 +73,16 @@ namespace Controllers
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x =>
                     (x.EntrepriseId.ToString() == search) 
-                    && (x.Offre.Gamme.Categorie.Name.Contains(search)), 
-                    x => x.Offre,
-                    x => x.Offre.Gamme, 
-                    x => x.Offre.Gamme.Marque, 
-                    x => x.Offre.Gamme.Style,
-                    x => x.Offre.Gamme.Categorie, 
+                    && (x.Offre.Categorie.Name.Contains(search)), 
+                    x => x.Offre, 
+                    x => x.Offre.Marque,
+                    x => x.Offre.Style,
+                    x => x.Offre.Categorie,
                     x => x.Offre.Taille, 
-                    x => x.Offre.Model);
+                    x => x.Offre.Model, 
+                    x => x.Offre.Style, 
+                    x => x.Offre.Niveau,
+                    x => x.Offre.Occasionss);
 
                     return Ok(result.OrderByDescending(x => x.Date));
                 }
@@ -104,12 +107,15 @@ namespace Controllers
                     var result = await repositoryWrapper.Item.GetByInclude(x => 
                                         (x.EntrepriseId == id 
                                         && x.ClientId == identity.First().Id),
-                                        x => x.Offre, x => x.Offre.Gamme,
-                                        x => x.Offre.Gamme.Marque, 
-                                        x => x.Offre.Gamme.Style,
-                                        x => x.Offre.Gamme.Categorie, 
-                                        x => x.Offre.Taille, 
-                                        x => x.Offre.Model);
+                                        x => x.Offre,
+                                        x => x.Offre.Marque,
+                                        x => x.Offre.Style,
+                                        x => x.Offre.Categorie,
+                                        x => x.Offre.Taille,
+                                        x => x.Offre.Model,
+                                        x => x.Offre.Style,
+                                        x => x.Offre.Niveau,
+                                        x => x.Offre.Occasionss);
 
                     return Ok(result.OrderByDescending(x => x.Date));
                 }
@@ -164,15 +170,18 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId.ToString() == search) &&
-                    (x.Offre.Gamme.Marque.Name.Contains(search) 
-                    && x.Date.Date >= start 
-                    && x.Date.Date <= end),
-                    x => x.Offre, x => x.Offre.Gamme, 
-                    x => x.Offre.Gamme.Marque, 
-                    x => x.Offre.Gamme.Style,
-                    x => x.Offre.Gamme.Categorie, 
-                    x => x.Offre.Taille, 
-                    x => x.Offre.Model);
+                    (x.Offre.Marque.Name.Contains(search) 
+                    && x.Date.Date >= start.Date 
+                    && x.Date.Date <= end.Date),
+                    x => x.Offre,
+                    x => x.Offre.Marque,
+                    x => x.Offre.Style,
+                    x => x.Offre.Categorie,
+                    x => x.Offre.Taille,
+                    x => x.Offre.Model,
+                    x => x.Offre.Style,
+                    x => x.Offre.Niveau,
+                    x => x.Offre.Occasionss);
 
                     return Ok(result.OrderByDescending(x => x.Date));
                 }
@@ -198,12 +207,15 @@ namespace Controllers
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x => x.EntrepriseId == entrepriseId &&
                                 x.Date.Date >= start && x.Date.Date <= end,
-                                x => x.Offre, x => x.Offre.Gamme,
-                                x => x.Offre.Gamme.Marque, 
-                                x => x.Offre.Gamme.Style,
-                                x => x.Offre.Gamme.Categorie,
-                                x => x.Offre.Taille, 
-                                x => x.Offre.Model);
+                                x => x.Offre,
+                                x => x.Offre.Marque,
+                                x => x.Offre.Style,
+                                x => x.Offre.Categorie,
+                                x => x.Offre.Taille,
+                                x => x.Offre.Model,
+                                x => x.Offre.Style,
+                                x => x.Offre.Niveau,
+                                x => x.Offre.Occasionss);
 
                     return Ok(result.OrderByDescending(x => x.Date));
                 }
