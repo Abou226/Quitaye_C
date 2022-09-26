@@ -23,7 +23,7 @@ namespace Quitaye.ViewModels
         public INavigation Navigation { get; }
         private string _password;
         public IBaseViewModel BaseVM { get; }
-        //private IUserDialogs _userDialogService;
+        private IUserDialogs _userDialogService;
         private ICommand _loginGoogleCommand;
 
         private IAuthService _authService;

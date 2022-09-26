@@ -1,7 +1,6 @@
 ﻿using Acr.UserDialogs;
 using BaseVM;
 using Models;
-using Quitaye.Services;
 using Quitaye.Views;
 using Services;
 using System;
@@ -26,13 +25,12 @@ using Xamarin.Forms;
 [assembly: Dependency(typeof(DataService<Ville>))]
 [assembly: Dependency(typeof(BaseViewModel))]
 [assembly: Dependency(typeof(InitialService))]
-
 namespace Quitaye.ViewModels
 {
     public class NouvelleEntrepriseViewModel : BaseViewModel
     {
         public ICommand AddCommand { get; }
-        public ISessionService SessionService { get; }
+
         public IDataService<Type_Entreprise> TypeService { get;}
         public IDataService<Entreprise> EntrepriseService { get;}
         public IDataService<Ville> Villeservice { get; }
@@ -91,7 +89,6 @@ namespace Quitaye.ViewModels
             BaseVM = DependencyService.Get<IBaseViewModel>();
             PositionCommand = new Command(OnPositionCommand);
             Initial = DependencyService.Get<IInitialService>();
-            SessionService = DependencyService.Get<ISessionService>();
             AddCommand = new Command(OnAddCommand);
             GetTypesAsync();
         }
@@ -103,16 +100,37 @@ namespace Quitaye.ViewModels
 
         private async Task TokenManagement()
         {
-            if (await SessionService.HasTokenExpired())
+            try
             {
-                if (await SessionService.IsSecureStorageCompatible())
+                var tok = await SecureStorage.GetAsync("Token");
+                if (!string.IsNullOrWhiteSpace(tok))
                 {
-                    await SessionService.GetNewToken(await SecureStorage.GetAsync("Token"));
+                    var token = await Token.PostAsync(new LogInModel() { Token = await SecureStorage.GetAsync("Token"), Username = "d", Password = "d" },
+                    await SecureStorage.GetAsync("Token"), "auth/TokenCheck");
+                    if (token == null)
+                    {
+                        var resul = await Initial.Get(new LogInModel() { Token = await SecureStorage.GetAsync("Token") });
+                        if (resul != null)
+                        {
+                            await SecureStorage.SetAsync("Token", resul.Token);
+                        }
+                    }
                 }
                 else
                 {
-                    await SessionService.GetNewToken(Preferences.Get("Token", "null"));
+                    var token = await Secret.GetItemAsync(null, "auth/useremail/" + await SecureStorage.GetAsync("Email"));
+                    if (token != null)
+                    {
+                        await SecureStorage.SetAsync("Token", token.Token);
+                        await SecureStorage.SetAsync("Prenom", token.Prenom);
+                        await SecureStorage.SetAsync("Nom", token.Nom);
+                        await SecureStorage.SetAsync("ProfilePic", token.ProfilePic);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+
             }
         }
 
@@ -261,7 +279,7 @@ namespace Quitaye.ViewModels
                     UserDialogs.Instance.ShowLoading("Chargement.....");
 
                     await TokenManagement();
-                    var types = await TypeService.GetItemsAsync(await SessionService.GetToken(), "Type_Entreprises/");
+                    var types = await TypeService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Type_Entreprises/");
                     Types.Clear();
                     if (types.Count() != 0)
                     {
@@ -310,7 +328,7 @@ namespace Quitaye.ViewModels
                 {
                     IsRunning = true;
                     IsNotBusy = false;
-                    var pays = await PaysService.GetItemsAsync(await SessionService.GetToken(), "Pays/");
+                    var pays = await PaysService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Pays/");
                     Pays.Clear();
                     if (pays.Count() != 0)
                     {
@@ -358,7 +376,7 @@ namespace Quitaye.ViewModels
                     IsRunning = true;
                     IsNotBusy = false;
                     UserDialogs.Instance.ShowLoading("Chargement....");
-                    var villes = await Villeservice.GetItemsAsync(await SessionService.GetToken(), "Villes/pays/"+paysId.ToString());
+                    var villes = await Villeservice.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Villes/pays/"+paysId.ToString());
                     Villes.Clear();
                     if (villes.Count() != 0)
                     {

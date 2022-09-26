@@ -6,8 +6,7 @@ namespace Models
 {
     public enum UserRole
     {
-        Owner,
-        Admin,
         Agent,
+        Admin
     }
 }

@@ -27,8 +27,5 @@ namespace Models
         [ForeignKey(nameof(User))]
         public Guid? UserId { get; set; }
         public User User { get; set; }
-
-        [NotMapped]
-        public bool Selected { get; set; }
     }
 }

@@ -1,4 +1,19 @@
-﻿namespace Controllers
+﻿using AutoMapper;
+using Contracts;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using Models;
+using Repository;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -9,15 +24,12 @@
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
-        private readonly IGenericRepositoryWrapper<Offre, User, Taille> _offreRepos;
 
         public TaillesController(IGenericRepositoryWrapper<Taille, User, Categorie> wrapper,
             IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, 
-            IGenericRepositoryWrapper<Offre,User, Taille> offreRepos,
             IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
-            _offreRepos = offreRepos;
             _entrepriseUser = entrepriseUser;
             _settings = settings;
             _mapper = mapper;
@@ -47,42 +59,24 @@
             }
         }
 
-        [HttpPatch("entreprise/{id:Guid}")]
-        public async Task<ActionResult<Taille>> ChangeEntrepriseUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
+        [HttpPatch("entreprise/{entreprise:Guid}")]
+        public async Task<ActionResult<Taille>> ChangeEntrepriseUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid entreprise)
         {
             try
             {
-                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
-                Equals(claim));
-                if (identity.Count() != 0)
+                var item = await repositoryWrapper.Item.GetBy(x => x.EntrepriseId == entreprise);
+                if (item.Count() != 0)
                 {
-                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.UserId == identity.First().Id);
-                    if (entreprise.Count() != 0)
+                    foreach (var items in item)
                     {
-                        List<Guid> list = new List<Guid>();
-                        foreach (var item in entreprise)
-                        {
-                            list.Add((Guid)item.UserId);
-                        }
-                        if (list.Contains(identity.First().Id))
-                        {
-                            var item = await repositoryWrapper.Item.GetBy(x => x.Id == id);
-                            if (item.Count() != 0)
-                            {
-                                var single = item.First();
-                                value.ApplyTo(single);
-                                await repositoryWrapper.SaveAsync();
-                            }
-                            else return NotFound("Element not found");
-
-                            return Ok(value);
-                        }
-                        else return NotFound("Non membre de cette entreprise");
+                        var single = items;
+                        value.ApplyTo(single);
+                        await repositoryWrapper.SaveAsync();
                     }
-                    else return NotFound("Non membre de cette entreprise");
                 }
                 else return NotFound("User not indentified");
+
+                return Ok(value);
             }
             catch (Exception ex)
             {
@@ -104,33 +98,6 @@
                 else return NotFound("User not indentified");
 
                 return Ok(value);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-        }
-
-        [HttpGet("min/{offreId:Guid}/{id:Guid}")]
-        public async Task<ActionResult<IEnumerable<Taille>>> GetByWithMinTaille([FromRoute] Guid offreId, Guid id)
-        {
-            try
-            {
-                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
-                Equals(claim));
-                if (identity.Count() != 0)
-                {
-                    var offres = await _offreRepos.Item.GetByInclude(x => x.Id == offreId, x => x.Taille);
-                    if (offres.Count() != 0)
-                    {
-                        var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id &&
-                        Convert.ToInt32(x.Name) >= Convert.ToInt32(offres.First().Taille.Name)), x => x.Categorie);
-                        return Ok(result.OrderBy(x => Convert.ToInt32(x.Name)));
-                    }
-                    else return null;
-                }
-                else return NotFound("User not indentified");
             }
             catch (Exception ex)
             {

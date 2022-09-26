@@ -9,11 +9,7 @@ namespace Services
 {
     public partial class Convert<T>
     {
-        public static T[] FromJson(string json) 
-        {
-            var result = JsonConvert.DeserializeObject<T[]>(json, Converter.Settings);
-            return result;
-        }
+        public static T[] FromJson(string json) => JsonConvert.DeserializeObject<T[]>(json, Converter.Settings);
     }
 
     public partial class ConvertGrouped<T>

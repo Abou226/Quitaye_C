@@ -347,11 +347,6 @@ namespace Services
                 return null;
             }
         }
-
-        public Task<object> UploadFileFormDataAsync(T value, string token, string url = null)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     public class CheckInternetService<T> : BaseVM.BaseViewModel, IDataService<T> where T : class
@@ -702,11 +697,6 @@ namespace Services
                 var phrase = ex.InnerException;
                 return null;
             }
-        }
-
-        public Task<object> UploadFileFormDataAsync(T value, string token, string url = null)
-        {
-            throw new NotImplementedException();
         }
     }
 }

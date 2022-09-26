@@ -1,24 +1,36 @@
-﻿namespace Controllers
+﻿using AutoMapper;
+using Contracts;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using Models;
+using Repository;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
     public class ClientPanierReservationsController : GenericController<PanierReservation, 
-        Client, Offre, Gamme, Marque, Taille, Model, Categorie, Style, Niveau, 
-        List<OccasionList>, Marque, Categorie, Style, Model>
+        Client, Gamme, Marque, Taille, Model, Categorie, Style>
     {
-        private readonly IGenericRepositoryWrapper<PanierReservation, Client, Offre,
-            Gamme, Marque, Taille, Model, Categorie, Style, Niveau, List<OccasionList>, 
-            Marque, Categorie, Style, Model> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<PanierReservation, Client, 
+            Gamme, Marque, Taille, Model, Categorie, Style> repositoryWrapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUserRepository;
         private readonly IConfigSettings _settings;
         private readonly IGenericRepositoryWrapper<PanierReservation> panierRepository;
         private readonly IGenericRepositoryWrapper<Num_Vente> num_vente_repository;
         private readonly IMapper _mapper;
 
-        public ClientPanierReservationsController(IGenericRepositoryWrapper<PanierReservation, 
-            Client, Offre, Gamme,
-            Marque, Taille, Model, Categorie, Style, Niveau, List<OccasionList>, Marque, Categorie, Style, Model> wrapper,
+        public ClientPanierReservationsController(IGenericRepositoryWrapper<PanierReservation, Client, Gamme,
+            Marque, Taille, Model, Categorie, Style> wrapper,
             IGenericRepositoryWrapper<EntrepriseUser> entrepriseUserRepository,
             IGenericRepositoryWrapper<PanierReservation> _panierRepository, 
             IGenericRepositoryWrapper<Num_Vente> _num_vente_repository,
@@ -90,19 +102,12 @@
                     var result = await repositoryWrapper.Item.GetByInclude(x =>
                                 (x.ClientId == identity.First().Id
                                 && x.EntrepriseId == entrepriseId),
-                                x => x.Offre,
-                                x => x.Gamme,
-                                x => x.Offre.Marque,
+                                x => x.Gamme, 
+                                x => x.Gamme.Marque, 
                                 x => x.Taille,
-                                x => x.Model,
-                                x => x.Offre.Categorie,
-                                x => x.Offre.Style,
-                                x => x.Offre.Niveau,
-                                x => x.Offre.Occasionss,
-                                x => x.Gamme.Marque,
-                                x => x.Gamme.Categorie,
-                                x => x.Gamme.Style, 
-                                x => x.Offre.Model);
+                                x => x.Model, 
+                                x => x.Gamme.Categorie, 
+                                x => x.Gamme.Style);
 
                     return Ok(result.OrderByDescending(x => x.DateOfCreation));
                 }
@@ -165,19 +170,12 @@
                                 && x.DateOfCreation.Date >= start
                                 && x.DateOfCreation.Date <= end
                                 && x.EntrepriseId == entrepriseId,
-                                x => x.Offre,
-                                x => x.Gamme,
-                                x => x.Offre.Marque,
+                                x => x.Gamme, 
+                                x => x.Gamme.Marque, 
                                 x => x.Taille,
-                                x => x.Model,
-                                x => x.Offre.Categorie,
-                                x => x.Offre.Style,
-                                x => x.Offre.Niveau,
-                                x => x.Offre.Occasionss,
-                                x => x.Gamme.Marque,
-                                x => x.Gamme.Categorie,
-                                x => x.Gamme.Style, 
-                                x => x.Offre.Model);
+                                x => x.Model, 
+                                x => x.Gamme.Categorie, 
+                                x => x.Gamme.Style);
                     return Ok(result.OrderByDescending(x => x.DateOfCreation));
                         
                 }
@@ -244,19 +242,12 @@
                                     (x.EntrepriseId == entrepriseId)
                                     && x.DateOfCreation.Date >= start 
                                     && x.DateOfCreation <= end && x.Annulée == false,
-                                    x => x.Offre,
-                                    x => x.Gamme,
-                                    x => x.Offre.Marque,
+                                    x => x.Gamme, 
+                                    x => x.Gamme.Marque, 
                                     x => x.Taille,
-                                    x => x.Model,
-                                    x => x.Offre.Categorie,
-                                    x => x.Offre.Style,
-                                    x => x.Offre.Niveau,
-                                    x => x.Offre.Occasionss,
-                                    x => x.Gamme.Marque,
-                                    x => x.Gamme.Categorie,
-                                    x => x.Gamme.Style,
-                                    x => x.Offre.Model);
+                                    x => x.Model, 
+                                    x => x.Gamme.Categorie, 
+                                    x => x.Gamme.Style);
 
                         return Ok(result.OrderByDescending(x => x.DateOfCreation));
                     }
@@ -288,19 +279,12 @@
                                 && x.Date_Livraison.Date >= start
                                 && x.Date_Livraison.Date <= end
                                 && x.Annulée == false,
-                                x => x.Offre,
-                                x => x.Gamme,
-                                x => x.Offre.Marque,
+                                x => x.Gamme, 
+                                x => x.Gamme.Marque, 
                                 x => x.Taille,
-                                x => x.Model,
-                                x => x.Offre.Categorie,
-                                x => x.Offre.Style,
-                                x => x.Offre.Niveau,
-                                x => x.Offre.Occasionss,
-                                x => x.Gamme.Marque,
-                                x => x.Gamme.Categorie,
-                                x => x.Gamme.Style, 
-                                x => x.Offre.Model);
+                                x => x.Model, 
+                                x => x.Gamme.Categorie, 
+                                x => x.Gamme.Style);
 
                     return Ok(result.OrderByDescending(x => x.Date_Livraison));
                 }

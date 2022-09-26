@@ -17,17 +17,13 @@ namespace Models
         [StringLength(120, ErrorMessage = "La taille de la description ne peut dépaser 120 characters")]
         public string Description { get; set; }
 
-        //[ForeignKey(nameof(Entreprise))]
+        [ForeignKey(nameof(Entreprise))]
         public Guid? EntrepriseId { get; set; }
-        //public Entreprise Entreprise { get; set; }
+        public Entreprise Entreprise { get; set; }
 
-        //[ForeignKey(nameof(User))]
+        [ForeignKey(nameof(User))]
         public Guid? UserId { get; set; }
-        //public User User { get; set; }
-
-        //[ForeignKey(nameof(Offre))]
-        public Guid? OffreId { get; set; }
-        //public Offre Offre { get; set; }
+        public User User { get; set; }
 
         [NotMapped]
         public bool Checked { get; set; }

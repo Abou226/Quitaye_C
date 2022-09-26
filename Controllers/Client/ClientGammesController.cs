@@ -1,4 +1,19 @@
-﻿namespace Controllers
+﻿using AutoMapper;
+using Contracts;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using Models;
+using Repository;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -105,11 +120,11 @@
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x =>
-                                (x.StyleId.Equals(id)),
-                                    x => x.Marque,
-                                    x => x.Style,
-                                    x => x.Categorie,
-                                    x => x.Entreprise);
+                    (x.StyleId.Equals(id)),
+                        x => x.Marque,
+                        x => x.Style,
+                        x => x.Categorie,
+                        x => x.Entreprise);
 
                     return Ok(result);
                 }

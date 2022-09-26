@@ -28,8 +28,5 @@ namespace Models
 
         [NotMapped]
         public IFormFile Image { get; set; }
-
-        [NotMapped]
-        public bool Selected { get; set; }
     }
 }

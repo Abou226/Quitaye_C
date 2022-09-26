@@ -11,7 +11,6 @@ namespace BaseVM
         bool IsInternetOn { get; set; }
         int InternetCheckTime { get; set; }
         bool RefreshCatégorie { get; set; }
-        string EntrepriseName { get; set; }
         bool RefreshTaille { get; set; }
         bool RefreshGamme { get; set; }
         bool RefreshModel { get; set; }

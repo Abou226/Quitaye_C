@@ -13,6 +13,5 @@ namespace Models
         public string Email { get; set; }
         public string Nom { get; set; }
         public bool Success { get; set; }
-        public DateTime TokenExpiry { get; set; }
     }
 }

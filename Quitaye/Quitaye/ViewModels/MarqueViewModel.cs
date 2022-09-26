@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Models;
 using Plugin.Connectivity;
-using Quitaye.Services;
 using Quitaye.Views.Settings;
 using Services;
 using System;
@@ -23,7 +22,6 @@ using Xamarin.Forms;
 [assembly: Dependency(typeof(DataService<Test>))]
 [assembly: Dependency(typeof(BaseViewModel))]
 [assembly: Dependency(typeof(InitialService))]
-
 
 namespace Quitaye.ViewModels
 {
@@ -71,7 +69,6 @@ namespace Quitaye.ViewModels
         public INavigation Navigation { get; }
         public ICommand BackCommand { get; }
         public ICommand DeleteCommand { get; }
-        public ISessionService SessionService { get; }
         public MarqueViewModel(INavigation navigation, Entreprise entreprise) 
         {
             Entreprise = entreprise;
@@ -81,7 +78,6 @@ namespace Quitaye.ViewModels
             Items = new ObservableCollection<Marque>();
             Init = DependencyService.Get<IInitialService>();
             MessageAlert = DependencyService.Get<IMessage>();
-            SessionService = DependencyService.Get<ISessionService>();
             AddImageCommand = new Command(OnAddImageCommand);
             AddCommand = new Command(OnAddCommand);
             BackCommand = new Command(OnBackCommand);
@@ -108,7 +104,7 @@ namespace Quitaye.ViewModels
                         IsNotBusy = false;
                         if(showDialog)
                         UserDialogs.Instance.ShowLoading("Chargement....");
-                        var items = await DataService.GetItemsAsync(await SessionService.GetToken(), "Marques/"+Entreprise.Id.ToString());
+                        var items = await DataService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Marques/"+Entreprise.Id.ToString());
                         Items.Clear();
                         if (items.Count() != 0)
                         {
@@ -141,7 +137,7 @@ namespace Quitaye.ViewModels
                 {
                     try
                     {
-                        var result = await Test.GetItemsAsync(await SessionService.GetToken(), "Tests");
+                        var result = await Test.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Tests");
                         //if(result == null)
                         {
                             BaseVM.IsInternetOn = true;
@@ -306,7 +302,7 @@ namespace Quitaye.ViewModels
                 if (result)
                 {
                     var marque = (Marque)obj;
-                    var item = await DataService.DeleteAsync(await SessionService.GetToken(), (Marque)obj, "marques/"+ marque.Id.ToString());
+                    var item = await DataService.DeleteAsync(await SecureStorage.GetAsync("Token"), (Marque)obj, "marques/"+ marque.Id.ToString());
                     if (item != null)
                     {
                         DependencyService.Get<IMessage>().LongAlert("Element supprimer avec succès.");

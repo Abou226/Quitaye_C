@@ -1,19 +1,31 @@
-﻿namespace Controllers
+﻿using AutoMapper;
+using Contracts;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Models;
+using Repository;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.JsonPatch;
+namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class Matière_PremieresController : GenericController<Matière_Premiere, User, UnitéMatière>
+    public class Matière_PremieresController : GenericController<Matière_Premiere, User>
     {
-        private readonly IGenericRepositoryWrapper<Matière_Premiere, User, UnitéMatière> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<Matière_Premiere, User> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
         private readonly IFileManager _fileManager;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
 
-        public Matière_PremieresController(IGenericRepositoryWrapper<Matière_Premiere, User, UnitéMatière> wrapper, 
-            IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, 
-            IFileManager fileManager, 
+        public Matière_PremieresController(IGenericRepositoryWrapper<Matière_Premiere, User> wrapper, 
+            IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, IFileManager fileManager, 
             IConfigSettings settings, 
             IMapper mapper) : base(wrapper)
         {
@@ -27,16 +39,14 @@
         [HttpDelete("{id}")]
         public override async Task<ActionResult<Matière_Premiere>> Delete([FromRoute] Guid id)
         {
-            Matière_Premiere u = new Matière_Premiere();
-
             try
             {
                 var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
                 var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
                 Equals(claim));
-
                 if (identity.Count() != 0)
                 {
+                    Matière_Premiere u = new Matière_Premiere();
                     u.Id = id;
                     repositoryWrapper.Item.Delete(u);
                     await repositoryWrapper.SaveAsync();
@@ -46,24 +56,7 @@
             }
             catch (Exception ex)
             {
-                if (ex.Message.ToLower().Contains("conflic"))
-                {
-                    var dard = new JsonPatchDocument();
-                    dard.Add("Op", "Replace");
-                    dard.Add("Value", "False");
-                    dard.Add("Path", "Active");
-
-                    var item = await repositoryWrapper.Item.GetBy(x => x.Id == id);
-                    if (item.Count() != 0)
-                    {
-                        var single = item.First();
-                        dard.ApplyTo(single);
-                        await repositoryWrapper.SaveAsync();
-                    }
-                    else return NotFound("Item not identified");
-                    return Ok(u);
-                }
-                else return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
 
@@ -157,9 +150,8 @@
 
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetByInclude(x =>
-                    (x.EntrepriseId == entrepriseId) 
-                    && x.Unité.Equals(search), x => x.Unité);
+                    var result = await repositoryWrapper.Item.GetBy(x =>
+                    (x.EntrepriseId == entrepriseId) && x.Unité.Equals(search));
 
                     return Ok(result);
                 }
@@ -172,7 +164,7 @@
         }
 
         [HttpGet("{id:Guid}")]
-        public async Task<ActionResult<IEnumerable<Matière_Premiere>>> GetBy(Guid id)
+        public async Task<ActionResult<IEnumerable<Model>>> GetBy(Guid id)
         {
             try
             {
@@ -192,7 +184,7 @@
 
                         if (list.Contains(identity.First().Id))
                         {
-                            var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id), x => x.Unité);
+                            var result = await repositoryWrapper.Item.GetBy(x => (x.EntrepriseId == id));
                             return Ok(result.OrderBy(x => x.Name));
                         }
                         else return NotFound("Non membre cette entreprise");
@@ -206,5 +198,6 @@
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
     }
 }
