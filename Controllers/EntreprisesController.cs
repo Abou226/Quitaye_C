@@ -1,19 +1,4 @@
-﻿using AutoMapper;
-using Contracts;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using Models;
-using Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Controllers
+﻿namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -159,7 +144,6 @@ namespace Controllers
         }
 
         [HttpGet("{id:Guid}")]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<Entreprise>>> GetBy([FromRoute] Guid id)
         {
             try
@@ -173,7 +157,7 @@ namespace Controllers
                     if (result.Count() != 0)
                     {
                         var entreprise = await repositoryWrapper.Item.GetByInclude(x => x.Id == id, x => x.Type, x => x.Quartier);
-                        return Ok(entreprise);
+                        return Ok(entreprise.First());
                     } else return null;
                 }
                 else return NotFound("User not indentified");
@@ -184,7 +168,6 @@ namespace Controllers
             }
         }
 
-        
         public override async Task<ActionResult<IEnumerable<Entreprise>>> AddAsync([FromBody] List<Entreprise> values)
         {
             try
@@ -212,6 +195,8 @@ namespace Controllers
                         use.EntrepriseId = value.Id;
                         use.DateOfAdd = DateTime.Now;
                         use.UserId = identity.First().Id;
+                        use.Confirmed = true;
+                        use.Role = UserRole.Owner;
                         await repositoryWrapper.ItemE.AddAsync(use);
                         await repositoryWrapper.SaveAsync();
                     }

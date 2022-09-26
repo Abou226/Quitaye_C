@@ -1,27 +1,10 @@
-﻿using Contracts;
-using Models;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Net;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Authorization;
-
-namespace Quitaye.Server.Controllers
+﻿namespace Quitaye.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class AuthClientController : ControllerBase
     {
-        const string Callback = "mahalfial";
+        const string Callback = "https://quitaye.mahalfial.com/signin-google";
         private readonly IGenericRepositoryWrapper<Client> _userRepository;
         private readonly IGenericRepositoryWrapper<ExternalLogin> _externalLoginRepository;
         private readonly IConfigSettings _settings;
@@ -36,6 +19,7 @@ namespace Quitaye.Server.Controllers
             _userRepository = userRepository;
             _settings = settings;
             _facebook = facebook;
+            _externalLoginRepository = externalLoginRepository;
             _refreshTokenRepository = refreshTokenRepository;
         }
 
@@ -66,6 +50,7 @@ namespace Quitaye.Server.Controllers
                             user.ProfilePic = result.First().PhotoUrl;
                             user.Prenom = result.First().Prenom;
                             user.Email = result.First().Email;
+                            user.TokenExpiry = result.First().DateOfCreation;
                             user.Nom = result.First().Nom;
                             user.Token = token.Token;
                             user.Success = true;
@@ -92,6 +77,7 @@ namespace Quitaye.Server.Controllers
                             user.Username = result.First().Username;
                             user.ProfilePic = result.First().PhotoUrl;
                             user.Prenom = result.First().Prenom;
+                            user.TokenExpiry = result.First().DateOfCreation;
                             user.Email = result.First().Email;
                             user.Nom = result.First().Nom;
                             user.Token = token.Token;
@@ -122,6 +108,7 @@ namespace Quitaye.Server.Controllers
                 userWithToken.Token = result.Token;
                 userWithToken.Prenom = result.Prenom;
                 userWithToken.Nom = result.Nom;
+                userWithToken.TokenExpiry = result.DateOfExpiry;
                 userWithToken.Email = user.Email;
                 userWithToken.ProfilePic = user.PhotoUrl;
                 userWithToken.Success = true;
@@ -168,40 +155,33 @@ namespace Quitaye.Server.Controllers
                 if (item.Count() != 0)
                 {
                     user = item.First();
-                }
-                user = await _userRepository.Item.AddAsync(new Client()
+                } else
                 {
-                    Email = email,
-                    Prenom = givenName,
-                    Nom = surName,
-                    PhotoUrl = picture,
-                    Id = Guid.NewGuid(),
-                    DateOfCreation = DateTime.Now,
-                });
+                    user = await _userRepository.Item.AddAsync(new Client()
+                    {
+                        Email = email,
+                        Prenom = givenName,
+                        Nom = surName,
+                        PhotoUrl = picture,
+                        Id = Guid.NewGuid(),
+                        DateOfCreation = DateTime.Now,
+                    });
 
+                    await _userRepository.SaveAsync();
+                }
+
+                var authToken = await GenerateAccessToken(user.Id);
                 await _externalLoginRepository.Item.AddAsync(new ExternalLogin()
                 {
                     UserId = user.Id,
+                    Token = authToken.Token,
+                    DateOfExpiry = authToken.DateOfExpiry,
                     DateOfLogin = DateTime.Now,
                     Provider = scheme,
                     Id = Guid.NewGuid()
                 });
 
-                await _userRepository.SaveAsync();
-                var authToken = await GenerateAccessToken(user.Id);
-                //return new UserProfile()
-                //{
-                //    Email = user.Email,
-                //    Prenom = user.Prenom,
-                //    Nom = user.Nom,
-                //    Url = user.Url,
-                //    Id = user.Id,
-                //    AwsAccessKey = _settings.AccessKey,
-                //    AwsSecretKey = _settings.SecretKey,
-                //    BucketName = _settings.BucketName,
-                //    Token = authToken
-                //};
-                //Get parameters to send back to the callback
+                await _externalLoginRepository.SaveAsync();
 
                 var qs = new Dictionary<string, string>
                 {
@@ -328,6 +308,7 @@ namespace Quitaye.Server.Controllers
                         Token = token.Token,
                         Prenom = token.Prenom,
                         Nom = token.Nom,
+                        TokenExpiry = token.DateOfExpiry,
                         Email = user.First().Email,
                         ProfilePic = user.First().PhotoUrl,
                     };
@@ -355,6 +336,7 @@ namespace Quitaye.Server.Controllers
                         Prenom = token.Prenom,
                         Email = user.First().Email,
                         Nom = token.Nom,
+                        TokenExpiry = token.DateOfExpiry,
                         ProfilePic = user.First().PhotoUrl,
                     };
                 }

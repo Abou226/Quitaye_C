@@ -1,19 +1,4 @@
-﻿using AutoMapper;
-using Contracts;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using Models;
-using Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Controllers
+﻿namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -87,6 +72,38 @@ namespace Controllers
             }
         }
 
+        [HttpGet("{search}/{id:Guid}")]
+        public async Task<ActionResult<IEnumerable<Offre>>> GetBy([FromRoute] string search, Guid id)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    var result = await repositoryWrapper.Item.GetByInclude(x => 
+                    (x.EntrepriseId == id && (x.Categorie.Name.Contains(search) 
+                    || x.Style.Name.Contains(search) 
+                    || x.Taille.Name.Contains(search))),
+                                x => x.Model,
+                                x => x.Taille,
+                                x => x.Niveau,
+                                x => x.Marque,
+                                x => x.Style,
+                                x => x.Categorie,
+                                x => x.Occasionss);
+                    return Ok(result);
+                }
+                else return NotFound("User not indentified");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+
         public override async Task<ActionResult<IEnumerable<Offre>>> GetBy(string search, DateTime start, DateTime end)
         {
             try
@@ -106,6 +123,66 @@ namespace Controllers
                                 x => x.Marque,
                                 x => x.Style,
                                 x => x.Categorie, 
+                                x => x.Occasionss);
+
+                    return Ok(result);
+                }
+                else return NotFound("User not indentified");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet("by_style/{id:Guid}/{entrepriseId:Guid}")]
+        public async Task<ActionResult<IEnumerable<Offre>>> GetByStyle([FromRoute] Guid id, Guid entrepriseId)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    var result = await repositoryWrapper.Item.GetByInclude(x =>
+                                (x.StyleId.Equals(id)),
+                                    x => x.Model,
+                                    x => x.Taille,
+                                    x => x.Niveau,
+                                    x => x.Marque,
+                                    x => x.Style,
+                                    x => x.Categorie,
+                                    x => x.Occasionss);
+
+                    return Ok(result);
+                }
+                else return NotFound("User not indentified");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet("single/{id:Guid}/{entrepriseId:Guid}")]
+        public async Task<ActionResult<IEnumerable<Offre>>> GetBy([FromRoute] Guid id, Guid entrepriseId)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    var result = await repositoryWrapper.Item.GetByInclude(x =>
+                                (x.Id.Equals(id)),
+                                x => x.Model,
+                                x => x.Taille,
+                                x => x.Niveau,
+                                x => x.Marque,
+                                x => x.Style,
+                                x => x.Categorie,
                                 x => x.Occasionss);
 
                     return Ok(result);

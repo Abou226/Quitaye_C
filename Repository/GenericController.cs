@@ -81,9 +81,9 @@ namespace Repository
             }
         }
 
-        [HttpPatch]
+        [HttpPatch("{id:Guid}")]
         [Authorize]
-        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value,  [FromHeader] Guid id)
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value,  [FromRoute] Guid id)
         {
             return null;
         }
@@ -157,9 +157,9 @@ namespace Repository
             }
         }
 
-        [HttpPatch]
+        [HttpPatch("{id:Guid}")]
         [Authorize]
-        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
         {
             return null;
         }
@@ -234,9 +234,9 @@ namespace Repository
             }
         }
 
-        [HttpPatch]
+        [HttpPatch("{id:Guid}")]
         [Authorize]
-        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value,  [FromHeader] Guid id)
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value,  [FromRoute] Guid id)
         {
             return null;
         }
@@ -312,9 +312,9 @@ namespace Repository
             }
         }
 
-        [HttpPatch]
+        [HttpPatch("{id:Guid}")]
         [Authorize]
-        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value,  [FromHeader] Guid id)
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value,  [FromRoute] Guid id)
         {
             return null;
         }
@@ -391,9 +391,9 @@ namespace Repository
             }
         }
 
-        [HttpPatch]
+        [HttpPatch("{id:Guid}")]
         [Authorize]
-        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value,  [FromHeader] Guid id)
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value,  [FromRoute] Guid id)
         {
             return null;
         }
@@ -468,9 +468,9 @@ namespace Repository
             }
         }
 
-        [HttpPatch]
+        [HttpPatch("{id:Guid}")]
         [Authorize]
-        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value,  [FromHeader] Guid id)
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value,  [FromRoute] Guid id)
         {
             return null;
         }
@@ -545,9 +545,9 @@ namespace Repository
             }
         }
 
-        [HttpPatch]
+        [HttpPatch("{id:Guid}")]
         [Authorize]
-        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value,  [FromHeader] Guid id)
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value,  [FromRoute] Guid id)
         {
             return null;
         }
@@ -623,9 +623,9 @@ namespace Repository
             }
         }
 
-        [HttpPatch]
+        [HttpPatch("{id:Guid}")]
         [Authorize]
-        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
         {
             return null;
         }
@@ -700,9 +700,9 @@ namespace Repository
             }
         }
 
-        [HttpPatch]
+        [HttpPatch("{id:Guid}")]
         [Authorize]
-        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
         {
             return null;
         }
@@ -778,9 +778,9 @@ namespace Repository
             }
         }
 
-        [HttpPatch]
+        [HttpPatch("{id:Guid}")]
         [Authorize]
-        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
         {
             return null;
         }
@@ -855,9 +855,9 @@ namespace Repository
             }
         }
 
-        [HttpPatch]
+        [HttpPatch("{id:Guid}")]
         [Authorize]
-        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
         {
             return null;
         }
@@ -933,9 +933,488 @@ namespace Repository
             }
         }
 
-        [HttpPatch]
+        [HttpPatch("{id:Guid}")]
         [Authorize]
-        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
+        {
+            return null;
+        }
+    }
+
+    public class GenericController<A, B, C, D, E, F, G, H, I, J, K, L, M> : ControllerBase,
+           IGenericController<A, B, C, D, E, F, G, H, I, J, K, L, M> where A : class where B : class
+           where C : class where D : class where E : class where F : class where G : 
+        class where H : class where I : class where J : class where K : class where L : class where M : class
+    {
+        private readonly IGenericRepositoryWrapper<A, B, C, D, E, F, G, H, I, J, K, L, M> repositoryWrapper;
+        public GenericController(IGenericRepositoryWrapper<A, B, C, D, E, F, G, H, I, J, K, L, M> wrapper)
+        {
+            repositoryWrapper = wrapper;
+        }
+
+        [HttpPost]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
+        {
+            return null;
+        }
+
+        [HttpDelete]
+        [Authorize]
+        public virtual Task<ActionResult<A>> Delete([FromBody] Guid id)
+        {
+            return null;
+        }
+
+        [HttpGet]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetAll()
+        {
+            return null;
+        }
+
+        [HttpGet("{search}")]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetBy(string search)
+        {
+            return null;
+        }
+
+        [HttpGet("{search}/{start:DateTime}/{end:DateTime}")]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end)
+        {
+            return null;
+        }
+
+        [HttpPut]
+        [Authorize]
+        public async Task<ActionResult<A>> UpdateAsync([FromBody] A value)
+        {
+            try
+            {
+                if (value == null)
+                    BadRequest();
+
+                repositoryWrapper.ItemA.Update(value);
+                await repositoryWrapper.SaveAsync();
+                return Ok(value);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPatch("{id:Guid}")]
+        [Authorize]
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
+        {
+            return null;
+        }
+    }
+
+    public class GenericController<A, B, C, D, E, F, G, H, I, J, K, L, M, N> : ControllerBase,
+           IGenericController<A, B, C, D, E, F, G, H, I, J, K, L, M, N> where A : class where B : class
+           where C : class where D : class where E : class where F : class where G :
+        class where H : class where I : class where J : class where K : class 
+        where L : class where M : class where N : class
+    {
+        private readonly IGenericRepositoryWrapper<A, B, C, D, E, F, G, H, I, J, K, L, M, N> repositoryWrapper;
+        public GenericController(IGenericRepositoryWrapper<A, B, C, D, E, F, G, H, I, J, K, L, M, N> wrapper)
+        {
+            repositoryWrapper = wrapper;
+        }
+
+        [HttpPost]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
+        {
+            return null;
+        }
+
+        [HttpDelete]
+        [Authorize]
+        public virtual Task<ActionResult<A>> Delete([FromBody] Guid id)
+        {
+            return null;
+        }
+
+        [HttpGet]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetAll()
+        {
+            return null;
+        }
+
+        [HttpGet("{search}")]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetBy(string search)
+        {
+            return null;
+        }
+
+        [HttpGet("{search}/{start:DateTime}/{end:DateTime}")]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end)
+        {
+            return null;
+        }
+
+        [HttpPut]
+        [Authorize]
+        public async Task<ActionResult<A>> UpdateAsync([FromBody] A value)
+        {
+            try
+            {
+                if (value == null)
+                    BadRequest();
+
+                repositoryWrapper.ItemA.Update(value);
+                await repositoryWrapper.SaveAsync();
+                return Ok(value);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPatch("{id:Guid}")]
+        [Authorize]
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
+        {
+            return null;
+        }
+    }
+
+    public class GenericController<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O> : ControllerBase,
+           IGenericController<A, B, C, D, E, F, G, H, I, J, K, L, M, N> where A : class where B : class
+           where C : class where D : class where E : class where F : class where G :
+        class where H : class where I : class where J : class where K : class
+        where L : class where M : class where N : class where O : class
+    {
+        private readonly IGenericRepositoryWrapper<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O> repositoryWrapper;
+        public GenericController(IGenericRepositoryWrapper<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O> wrapper)
+        {
+            repositoryWrapper = wrapper;
+        }
+
+        [HttpPost]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
+        {
+            return null;
+        }
+
+        [HttpDelete]
+        [Authorize]
+        public virtual Task<ActionResult<A>> Delete([FromBody] Guid id)
+        {
+            return null;
+        }
+
+        [HttpGet]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetAll()
+        {
+            return null;
+        }
+
+        [HttpGet("{search}")]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetBy(string search)
+        {
+            return null;
+        }
+
+        [HttpGet("{search}/{start:DateTime}/{end:DateTime}")]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end)
+        {
+            return null;
+        }
+
+        [HttpPut]
+        [Authorize]
+        public async Task<ActionResult<A>> UpdateAsync([FromBody] A value)
+        {
+            try
+            {
+                if (value == null)
+                    BadRequest();
+
+                repositoryWrapper.ItemA.Update(value);
+                await repositoryWrapper.SaveAsync();
+                return Ok(value);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPatch("{id:Guid}")]
+        [Authorize]
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
+        {
+            return null;
+        }
+    }
+
+    public class GenericController<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P> : ControllerBase,
+           IGenericController<A, B, C, D, E, F, G, H, I, J, K, L, M, N> where A : class where B : class
+           where C : class where D : class where E : class where F : class where G :
+        class where H : class where I : class where J : class where K : class
+        where L : class where M : class where N : class where O : class where P : class
+    {
+        private readonly IGenericRepositoryWrapper<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P> repositoryWrapper;
+        public GenericController(IGenericRepositoryWrapper<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P> wrapper)
+        {
+            repositoryWrapper = wrapper;
+        }
+
+        [HttpPost]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
+        {
+            return null;
+        }
+
+        [HttpDelete]
+        [Authorize]
+        public virtual Task<ActionResult<A>> Delete([FromBody] Guid id)
+        {
+            return null;
+        }
+
+        [HttpGet]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetAll()
+        {
+            return null;
+        }
+
+        [HttpGet("{search}")]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetBy(string search)
+        {
+            return null;
+        }
+
+        [HttpGet("{search}/{start:DateTime}/{end:DateTime}")]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end)
+        {
+            return null;
+        }
+
+        [HttpPut]
+        [Authorize]
+        public async Task<ActionResult<A>> UpdateAsync([FromBody] A value)
+        {
+            try
+            {
+                if (value == null)
+                    BadRequest();
+
+                repositoryWrapper.ItemA.Update(value);
+                await repositoryWrapper.SaveAsync();
+                return Ok(value);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPatch("{id:Guid}")]
+        [Authorize]
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
+        {
+            return null;
+        }
+    }
+
+    public class GenericController<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q> : ControllerBase,
+           IGenericController<A, B, C, D, E, F, G, H, I, J, K, L, M, N> where A : class where B : class
+           where C : class where D : class where E : class where F : class where G :
+        class where H : class where I : class where J : class where K : class
+        where L : class where M : class where N : class where O : class where P : class where Q : class
+    {
+        private readonly IGenericRepositoryWrapper<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q> repositoryWrapper;
+        public GenericController(IGenericRepositoryWrapper<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q> wrapper)
+        {
+            repositoryWrapper = wrapper;
+        }
+
+        [HttpPost]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
+        {
+            return null;
+        }
+
+        [HttpDelete]
+        [Authorize]
+        public virtual Task<ActionResult<A>> Delete([FromBody] Guid id)
+        {
+            return null;
+        }
+
+        [HttpGet]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetAll()
+        {
+            return null;
+        }
+
+        [HttpGet("{search}")]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetBy(string search)
+        {
+            return null;
+        }
+
+        [HttpGet("{search}/{start:DateTime}/{end:DateTime}")]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end)
+        {
+            return null;
+        }
+
+        [HttpPut]
+        [Authorize]
+        public async Task<ActionResult<A>> UpdateAsync([FromBody] A value)
+        {
+            try
+            {
+                if (value == null)
+                    BadRequest();
+
+                repositoryWrapper.ItemA.Update(value);
+                await repositoryWrapper.SaveAsync();
+                return Ok(value);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPatch("{id:Guid}")]
+        [Authorize]
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
+        {
+            return null;
+        }
+    }
+
+    public class GenericController<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R> : ControllerBase,
+           IGenericController<A, B, C, D, E, F, G, H, I, J, K, L, M, N> where A : class where B : class
+           where C : class where D : class where E : class where F : class where G :
+        class where H : class where I : class where J : class where K : class
+        where L : class where M : class where N : class where O : class where P : class where Q : class where R : class
+    {
+        private readonly IGenericRepositoryWrapper<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R> repositoryWrapper;
+        public GenericController(IGenericRepositoryWrapper<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R> wrapper)
+        {
+            repositoryWrapper = wrapper;
+        }
+
+        [HttpPost]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromBody] List<A> value)
+        {
+            return null;
+        }
+
+
+        [HttpPost("single")]
+        public virtual Task<ActionResult<IEnumerable<A>>> AddAsync([FromForm] A value)
+        {
+            return null;
+        }
+
+        [HttpDelete]
+        [Authorize]
+        public virtual Task<ActionResult<A>> Delete([FromBody] Guid id)
+        {
+            return null;
+        }
+
+        [HttpGet]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetAll()
+        {
+            return null;
+        }
+
+        [HttpGet("{search}")]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetBy(string search)
+        {
+            return null;
+        }
+
+        [HttpGet("{search}/{start:DateTime}/{end:DateTime}")]
+        [Authorize]
+        public virtual Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end)
+        {
+            return null;
+        }
+
+        [HttpPut]
+        [Authorize]
+        public async Task<ActionResult<A>> UpdateAsync([FromBody] A value)
+        {
+            try
+            {
+                if (value == null)
+                    BadRequest();
+
+                repositoryWrapper.ItemA.Update(value);
+                await repositoryWrapper.SaveAsync();
+                return Ok(value);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPatch("{id:Guid}")]
+        [Authorize]
+        public virtual Task<ActionResult<A>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id)
         {
             return null;
         }

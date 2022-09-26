@@ -1,34 +1,19 @@
-﻿using AutoMapper;
-using Contracts;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using Models;
-using Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Controllers
+﻿namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
     public class LivraisonsController : GenericController<Livraison, User, Vente, Offre,
-        Marque, Taille, Model, Style, Categorie, Niveau, List<OccasionList>, Client>
+        Marque, Taille, Model, Style, Categorie, Niveau, List<OccasionList>, Models.Client>
     {
         private readonly IGenericRepositoryWrapper<Livraison, User, Vente, Offre,
-            Marque, Taille, Model, Style, Categorie, Niveau, List<OccasionList>, Client> repositoryWrapper;
+            Marque, Taille, Model, Style, Categorie, Niveau, List<OccasionList>, Models.Client> repositoryWrapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUserRepository;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
 
         public LivraisonsController(IGenericRepositoryWrapper<Livraison, User, Vente, Offre,
-            Marque, Taille, Model, Style, Categorie, Niveau, List<OccasionList>, Client> wrapper, 
+            Marque, Taille, Model, Style, Categorie, Niveau, List<OccasionList>, Models.Client> wrapper, 
             IGenericRepositoryWrapper<EntrepriseUser> entrepriseUserRepository,
             IConfigSettings settings, IMapper mapper) : base(wrapper)
         {

@@ -358,6 +358,41 @@ namespace Services
                 return null;
             }
         }
+
+        public async Task<object> UploadFileFormDataAsync(T value, string token, string url = null)
+        {
+            var response = new HttpResponseMessage();
+            var type = value.GetType().ToString();
+            var a = type.Split('.');
+            foreach (var item in a)
+            {
+                type = item;
+            }
+
+            response = await Client.PostFormDataAsync("api/" + type + "s/" + url, token, value);
+            if (response.IsSuccessStatusCode)
+            {
+                if (value is Models.File)
+                {
+                    var data = ConvertSingle<Models.FileUrl>.FromJson(await response.Content.ReadAsStringAsync());
+                    var d = new Models.File() { Url = data.Url };
+
+                    return d;
+                }
+                else
+                {
+                    var data = ConvertSingle<T>.FromJson(await response.Content.ReadAsStringAsync());
+                    return data;
+                }
+
+            }
+            else
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                var mes = response.ReasonPhrase.ToString();
+                return null;
+            }
+        }
     }
 
     public class ClientService<T> : BaseVM.BaseViewModel, IDataService<T> where T : class
@@ -516,7 +551,11 @@ namespace Services
                 if (response.IsSuccessStatusCode)
                     return values;
                 else
+                {
+                    var message = await response.Content.ReadAsStringAsync();
+                    var mese = response.ReasonPhrase;
                     return null;
+                }
             }
             catch (Exception ex)
             {
@@ -676,6 +715,40 @@ namespace Services
             {
                 var message = ex.Message;
                 var phrase = ex.InnerException;
+                return null;
+            }
+        }
+
+        public async Task<object> UploadFileFormDataAsync(T value, string token, string url = null)
+        {
+            var response = new HttpResponseMessage();
+            var type = value.GetType().ToString();
+            var a = type.Split('.');
+            foreach (var item in a)
+            {
+                type = item;
+            }
+
+            response = await Client.PostFormDataAsync("api/" + type + "s/" + url, token, value);
+            if (response.IsSuccessStatusCode)
+            {
+                if (value is Models.File)
+                {
+                    var data = ConvertSingle<Models.FileUrl>.FromJson(await response.Content.ReadAsStringAsync());
+                    var d = new Models.File() { Url = data.Url };
+
+                    return d;
+                }
+                else
+                {
+                    var data = ConvertSingle<T>.FromJson(await response.Content.ReadAsStringAsync());
+                    return data;
+                }
+            }
+            else
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                var mes = response.ReasonPhrase.ToString();
                 return null;
             }
         }

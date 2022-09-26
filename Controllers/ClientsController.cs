@@ -1,31 +1,17 @@
-﻿using AutoMapper;
-using Contracts;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using Models;
-using Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class ClientsController : GenericController<Client, User>
+    public class ClientsController : GenericController<Models.Client, User>
     {
-        private readonly IGenericRepositoryWrapper<Client, User> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<Models.Client, User> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
 
-        public ClientsController(IGenericRepositoryWrapper<Client, User> wrapper,
+        public ClientsController(IGenericRepositoryWrapper<Models.Client, User> wrapper,
             IConfigSettings settings, 
             IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, 
             IMapper mapper) : base(wrapper)
@@ -37,7 +23,7 @@ namespace Controllers
         }
 
         [HttpDelete("{id}")]
-        public override async Task<ActionResult<Client>> Delete([FromRoute] Guid id)
+        public override async Task<ActionResult<Models.Client>> Delete([FromRoute] Guid id)
         {
             try
             {
@@ -46,7 +32,7 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    Client u = new Client();
+                    Models.Client u = new Models.Client();
                     u.Id = id;
                     repositoryWrapper.Item.Delete(u);
                     await repositoryWrapper.SaveAsync();
@@ -60,7 +46,7 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<Client>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
+        public override async Task<ActionResult<Models.Client>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id)
         {
             try
             {
@@ -82,7 +68,7 @@ namespace Controllers
         }
 
         [HttpPatch("base")]
-        public async Task<ActionResult<Client>> PatchUpdateAsync([FromBody] JsonPatchDocument value)
+        public async Task<ActionResult<Models.Client>> PatchUpdateAsync([FromBody] JsonPatchDocument value)
         {
             try
             {
@@ -106,7 +92,7 @@ namespace Controllers
 
         [AllowAnonymous]
         [HttpGet("Email/{email}")]
-        public async Task<ActionResult<Client>> GetUser([FromRoute] string email)
+        public async Task<ActionResult<Models.Client>> GetUser([FromRoute] string email)
         {
             try
             {
@@ -118,7 +104,7 @@ namespace Controllers
                     var result = await repositoryWrapper.ItemA.GetBy(x => (x.Email == email));
                     if (result.Count() != 0)
                     {
-                        Client client = new Client();
+                        Models.Client client = new Models.Client();
                         client.Email = result.First().Email;
                         return Ok(client);
                     }
@@ -134,7 +120,7 @@ namespace Controllers
 
        
         [HttpGet("baseinfo")]
-        public async Task<ActionResult<Client>> GetUserBaseInfo()
+        public async Task<ActionResult<Models.Client>> GetUserBaseInfo()
         {
             try
             {
@@ -143,7 +129,7 @@ namespace Controllers
                 Equals(claim));
                 if (identity.Count() != 0)
                 {
-                    Client client = new Client();
+                    Models.Client client = new Models.Client();
                     client.Email = identity.First().Email;
                     client.Prenom = identity.First().Prenom;
                     client.Nom = identity.First().Nom;
@@ -160,7 +146,7 @@ namespace Controllers
         }
 
 
-        public override async Task<ActionResult<IEnumerable<Client>>> GetAll()
+        public override async Task<ActionResult<IEnumerable<Models.Client>>> GetAll()
         {
             try
             {
@@ -181,7 +167,7 @@ namespace Controllers
             }
         }
 
-        public override async Task<ActionResult<IEnumerable<Client>>> GetBy(string search)
+        public override async Task<ActionResult<IEnumerable<Models.Client>>> GetBy(string search)
         {
             try
             {
@@ -205,7 +191,7 @@ namespace Controllers
         }
 
         [HttpGet("{id:Guid}")]
-        public async Task<ActionResult<IEnumerable<Client>>> GetBy([FromRoute] Guid id)
+        public async Task<ActionResult<IEnumerable<Models.Client>>> GetBy([FromRoute] Guid id)
         {
             try
             {
@@ -242,7 +228,7 @@ namespace Controllers
         }
 
         [AllowAnonymous]
-        public override async Task<ActionResult<IEnumerable<Client>>> AddAsync([FromBody] List<Client> values)
+        public override async Task<ActionResult<IEnumerable<Models.Client>>> AddAsync([FromBody] List<Models.Client> values)
         {
             try
             {
@@ -279,7 +265,7 @@ namespace Controllers
             }
         }
 
-        async Task Add(Client value)
+        async Task Add(Models.Client value)
         {
             value.Id = Guid.NewGuid();
             if (value.DateOfCreation == Convert.ToDateTime("0001-01-01T00:00:00"))
@@ -294,7 +280,7 @@ namespace Controllers
 
         [HttpGet("{entrepriseId:Guid}/{search}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<Client>>> GetBy([FromRoute] Guid entrepriseId, string search)
+        public async Task<ActionResult<IEnumerable<Models.Client>>> GetBy([FromRoute] Guid entrepriseId, string search)
         {
             try
             {

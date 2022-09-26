@@ -1,6 +1,7 @@
 ﻿using Acr.UserDialogs;
 using BaseVM;
 using Models;
+using Quitaye.Services;
 using Services;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,8 @@ using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
+
+
 namespace Quitaye.ViewModels
 {
     public abstract class ObjectViewModel<T> : BaseVM.BaseViewModel where T : class, new()
@@ -22,6 +25,7 @@ namespace Quitaye.ViewModels
         public bool IsRunning { get; set; }
         public ICommand BackCommand { get; }
         public ICommand DeleteCommand { get; }
+        public ISessionService SessionService { get; }
         public IDataService<T> DataService { get; }
         public IFileUploadService FileUpload { get; }
         public ICommand RefreshCommand { get; }
@@ -60,6 +64,7 @@ namespace Quitaye.ViewModels
             FileUpload = DependencyService.Get<IFileUploadService>();
             RefreshCommand = new Command(OnRefreshCommand);
             DeleteCommand = new Command(OnDeleteCommand);
+            SessionService = DependencyService.Get<ISessionService>();
             Item = new T();
             MessageAlert = DependencyService.Get<IMessage>();
             Init = DependencyService.Get<IInitialService>();
@@ -132,7 +137,7 @@ namespace Quitaye.ViewModels
 
             try
             {
-                var list = await DataService.GetItemsAsync(await SecureStorage.GetAsync("Token"), ps + "s/" + Entreprise.Id.ToString());
+                var list = await DataService.GetItemsAsync(await SessionService.GetToken(), ps + "s/" + Entreprise.Id.ToString());
                 Items.Clear();
                 if (list.Count() != 0)
                 {
@@ -160,11 +165,7 @@ namespace Quitaye.ViewModels
             Debug.WriteLine($"Echec operation: {ex.Message}");
             if (ex.Message.Contains("Unauthorize"))
             {
-                var result = await Init.Get(new LogInModel() { Token = await SecureStorage.GetAsync("Token"), Password = "d", Username = "d" });
-                await SecureStorage.SetAsync("Token", result.Token);
-                await SecureStorage.SetAsync("Prenom", result.Prenom);
-                await SecureStorage.SetAsync("Nom", result.Nom);
-                await SecureStorage.SetAsync("ProfilePic", result.ProfilePic);
+                await SessionService.GetNewToken(await SessionService.GetToken());
                 await action;
             }
             else if (ex.Message.Contains("host"))

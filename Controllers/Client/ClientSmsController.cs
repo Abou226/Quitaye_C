@@ -1,29 +1,13 @@
-﻿using Amazon.SimpleNotificationService.Model;
-using Contracts;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using Models;
-using Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace Controllers
+﻿namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class ClientSmsController : GenericController<Client, Sms>
+    public class ClientSmsController : GenericController<Models.Client, Sms>
     {
         private readonly IConfigSettings _settings;
-        private readonly IGenericRepositoryWrapper<Client, Sms> repositoryWrapper;
-        public ClientSmsController(IConfigSettings settings, IGenericRepositoryWrapper<Client, Sms> _repositoryWrapper):base(_repositoryWrapper)
+        private readonly IGenericRepositoryWrapper<Models.Client, Sms> repositoryWrapper;
+        public ClientSmsController(IConfigSettings settings, IGenericRepositoryWrapper<Models.Client, Sms> _repositoryWrapper):base(_repositoryWrapper)
         {
             _settings = settings;
             repositoryWrapper = _repositoryWrapper;

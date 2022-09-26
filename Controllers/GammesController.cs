@@ -1,19 +1,4 @@
-﻿using AutoMapper;
-using Contracts;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using Models;
-using Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Controllers
+﻿namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -141,7 +126,9 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x =>
-                    (x.EntrepriseId.ToString() == search) && (x.Categorie.Name.Contains(search) ), x => x.Marque, x => x.Style, x => x.Categorie);
+                    (x.EntrepriseId.ToString() == search) 
+                    && (x.Categorie.Name.Contains(search) ), 
+                    x => x.Marque, x => x.Style, x => x.Categorie);
 
                     return Ok(result);
                 }
@@ -242,7 +229,9 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x =>
-                    (x.EntrepriseId.ToString() == search) && (x.Marque.Name.Contains(search)), x => x.Marque, x => x.Style, x => x.Categorie);
+                    (x.EntrepriseId.ToString() == search) 
+                    && (x.Marque.Name.Contains(search)), 
+                    x => x.Marque, x => x.Style, x => x.Categorie);
 
                     return Ok(result);
                 }
@@ -266,7 +255,8 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetByInclude( x => x.Marque, x => x.Style, x => x.Categorie);
+                    var result = await repositoryWrapper.Item.GetByInclude( x => x.Marque, 
+                        x => x.Style, x => x.Categorie);
 
                     return Ok(result);
                 }

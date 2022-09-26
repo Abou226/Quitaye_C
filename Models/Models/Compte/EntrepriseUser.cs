@@ -22,6 +22,8 @@ namespace Models
         [ForeignKey(nameof(Departement))]
         public Guid? DepartementId { get; set; }
         public Departement Departement { get; set; }
-        public UserRole Role { get; set; } = UserRole.Admin;
+
+        public bool Confirmed { get; set; } 
+        public UserRole Role { get; set; } = UserRole.Owner;
     }
 }

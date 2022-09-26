@@ -1,19 +1,4 @@
-﻿using AutoMapper;
-using Contracts;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using Models;
-using Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Controllers
+﻿namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -112,6 +97,30 @@ namespace Controllers
                     var result = await repositoryWrapper.Item.GetByInclude(x =>
                     (x.EntrepriseId == entrepriseId)
                     && (x.Matière.Name.Contains(search) || x.Unité.Equals(search)), x => x.Matière);
+
+                    return Ok(result);
+                }
+                else return NotFound("User not indentified");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet("{entrepriseId:Guid}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<Conso_Matiere>>> GetByEntreprise([FromRoute]Guid entrepriseId)
+        {
+            try
+            {
+                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
+                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
+                Equals(claim));
+                if (identity.Count() != 0)
+                {
+                    var result = await repositoryWrapper.Item.GetByInclude(x =>
+                    (x.EntrepriseId == entrepriseId), x => x.Matière);
 
                     return Ok(result);
                 }

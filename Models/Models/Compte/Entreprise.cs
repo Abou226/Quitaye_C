@@ -29,6 +29,8 @@ namespace Models
         public int Nb_Employés { get; set; }
 
         //[ForeignKey(nameof(Owner))]
+        [StringLength(60, ErrorMessage = "La taille de l'heure ne peut dépasser 60 characters")]
+        public string TypeHeure { get; set; }
         public Guid? OwnerId { get; set; }
         //public User Owner { get; set; }
     }

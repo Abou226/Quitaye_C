@@ -43,5 +43,8 @@ namespace Models
         public Guid? UserId { get; set; }
         public User User { get; set; }
         public Genre Genre { get; set; } = Genre.Femme;
+
+        [NotMapped]
+        public bool Selected { get; set; }
     }
 }

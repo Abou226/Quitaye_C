@@ -1,22 +1,7 @@
-﻿using Contracts;
-using Entities;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
-using AutoMapper;
-using Amazon.S3;
-using Repository.Quitaye;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace Quitaye.Controllers.Extensions
 {
@@ -27,29 +12,50 @@ namespace Quitaye.Controllers.Extensions
             services.AddDbContext<RepositoryContext>(options => options.UseSqlServer(configuration.GetConnectionString("DbConnection")));
         }
 
-        public static void ConfigureRepositoryWrapper(this IServiceCollection services, IConfiguration config)
+        public static void ConfigureRepositoryWrapper(this IServiceCollection services, IConfiguration config, IWebHostEnvironment WebHostEnvironment)
         {
             var key = config.GetSection("ConfigSettings")["Key"].ToString();
             var hostName = config.GetSection("ConfigSettings")["HostName"].ToString();
+            var GatoniniGoogleClient_Id = config.GetSection("ConfigSettings")["QuitayeGoogleAppId"].ToString();
+            var GatoniniGoogleClient_Secret = config.GetSection("ConfigSettings")["QuitayeGoogleAppSecret"].ToString();
+            var GatoniniFacebookClient_Id = config.GetSection("ConfigSettings")["QuitayeFacebookAppId"].ToString();
+            var GatoniniFacebookClient_Secret = config.GetSection("ConfigSettings")["QuitayeFacebookAppSecret"].ToString();
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedProto;
+            }); 
             services.AddAuthentication(opt => {
                 opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.RequireHttpsMetadata = false;
-                options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
+            }).AddCookie()
+                .AddFacebook(fb =>
                 {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = hostName,
-                    ValidAudience = hostName,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
-                };
-            });
+                    fb.AppId = GatoniniFacebookClient_Id;
+                    fb.AppSecret = GatoniniFacebookClient_Secret;
+                    fb.SaveTokens = true;
+                })
+                .AddGoogle(g =>
+                {
+                    g.ClientId = GatoniniGoogleClient_Id;
+                    g.ClientSecret = GatoniniGoogleClient_Secret;
+                    g.SaveTokens = true;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = true;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = hostName,
+                        ValidAudience = hostName,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+                    };
+                });
 
             //services.AddScoped(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
             services.Configure<ConfigSettings>(config.GetSection("ConfigSettings"));
@@ -71,6 +77,13 @@ namespace Quitaye.Controllers.Extensions
             services.AddScoped(typeof(IGenericRepository<,,,,,,,,,>), typeof(GenericRepository<,,,,,,,,,>));
             services.AddScoped(typeof(IGenericRepository<,,,,,,,,,,>), typeof(GenericRepository<,,,,,,,,,,>));
             services.AddScoped(typeof(IGenericRepository<,,,,,,,,,,,>), typeof(GenericRepository<,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepository<,,,,,,,,,,,,>), typeof(GenericRepository<,,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepository<,,,,,,,,,,,,,>), typeof(GenericRepository<,,,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepository<,,,,,,,,,,,,,,>), typeof(GenericRepository<,,,,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepository<,,,,,,,,,,,,,,,>), typeof(GenericRepository<,,,,,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepository<,,,,,,,,,,,,,,,,>), typeof(GenericRepository<,,,,,,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepository<,,,,,,,,,,,,,,,,,>), typeof(GenericRepository<,,,,,,,,,,,,,,,,,>));
+            
             services.AddScoped(typeof(IGenericController<>), typeof(GenericController<>));
             services.AddScoped(typeof(IGenericController<,>), typeof(GenericController<,>));
             services.AddScoped(typeof(IGenericController<,,>), typeof(GenericController<,,>));
@@ -83,6 +96,13 @@ namespace Quitaye.Controllers.Extensions
             services.AddScoped(typeof(IGenericController<,,,,,,,,,>), typeof(GenericController<,,,,,,,,,>));
             services.AddScoped(typeof(IGenericController<,,,,,,,,,,>), typeof(GenericController<,,,,,,,,,,>));
             services.AddScoped(typeof(IGenericController<,,,,,,,,,,,>), typeof(GenericController<,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericController<,,,,,,,,,,,,>), typeof(GenericController<,,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericController<,,,,,,,,,,,,,>), typeof(GenericController<,,,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericController<,,,,,,,,,,,,,,>), typeof(GenericController<,,,,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericController<,,,,,,,,,,,,,,,>), typeof(GenericController<,,,,,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericController<,,,,,,,,,,,,,,,,>), typeof(GenericController<,,,,,,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericController<,,,,,,,,,,,,,,,,,>), typeof(GenericController<,,,,,,,,,,,,,,,,,>));
+            
             services.AddScoped(typeof(IGenericRepositoryWrapper<>), typeof(GenericRepositoryWrapper<>));
             services.AddScoped(typeof(IGenericRepositoryWrapper<,>), typeof(GenericRepositoryWrapper<,>));
             services.AddScoped(typeof(IGenericRepositoryWrapper<,,>), typeof(GenericRepositoryWrapper<,,>));
@@ -95,6 +115,13 @@ namespace Quitaye.Controllers.Extensions
             services.AddScoped(typeof(IGenericRepositoryWrapper<,,,,,,,,,>), typeof(GenericRepositoryWrapper<,,,,,,,,,>));
             services.AddScoped(typeof(IGenericRepositoryWrapper<,,,,,,,,,,>), typeof(GenericRepositoryWrapper<,,,,,,,,,,>));
             services.AddScoped(typeof(IGenericRepositoryWrapper<,,,,,,,,,,,>), typeof(GenericRepositoryWrapper<,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepositoryWrapper<,,,,,,,,,,,,>), typeof(GenericRepositoryWrapper<,,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepositoryWrapper<,,,,,,,,,,,,,>), typeof(GenericRepositoryWrapper<,,,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepositoryWrapper<,,,,,,,,,,,,,,>), typeof(GenericRepositoryWrapper<,,,,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepositoryWrapper<,,,,,,,,,,,,,,,>), typeof(GenericRepositoryWrapper<,,,,,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepositoryWrapper<,,,,,,,,,,,,,,,,>), typeof(GenericRepositoryWrapper<,,,,,,,,,,,,,,,,>));
+            services.AddScoped(typeof(IGenericRepositoryWrapper<,,,,,,,,,,,,,,,,,>), typeof(GenericRepositoryWrapper<,,,,,,,,,,,,,,,,,>));
+            
         }
 
         public static void ConfigureAuthentication(this IServiceCollection services)
