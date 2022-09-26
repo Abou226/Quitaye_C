@@ -20,6 +20,7 @@ namespace Models
 
         [Required(ErrorMessage = "La date du login est requise")]
         public DateTime DateOfLogin { get; set; }
+        [Required(ErrorMessage = "La date d'expiration est requise")]
         public DateTime DateOfExpiry { get; set; }
 
         //[ForeignKey(nameof(User))]

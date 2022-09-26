@@ -16,8 +16,6 @@ namespace Models
         public DateTime Date { get; set; }
         public DateTime Date_Payement { get; set; }
 
-        [StringLength(60, ErrorMessage = "La taille de la réference ne peut dépasser 60 characters")]
-        public string Reference { get; set; }
         public string Num_Operation { get; set; }
         public Guid? Num_PayementId { get; set; }
         public Num_Payement Num_Payement { get; set; }
@@ -40,11 +38,5 @@ namespace Models
         [ForeignKey(nameof(Client))]
         public Guid? ClientId { get; set; }
         public Client Client { get; set; }
-
-        [ForeignKey(nameof(ModePayement))]
-        public Guid? ModePayementId { get; set; }
-        public ModePayement ModePayement { get; set; }
-        [NotMapped]
-        public bool Selected { get; set; }
     }
 }

@@ -30,9 +30,5 @@ namespace Models
 
         [StringLength(120, ErrorMessage = "La taille du topic ne peut dépasser 120 characters")]
         public string Url { get; set; }
-
-        [ForeignKey(nameof(User))]
-        public Guid? UserId { get; set; }
-        public User User { get; set; }
     }
 }

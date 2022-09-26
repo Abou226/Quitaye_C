@@ -49,18 +49,12 @@ namespace Models
         public Guid? UserId { get; set; }
         public User User { get; set; }
 
-        [Column(TypeName = "decimal(18, 2)")]
-        public decimal PourcentageReduction { get; set; }
-
         [Required(ErrorMessage = "Le prix unité est requis")]
         [Column(TypeName = "decimal(18, 2)")]
         public decimal Prix_Unité { get; set; }
 
         [StringLength(120, ErrorMessage = "La taille de l'url ne peut dépasser 120 characters")]
         public string Url { get; set; }
-
-        [NotMapped]
-        public bool IsChecked { get; set; }
 
         [NotMapped]
         public IFormFile Image { get; set; }

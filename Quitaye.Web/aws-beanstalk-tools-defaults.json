@@ -10,8 +10,8 @@
     "app-path"       : "/",
     "enable-xray"    : false,
     "configuration"  : "Release",
-    "framework"      : "net6.0",
-    "self-contained" : true,
+    "framework"      : "net5.0",
+    "self-contained" : false,
     "enhanced-health-type" : "basic",
     "additional-options"   : "",
     "proxy-server"         : "none"

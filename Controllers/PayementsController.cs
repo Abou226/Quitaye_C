@@ -1,16 +1,31 @@
-﻿namespace Controllers
+﻿using AutoMapper;
+using Contracts;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using Models;
+using Repository;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class PayementsController : GenericController<Payement, User, Num_Payement, ModePayement>
+    public class PayementsController : GenericController<Payement, User, Num_Payement>
     {
-        private readonly IGenericRepositoryWrapper<Payement, User, Num_Payement, ModePayement> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<Payement, User, Num_Payement> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
 
-        public PayementsController(IGenericRepositoryWrapper<Payement, User, Num_Payement, ModePayement> wrapper,
+        public PayementsController(IGenericRepositoryWrapper<Payement, User, Num_Payement> wrapper,
             IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
@@ -186,7 +201,7 @@
             }
         }
 
-        [HttpGet("{search}/{start:DateTime}/{end:DateTime}/{entrepriseId:Guid}")]
+        [HttpGet("{search}/{entrepriseId:Guid}/{start:DateTime}/{end:DateTime}")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<Payement>>> GetBy([FromRoute] string search, Guid entrepriseId, DateTime start, DateTime end)
         {
@@ -210,13 +225,12 @@
                         if (list.Contains(identity.First().Id))
                         {
                             var result = await repositoryWrapper.Item.GetByInclude(x =>
-                                        (x.EntrepriseId == entrepriseId)
-                                        && (x.Nature.Contains(search) 
-                                        || x.Type.Contains(search) 
-                                        || x.Num_Operation.Contains(search)) 
-                                        && x.Date.Date >= start.Date 
-                                        && x.Date.Date <= end.Date, 
-                                        x => x.Num_Payement, x => x.ModePayement);
+                            (x.EntrepriseId == entrepriseId)
+                            && (x.Nature.Contains(search) 
+                            || x.Type.Contains(search)) 
+                            && x.Date.Date >= start.Date 
+                            && x.Date.Date <= end.Date, 
+                            x => x.Num_Payement);
 
                             return Ok(result);
                         }
@@ -232,7 +246,7 @@
             }
         }
 
-        [HttpGet("{start:DateTime}/{end:DateTime}/{entrepriseId:Guid}")]
+        [HttpGet("{entrepriseId:Guid}/{start:DateTime}/{end:DateTime}")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<Payement>>> GetBy([FromRoute] Guid entrepriseId, DateTime start, DateTime end)
         {
@@ -244,11 +258,9 @@
 
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetByInclude(x =>
-                                (x.EntrepriseId == entrepriseId) 
-                                && x.Date_Payement.Date >= start.Date 
-                                && x.Date_Payement.Date <= end.Date, 
-                                x => x.Num_Payement, x => x.ModePayement);
+                    var result = await repositoryWrapper.Item.GetBy(x =>
+                    (x.EntrepriseId == entrepriseId) 
+                    && x.Date_Payement.Date >= start.Date && x.Date_Payement.Date <= end.Date);
 
                     return Ok(result);
                 }
@@ -260,9 +272,9 @@
             }
         }
 
-        [HttpGet("num_operation/{num_operation}")]
+        [HttpGet("interval/{entrepriseId:Guid}/{start:DateTime}/{end:DateTime}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<Payement>>> GetByNum_Vente([FromRoute] string num_operation)
+        public async Task<ActionResult<IEnumerable<Payement>>> GetForChart([FromRoute] Guid entrepriseId, DateTime start, DateTime end)
         {
             try
             {
@@ -272,67 +284,25 @@
 
                 if (identity.Count() != 0)
                 {
-                    var result = await repositoryWrapper.Item.GetByInclude(x =>
-                                (x.Num_Operation == num_operation),
-                                x => x.Num_Payement, x => x.ModePayement);
-
-                    return Ok(result);
-                }
-                else return NotFound("User not indentified");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-        }
-
-
-        [HttpGet("result/{start:DateTime}/{end:DateTime}/{entrepriseId:Guid}")]
-        [Authorize]
-        public async Task<ActionResult<IEnumerable<Reservation>>> GetForChart([FromRoute] DateTime start, DateTime end, Guid entrepriseId)
-        {
-            try
-            {
-                var claim = (((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(x => x.Type == "Id").Value);
-                var identity = await repositoryWrapper.ItemB.GetBy(x => x.Id.ToString().
-                Equals(claim));
-
-                if (identity.Count() != 0)
-                {
-                    var entreprise = await _entrepriseUser.Item.GetBy(x => x.EntrepriseId == entrepriseId);
-                    if (entreprise.Count() != 0)
+                    var entrepriseUser = await _entrepriseUser.Item.GetBy(x => x.UserId == identity.First().Id);
+                    if (entrepriseUser.Count() != 0)
                     {
-                        List<Guid> list = new List<Guid>();
-                        foreach (var item in entreprise)
-                        {
-                            list.Add((Guid)item.UserId);
-                        }
+                        var result = await repositoryWrapper.Item.GetBy(x =>
+                        (x.EntrepriseId == entrepriseId)
+                        && x.Date.Date >= start.Date && x.Date <= end.Date);
 
-                        if (list.Contains(identity.First().Id))
+                        var charts = new List<ChartData>();
+                        foreach (var item in result.OrderBy(x => x.Date).GroupBy(x => x.Date.Date))
                         {
-                            var result = await repositoryWrapper.Item.GetByInclude(x =>
-                                        (x.EntrepriseId == entrepriseId)
-                                        && x.Date_Payement.Date >= start.Date
-                                        && x.Date_Payement.Date <= end.Date, 
-                                        x => x.Num_Payement, 
-                                        x => x.ModePayement);
-
-                            var charts = new List<PayementChart>();
-                            foreach (var item in result)
+                            charts.Add(new ChartData()
                             {
-                                charts.Add(new PayementChart()
-                                {
-                                    Date = item.Date_Payement,
-                                    Montant = item.Montant,
-                                    Type = item.Type,
-                                    Nature = item.Nature,
-                                });
-                            }
-                            return Ok(charts);
+                                Date = item.Key.Date,
+                                Montant = item.Sum(x => x.Montant),
+                            });
                         }
-                        else return NotFound("Non membre cette entreprise");
+                        return Ok(charts);
                     }
-                    else return NotFound("Non trouvé");
+                    else return null;
                 }
                 else return NotFound("User not indentified");
             }
@@ -341,6 +311,5 @@
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
-
     }
 }

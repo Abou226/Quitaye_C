@@ -5,7 +5,6 @@ using Models;
 using Plugin.Connectivity;
 using Plugin.FirebasePushNotification;
 using Quitaye.Helpers;
-using Quitaye.Services;
 using Quitaye.Views;
 using Quitaye.Views.Home;
 using Services;
@@ -195,7 +194,6 @@ namespace Quitaye
 
         public ICommand UsersCommand { get; }
         public IDataService<Test> Test { get; }
-        public ISessionService SessionService { get; }
         public IDataService<Entreprise> EntrepriseService { get; }
         public ObservableCollection<ChartData> ChartDatas { get; }
         public IDataService<ChartData> ChartService { get; }
@@ -418,7 +416,6 @@ namespace Quitaye
             UsersCommand = new Command(OnUsersCommand);
             Init = DependencyService.Get<IInitialService>();
             Secret = DependencyService.Get<IDataService<Secrets>>();
-            SessionService = DependencyService.Get<ISessionService>();
             Token = DependencyService.Get<IDataService<RefreshToken>>();
             MessageAlert = DependencyService.Get<IMessage>();
             Test = DependencyService.Get<IDataService<Test>>();
@@ -455,7 +452,7 @@ namespace Quitaye
                 {
                     try
                     {
-                        var result = await Test.GetItemsAsync(await SessionService.GetToken(), "Tests");
+                        var result = await Test.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Tests");
                         //if(result == null)
                         {
                             BaseVM.IsInternetOn = true;
@@ -494,7 +491,7 @@ namespace Quitaye
 
                 try
                 {
-                    var ventes = await ChartService.GetItemsAsync(await SessionService.GetToken(), "Reservations/interval/" + Entreprise.Id.ToString() + "/" + DateTime.Today.AddDays(-6).Date.ToString("MM-dd-yyyy") + "/" + DateTime.Today.Date.ToString("MM-dd-yyyy"));
+                    var ventes = await ChartService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Reservations/interval/" + Entreprise.Id.ToString() + "/" + DateTime.Today.AddDays(-6).Date.ToString("MM-dd-yyyy") + "/" + DateTime.Today.Date.ToString("MM-dd-yyyy"));
                     foreach (var item in ventes)
                     {
                         turnoverEntries.Add(new ChartEntry((float)item.Montant)
@@ -505,7 +502,7 @@ namespace Quitaye
                         });
                     }
 
-                    var payements = await ChartService.GetItemsAsync(await SessionService.GetToken(), "Payements/interval/" + Entreprise.Id.ToString() + "/" + DateTime.Today.AddDays(-6).Date.ToString("MM-dd-yyyy") + "/" + DateTime.Today.Date.ToString("MM-dd-yyyy"));
+                    var payements = await ChartService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Payements/interval/" + Entreprise.Id.ToString() + "/" + DateTime.Today.AddDays(-6).Date.ToString("MM-dd-yyyy") + "/" + DateTime.Today.Date.ToString("MM-dd-yyyy"));
                     foreach (var item in payements)
                     {
                         chargesEntries.Add(new ChartEntry((float)item.Montant)
@@ -551,16 +548,37 @@ namespace Quitaye
 
         private async Task TokenManagement()
         {
-            if(await SessionService.HasTokenExpired())
+            try
             {
-                if (await SessionService.IsSecureStorageCompatible())
+                var tok = await SecureStorage.GetAsync("Token");
+                if (!string.IsNullOrWhiteSpace(tok))
                 {
-                    await SessionService.GetNewToken(await SecureStorage.GetAsync("Token"));
+                    var token = await Token.PostAsync(new LogInModel() { Token = await SecureStorage.GetAsync("Token"), Username = "d", Password = "d" },
+                    await SecureStorage.GetAsync("Token"), "auth/TokenCheck");
+                    if (token == null)
+                    {
+                        var resul = await Init.Get(new LogInModel() { Token = await SecureStorage.GetAsync("Token") });
+                        if (resul != null)
+                        {
+                            await SecureStorage.SetAsync("Token", resul.Token);
+                        }
+                    }
                 }
                 else
                 {
-                    await SessionService.GetNewToken(Preferences.Get("Token", "null"));
+                    var token = await Secret.GetItemAsync(null, "auth/useremail/" + await SecureStorage.GetAsync("Email"));
+                    if (token != null)
+                    {
+                        await SecureStorage.SetAsync("Token", token.Token);
+                        await SecureStorage.SetAsync("Prenom", token.Prenom);
+                        await SecureStorage.SetAsync("Nom", token.Nom);
+                        await SecureStorage.SetAsync("ProfilePic", token.ProfilePic);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+
             }
         }
 
@@ -578,7 +596,7 @@ namespace Quitaye
 
                     await TokenManagement();
 
-                    var pays = await EntrepriseService.GetItemsAsync(await SessionService.GetToken(), "Entreprises/");
+                    var pays = await EntrepriseService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Entreprises/");
                     Entreprises.Clear();
                     if (pays.Count() != 0)
                     {
@@ -586,7 +604,7 @@ namespace Quitaye
                         {
                             Entreprises.Add(item);
                         }
-                       var entrepriseId = await SessionService.GetLastEntrepriseId();
+                        var entrepriseId = await SecureStorage.GetAsync("LastEntreprise");
                         var entre = from d in pays where d.Id.ToString().Equals(entrepriseId) select d;
                         Entreprise = entre.First();
                         Project = entre.First();
@@ -603,7 +621,11 @@ namespace Quitaye
                     Debug.WriteLine($"Echec operation: {ex.Message}");
                     if (ex.Message.Contains("Unauthorize"))
                     {
-                        await SessionService.GetNewToken(await SessionService.GetToken());
+                        var result = await Init.Get(new LogInModel() { Token = await SecureStorage.GetAsync("Token"), Password = "d", Username = "d" });
+                        await SecureStorage.SetAsync("Token", result.Token);
+                        await SecureStorage.SetAsync("Prenom", result.Prenom);
+                        await SecureStorage.SetAsync("Nom", result.Nom);
+                        await SecureStorage.SetAsync("ProfilePic", result.ProfilePic);
                         IsNotBusy = true;
                         await GetProjects();
                     }
@@ -672,7 +694,7 @@ namespace Quitaye
 
         async void Initial()
         {
-            ProfilePic = await SessionService.GetSavedProfilePic();
+            ProfilePic = await SecureStorage.GetAsync("ProfilePic");
         }
     }
 }

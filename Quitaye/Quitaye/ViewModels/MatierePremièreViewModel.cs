@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Models;
 using Plugin.Connectivity;
-using Quitaye.Services;
 using Services;
 using System;
 using System.Collections.Generic;
@@ -22,7 +21,6 @@ using Xamarin.Forms;
 [assembly: Dependency(typeof(DataService<Test>))]
 [assembly: Dependency(typeof(BaseViewModel))]
 [assembly: Dependency(typeof(InitialService))]
-
 
 namespace Quitaye.ViewModels
 {
@@ -84,14 +82,12 @@ namespace Quitaye.ViewModels
 
         public IBaseViewModel BaseVM { get; }
         public INavigation Navigation { get; }
-        public ISessionService SessionService { get; }
         public ICommand BackCommand { get; }
         public MatierePremièreViewModel(INavigation navigation, Entreprise entreprise)
         {
             Entreprise = entreprise;
             Navigation = navigation;
             BaseVM = DependencyService.Get<IBaseViewModel>();
-            SessionService = DependencyService.Get<ISessionService>();
             DataService = DependencyService.Get<IDataService<Matière_Premiere>>();
             Items = new ObservableCollection<Matière_Premiere>();
             Init = DependencyService.Get<IInitialService>();
@@ -122,7 +118,7 @@ namespace Quitaye.ViewModels
                         if(showDialog)
                         UserDialogs.Instance.ShowLoading("Chargement....");
 
-                        var items = await DataService.GetItemsAsync(await SessionService.GetToken(), "Matiere_Premieres/" + Entreprise.Id.ToString());
+                        var items = await DataService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Matiere_Premieres/" + Entreprise.Id.ToString());
                         Items.Clear();
                         if (items.Count() != 0)
                         {
@@ -155,7 +151,7 @@ namespace Quitaye.ViewModels
                 {
                     try
                     {
-                        var result = await Test.GetItemsAsync(await SessionService.GetToken(), "Tests");
+                        var result = await Test.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Tests");
                         //if(result == null)
                         {
                             BaseVM.IsInternetOn = true;
@@ -182,7 +178,11 @@ namespace Quitaye.ViewModels
             Debug.WriteLine($"Echec operation: {ex.Message}");
             if (ex.Message.Contains("Unauthorize"))
             {
-                await SessionService.GetNewToken(await SessionService.GetToken());
+                var result = await Init.Get(new LogInModel() { Token = await SecureStorage.GetAsync("Token"), Password = "d", Username = "d" });
+                await SecureStorage.SetAsync("Token", result.Token);
+                await SecureStorage.SetAsync("Prenom", result.Prenom);
+                await SecureStorage.SetAsync("Nom", result.Nom);
+                await SecureStorage.SetAsync("ProfilePic", result.ProfilePic);
                 await action;
             }
             else if (ex.Message.Contains("host"))

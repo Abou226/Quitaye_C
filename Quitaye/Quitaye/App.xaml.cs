@@ -10,10 +10,8 @@ using Xamarin.Essentials;
 using Microsoft.Extensions.DependencyInjection;
 using Quitaye.Views;
 using Plugin.FirebasePushNotification;
-using Quitaye.Services;
 
 [assembly: Dependency(typeof(BaseViewModel))]
-//
 [assembly: Dependency(typeof(CheckInternetService<Test>))]
 namespace Quitaye
 {
@@ -21,13 +19,11 @@ namespace Quitaye
     {
         public IBaseViewModel BaseVM { get; }
         public IDataService<Test> Test { get; }
-        public ISessionService SessionService { get; }
         public App()
         {
             InitializeComponent();
             BaseVM = DependencyService.Get<IBaseViewModel>();
             Test = DependencyService.Get<IDataService<Test>>();
-            SessionService = DependencyService.Get<ISessionService>();
             Device.StartTimer(TimeSpan.FromSeconds(BaseVM.InternetCheckTime), () =>
             {
                 // Do something
@@ -45,9 +41,9 @@ namespace Quitaye
                 Resources["Primary"] = Resources["Primary"];
                 Resources["ThirdColor"] = Resources["ThirdColor"];
             }
-            //CrossFirebasePushNotification.Current.Subscribe("all");
-            //CrossFirebasePushNotification.Current.OnTokenRefresh += Current_OnTokenRefresh;
-            //CrossFirebasePushNotification.Current.OnNotificationReceived += Current_OnNotificationReceived;
+            CrossFirebasePushNotification.Current.Subscribe("all");
+            CrossFirebasePushNotification.Current.OnTokenRefresh += Current_OnTokenRefresh;
+            CrossFirebasePushNotification.Current.OnNotificationReceived += Current_OnNotificationReceived;
         }
 
         private void Current_OnNotificationReceived(object source, FirebasePushNotificationDataEventArgs e)
@@ -67,7 +63,7 @@ namespace Quitaye
                 {
                     try
                     {
-                        var result = await Test.GetItemsAsync(await SessionService.GetToken(), "Tests");
+                        var result = await Test.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Tests");
                         //if(result == null)
                         {
                             BaseVM.IsInternetOn = true;
@@ -89,6 +85,27 @@ namespace Quitaye
             }
         }
 
+        //public App(IHost host) : this() => Host = host;
+
+        //public static IHost Host { get; private set; }
+
+        //public static IHostBuilder BuildHost() =>
+        //    XamarinHost.CreateDefaultBuilder<App>()
+        //    .ConfigureServices((context, services) =>
+        //    {
+        //        services.AddScoped<HomePage>();
+        //        services.AddScoped<LoginPage>();
+        //        services.AddScoped<SignUpPage>();
+        //        services.AddScoped<RapportPayement>();
+        //        services.AddScoped(typeof(IDataService<>), typeof(DataService<>));
+        //        services.AddScoped<IBaseViewModel, BaseViewModel>();
+        //        services.AddScoped<IInitialService, InitialService>();
+        //        services.AddScoped<IFileUploadService, FileUploadService>();
+        //        services.AddScoped<ILogInService, LogInService>();
+        //        services.AddScoped<ISignUpService, SignUpService>();
+        //    });
+
+
         protected override async void OnStart()
         {
             //await Host.StartAsync();
@@ -97,7 +114,7 @@ namespace Quitaye
             var token = await SecureStorage.GetAsync("Token");
             if (string.IsNullOrWhiteSpace(token))
             {
-                MainPage = new NavigationPage(new SocialLoginPage());
+                MainPage = new NavigationPage(new LoginPage());
             }
             else
             {

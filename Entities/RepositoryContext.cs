@@ -1,23 +1,20 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Entities
 {
     public class RepositoryContext : DbContext
     {
-        public RepositoryContext(DbContextOptions options) : base(options)
+        public RepositoryContext(DbContextOptions options):base(options)
         {
 
         }
 
-        public DbSet<ModePayement> ModePayements { get; set; }
-        public DbSet<UserInvitation> UserInvitations { get; set; }
-
-        public DbSet<PromotionOffre> PromotionOffres { get; set; }
-        public DbSet<PromotionType> PromotionTypes { get; set; }
-        public DbSet<QuitayeUpdate> QuitayeUpdates { get; set; }
-        public DbSet<GatoniniUpdate> GatoniniUpdates { get; set; }
-        public DbSet<Promotion> Promotions { get; set; }
         public DbSet<OccasionList> OccasionLists { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Departement> Departements { get; set; }

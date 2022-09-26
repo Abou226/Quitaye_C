@@ -1,4 +1,19 @@
-﻿namespace Controllers
+﻿using AutoMapper;
+using Contracts;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using Models;
+using Repository;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -160,7 +175,6 @@
                 {
                     foreach (var value in values)
                     {
-                        value.Id = Guid.NewGuid();
                         value.UserId = identity.First().Id;
                         value.EntrepriseId = value.EntrepriseId;
                         await repositoryWrapper.ItemA.AddAsync(value);

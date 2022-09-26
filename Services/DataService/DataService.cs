@@ -262,7 +262,7 @@ namespace Services
                 type = item;
             }
             
-            response = await Client.PostFormDataAsync("api/" + type+"s/" + url, token, value);
+            response = await Client.PostFormDataAsync("api/" + type+"s" + url, token, value);
             if (response.IsSuccessStatusCode)
                 return value;
             else
@@ -338,41 +338,6 @@ namespace Services
                 return null;
             }
         }
-
-        public async Task<object> UploadFileFormDataAsync(T value, string token, string url = null)
-        {
-            var response = new HttpResponseMessage();
-            var type = value.GetType().ToString();
-            var a = type.Split('.');
-            foreach (var item in a)
-            {
-                type = item;
-            }
-
-            response = await Client.PostFormDataAsync("api/" + type + "s/" + url, token, value);
-            if (response.IsSuccessStatusCode)
-            {
-                if (value is Models.File)
-                {
-                    var data = ConvertSingle<Models.FileUrl>.FromJson(await response.Content.ReadAsStringAsync());
-                    var d = new Models.File() { Url = data.Url };
-                    
-                    return d;
-                }
-                else
-                {
-                    var data = ConvertSingle<T>.FromJson(await response.Content.ReadAsStringAsync());
-                    return data;
-                }
-
-            }
-            else
-            {
-                var message = await response.Content.ReadAsStringAsync();
-                var mes = response.ReasonPhrase.ToString();
-                return null;
-            }
-        }
     }
 
     public class DataService<T> : BaseVM.BaseViewModel, IDataService<T> where T : class
@@ -430,7 +395,7 @@ namespace Services
                 }
                 HttpContent httpContent = new StringContent(jsons);
                 httpContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                var response = await Client.PostAsync("api/"+ type +"s/" + url, httpContent);
+                var response = await Client.PostAsync("api/"+ type +"s" + url, httpContent);
                 if (response.IsSuccessStatusCode)
                     return values;
                 else
@@ -461,11 +426,7 @@ namespace Services
                 if (response.IsSuccessStatusCode)
                     return value;
                 else
-                {
-                    var message = await response.Content.ReadAsStringAsync();
-                    var phrase = response.ReasonPhrase;
                     return null;
-                }
             }
             catch (Exception ex)
             {
@@ -536,11 +497,7 @@ namespace Services
                 if (response.IsSuccessStatusCode)
                     return values;
                 else
-                {
-                    var message = await response.Content.ReadAsStringAsync();
-                    var phrase = response.ReasonPhrase.ToString();
                     return null;
-                }
             }
             catch (Exception ex)
             {
@@ -616,7 +573,7 @@ namespace Services
             if (response.IsSuccessStatusCode) 
             {
                 var data = ConvertSingle<T>.FromJson(await response.Content.ReadAsStringAsync());
-                return value;
+                return data;
             }
             else
             {
@@ -688,40 +645,6 @@ namespace Services
             {
                 var message = ex.Message;
                 var phrase = ex.InnerException;
-                return null;
-            }
-        }
-
-        public async Task<object> UploadFileFormDataAsync(T value, string token, string url = null)
-        {
-            var response = new HttpResponseMessage();
-            var type = value.GetType().ToString();
-            var a = type.Split('.');
-            foreach (var item in a)
-            {
-                type = item;
-            }
-
-            response = await Client.PostFormDataAsync("api/" + type + "s/" + url, token, value);
-            if (response.IsSuccessStatusCode)
-            {
-                if (value is Models.File)
-                {
-                    var data = ConvertSingle<Models.FileUrl>.FromJson(await response.Content.ReadAsStringAsync());
-                    var d = new Models.File() { Url = data.Url };
-                    return  d;
-                }
-                else
-                {
-                    var data = ConvertSingle<T>.FromJson(await response.Content.ReadAsStringAsync());
-                    return data;
-                }
-
-            }
-            else
-            {
-                var message = await response.Content.ReadAsStringAsync();
-                var mes = response.ReasonPhrase.ToString();
                 return null;
             }
         }

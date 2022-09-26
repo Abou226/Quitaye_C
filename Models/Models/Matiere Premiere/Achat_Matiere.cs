@@ -18,9 +18,7 @@ namespace Models
         [Column(TypeName = "decimal (18, 0)")]
         public decimal Quantité { get; set; }
         public DateTime Date { get; set; }
-        [ForeignKey(nameof(Unité))]
-        public Guid? UnitéMatièreId { get; set; }
-        public UnitéMatière Unité { get; set; }
+        public Unité Unité { get; set; } = Unité.Pièce;
         public Guid? UserId { get; set; }
 
         [ForeignKey(nameof(Entreprise))]

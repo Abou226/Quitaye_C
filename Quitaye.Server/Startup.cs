@@ -1,21 +1,30 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Quitaye.Controllers.Extensions;
 using Repository;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using System.IO;
 
 namespace Quitaye.Server
 {
     public class Startup
     {
-        public IWebHostEnvironment WebHostEnvironment { get; }
+        private readonly IWebHostEnvironment _environment;
         public Startup(IConfiguration configuration, IWebHostEnvironment environment)
         {
             Configuration = configuration;
-            WebHostEnvironment = environment;
+            _environment = environment;
         }
 
         public IConfiguration Configuration { get; }
@@ -38,7 +47,7 @@ namespace Quitaye.Server
             //});
             services.AddAutoMapper(typeof(Startup));
             services.ConfigureSqlContext(Configuration);
-            services.ConfigureRepositoryWrapper(Configuration, WebHostEnvironment);
+            services.ConfigureRepositoryWrapper(Configuration);
             services.AddAuthentication();
             //services.AddNewtonsoftJson();
             services.AddControllers();
