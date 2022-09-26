@@ -1,6 +1,7 @@
 ﻿using Acr.UserDialogs;
 using BaseVM;
 using Models;
+using Quitaye.Services;
 using Services;
 
 using System;
@@ -18,6 +19,7 @@ using Xamarin.Forms;
 [assembly: Dependency(typeof(DataService<Livraison>))]
 [assembly: Dependency(typeof(BaseViewModel))]
 [assembly: Dependency(typeof(InitialService))]
+
 [assembly: Dependency(typeof(DataService<Heure>))]
 
 namespace Quitaye
@@ -26,6 +28,7 @@ namespace Quitaye
     {
         public IBaseViewModel BaseVM { get; }
         public INavigation Navigation { get; }
+        public ISessionService SessionService { get; }
         private bool _isRunning;
 
         public bool IsRunning
@@ -141,6 +144,7 @@ namespace Quitaye
             EditService = DependencyService.Get<IDataService<EditObject>>();
             ClientService = DependencyService.Get<IDataService<Reservation>>();
             AnnuléeCommand = new Command(OnAnnuléeCommand);
+            SessionService = DependencyService.Get<ISessionService>();
             SearchCommand = new Command(OnSearchCommand);
             Initial = DependencyService.Get<IInitialService>();
             IsNotBusy = false;
@@ -286,7 +290,7 @@ namespace Quitaye
                     IsNotBusy = false;
                     UserDialogs.Instance.ShowLoading("Chargement....");
                     ClientService.ProjectId = await SecureStorage.GetAsync("Source");
-                    var items = await ClientService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "reservations/Livraison/" + Start.ToString("MM-dd-yyyy") + "/" + End.ToString("MM-dd-yyyy") + "/" + Entreprise.Id.ToString());
+                    var items = await ClientService.GetItemsAsync(await SessionService.GetToken(), "reservations/Livraison/" + Start.ToString("MM-dd-yyyy") + "/" + End.ToString("MM-dd-yyyy") + "/" + Entreprise.Id.ToString());
                     Items.Clear();
                     InitialItems.Clear();
                     Total = 0;
@@ -330,7 +334,7 @@ namespace Quitaye
                     Debug.WriteLine($"Echec operation: {ex.Message}");
                     if (ex.Message.Contains("Unauthorize"))
                     {
-                        var result = await Initial.Get(new LogInModel() { Token = await SecureStorage.GetAsync("Token"), Password = "d", Username = "d" });
+                        await SessionService.GetNewToken(await SessionService.GetToken());
                         await GetItemsAsync();
                     }
                     else if (ex.Message.Contains("host"))

@@ -76,21 +76,9 @@ namespace Services
                                 }
                                 else
                                 {
-                                    if (value is null)
+                                    if(value != null)
                                     {
-
-                                    }
-                                    else
-                                    {
-                                        var type = value.GetType().ToString();
-                                        //var t = type.BaseType;
-                                        if(type.Contains("System.Collections.Generic.List"))
-                                        {
-                                            var da = JsonConvert.SerializeObject(value);
-                                            content.Add(new StringContent(da.ToString()), prop.Name);
-                                        }
-                                        else 
-                                            content.Add(new StringContent(value.ToString()), prop.Name);
+                                        content.Add(new StringContent(value.ToString()), prop.Name);
                                     }
                                 }
                             }

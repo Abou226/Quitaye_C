@@ -1,18 +1,4 @@
-﻿using AutoMapper;
-using Contracts;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Models;
-using Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Controllers
+﻿namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -48,6 +34,7 @@ namespace Controllers
                     {
                         var result = await _fileManager.Upload(_settings.AccessKey, _settings.SecretKey, _settings.BucketName, Amazon.RegionEndpoint.USEast1, value.Image);
                         value.Url = result.Url;
+                        value.Image = null;
                     }
                     return Ok(value);
                 }

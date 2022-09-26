@@ -1,19 +1,4 @@
-﻿using AutoMapper;
-using Contracts;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using Models;
-using Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Controllers
+﻿namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -23,13 +8,17 @@ namespace Controllers
         private readonly IGenericRepositoryWrapper<Heure, Client> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
+        private readonly IGenericRepositoryWrapper<Entreprise> _entrepriseRepos;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
 
         public ClientHeuresController(IGenericRepositoryWrapper<Heure, Client> wrapper,
-            IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser,
+            IConfigSettings settings, 
+            IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser, 
+            IGenericRepositoryWrapper<Entreprise> entrepriseRepos,
             IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
+            _entrepriseRepos = entrepriseRepos;
             _entrepriseUser = entrepriseUser;
             _settings = settings;
             _mapper = mapper;
@@ -94,15 +83,63 @@ namespace Controllers
                 {
                     if (date.Date == DateTime.Today.Date)
                     {
-                        var result = await repositoryWrapper.ItemA.GetBy(x => x.EntrepriseId == entrepriseId && Convert.ToInt32(x.Name) > DateTime.Now.Hour);
+                        var entrepriseHourType = await _entrepriseRepos.Item.GetBy(x => x.Id == entrepriseId);
+                        if (entrepriseHourType.Count() != 0)
+                        {
+                            if (string.IsNullOrWhiteSpace(entrepriseHourType.First().TypeHeure))
+                            {
+                                var result = await repositoryWrapper.ItemA.GetBy(x => x.EntrepriseId == entrepriseId
+                                && Convert.ToInt32(x.Name) > DateTime.Now.Hour);
 
-                        return Ok(result.OrderBy(x => Convert.ToInt32(x.Name)));
+                                return Ok(result.OrderBy(x => Convert.ToInt32(x.Name)));
+                            }
+                            else 
+                            {
+                                if (entrepriseHourType.First().TypeHeure.Contains("Ponctuel"))
+                                {
+                                    var result = await repositoryWrapper.ItemA.GetBy(x => x.EntrepriseId == entrepriseId
+                                    && Convert.ToInt32(x.Name) > DateTime.Now.Hour);
+
+                                    return Ok(result.OrderBy(x => Convert.ToInt32(x.Name)));
+                                }
+                                else if (entrepriseHourType.First().TypeHeure.Contains("Interval"))
+                                {
+                                    var result = await repositoryWrapper.ItemA.GetBy(x => x.EntrepriseId == entrepriseId
+                                    && x.Start.Value.Hour > DateTime.Now.Hour);
+
+                                    return Ok(result.OrderBy(x => Convert.ToInt32(x.Start.Value)));
+                                }
+                                else return null;
+                            }
+                        }
+                        else return null;
                     }
-                    else if (date.Date >= DateTime.Today.Date)
+                    else if (date.Date > DateTime.Today.Date)
                     {
-                        var result = await repositoryWrapper.ItemA.GetBy(x => x.EntrepriseId == entrepriseId);
+                        var entrepriseHourType = await _entrepriseRepos.Item.GetBy(x => x.Id == entrepriseId);
+                        if (entrepriseHourType.Count() != 0)
+                        {
+                            if (string.IsNullOrWhiteSpace(entrepriseHourType.First().TypeHeure))
+                            {
+                                var result = await repositoryWrapper.ItemA.GetBy(x => x.EntrepriseId == entrepriseId);
 
-                        return Ok(result.OrderBy(x => Convert.ToInt32(x.Name)));
+                                return Ok(result.OrderBy(x => Convert.ToInt32(x.Name)));
+                            }
+                            else if (entrepriseHourType.First().TypeHeure.Contains("Pontuel"))
+                            {
+                                var result = await repositoryWrapper.ItemA.GetBy(x => x.EntrepriseId == entrepriseId);
+
+                                return Ok(result.OrderBy(x => Convert.ToInt32(x.Name)));
+                            }
+                            else if (entrepriseHourType.First().TypeHeure.Contains("Interval"))
+                            {
+                                var result = await repositoryWrapper.ItemA.GetBy(x => x.EntrepriseId == entrepriseId);
+
+                                return Ok(result.OrderBy(x => Convert.ToInt32(x.Start.Value.Hour)));
+                            }
+                            else return null;
+                        }
+                        else return null;
                     }
                     else return null;
                 }

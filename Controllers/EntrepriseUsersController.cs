@@ -1,31 +1,16 @@
-﻿using AutoMapper;
-using Contracts;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using Models;
-using Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Controllers
+﻿namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class EntrepriseUsersController : GenericController<EntrepriseUser, User>
+    public class EntrepriseUsersController : GenericController<EntrepriseUser, User, User>
     {
-        private readonly IGenericRepositoryWrapper<EntrepriseUser, User> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<EntrepriseUser, User, User> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
 
-        public EntrepriseUsersController(IGenericRepositoryWrapper<EntrepriseUser, User> wrapper,
+        public EntrepriseUsersController(IGenericRepositoryWrapper<EntrepriseUser, User, User> wrapper,
             IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser,
             IMapper mapper) : base(wrapper)
         {
@@ -169,7 +154,7 @@ namespace Controllers
 
                         if (list.Contains(identity.First().Id))
                         {
-                            var result = await repositoryWrapper.Item.GetBy(x => (x.EntrepriseId == id));
+                            var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id), x => x.User);
                             return Ok(result);
                         }
                         else return NotFound("Non membre de cette entreprise");

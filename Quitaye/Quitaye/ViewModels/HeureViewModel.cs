@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Models;
 using Plugin.Connectivity;
+using Quitaye.Services;
 using Quitaye.Views.Settings;
 using Services;
 using System;
@@ -22,6 +23,7 @@ using Xamarin.Forms;
 [assembly: Dependency(typeof(BaseViewModel))]
 [assembly: Dependency(typeof(InitialService))]
 
+
 namespace Quitaye.ViewModels
 {
     public class HeureViewModel : BaseViewModel
@@ -30,6 +32,7 @@ namespace Quitaye.ViewModels
         public ICommand AddCommand { get; }
         public ICommand DeleteCommand { get; }
         public IDataService<Test> Test { get; }
+        public ISessionService SessionService { get; }
         public Entreprise Entreprise { get; set; }
         public IMessage MessageAlert { get; }
         public IInitialService Init { get; }
@@ -96,6 +99,7 @@ namespace Quitaye.ViewModels
             DeleteCommand = new Command(OnDeleteCommand);
             AddCommand = new Command(OnAddCommand);
             BackCommand = new Command(OnBackCommand);
+            SessionService = DependencyService.Get<ISessionService>();
             Test = DependencyService.Get<IDataService<Test>>();
             Entreprise = entreprise;
             GetItemsAsync(true);
@@ -196,7 +200,7 @@ namespace Quitaye.ViewModels
                         IsNotBusy = false;
                         if(showDialog)
                         UserDialogs.Instance.ShowLoading("Chargement....");
-                        var items = await DataService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Heures/" + Entreprise.Id.ToString());
+                        var items = await DataService.GetItemsAsync(await SessionService.GetToken(), "Heures/" + Entreprise.Id.ToString());
                         Items.Clear();
                         if (items.Count() != 0)
                         {
@@ -229,7 +233,7 @@ namespace Quitaye.ViewModels
                 {
                     try
                     {
-                        var result = await Test.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Tests");
+                        var result = await Test.GetItemsAsync(await SessionService.GetToken(), "Tests");
                         //if(result == null)
                         {
                             BaseVM.IsInternetOn = true;
@@ -256,11 +260,7 @@ namespace Quitaye.ViewModels
             Debug.WriteLine($"Echec operation: {ex.Message}");
             if (ex.Message.Contains("Unauthorize"))
             {
-                var result = await Init.Get(new LogInModel() { Token = await SecureStorage.GetAsync("Token"), Password = "d", Username = "d" });
-                await SecureStorage.SetAsync("Token", result.Token);
-                await SecureStorage.SetAsync("Prenom", result.Prenom);
-                await SecureStorage.SetAsync("Nom", result.Nom);
-                await SecureStorage.SetAsync("ProfilePic", result.ProfilePic);
+                await SessionService.GetNewToken(await SessionService.GetToken());
                 await action;
             }
             else if (ex.Message.Contains("host"))
@@ -287,7 +287,7 @@ namespace Quitaye.ViewModels
                 if (result)
                 {
                     var data = (Heure)obj;
-                    var item = await DataService.DeleteAsync(await SecureStorage.GetAsync("Token"), (Heure)obj, "heures/"+data.Id.ToString());
+                    var item = await DataService.DeleteAsync(await SessionService.GetToken(), (Heure)obj, "heures/"+data.Id.ToString());
                     if (item != null)
                     {
                         DependencyService.Get<IMessage>().LongAlert("Element supprimer avec succès.");

@@ -1,26 +1,15 @@
-﻿using AutoMapper;
-using Contracts;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using Models;
-using Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Controllers
+﻿namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class ClientReservationsController : GenericController<Reservation, Client, Gamme, Marque, Taille, Model, Categorie, Style, Marque>
+    public class ClientReservationsController : GenericController<Reservation, Client, Offre,
+        Gamme, Marque, Taille, Model, Categorie, Style, Marque, Niveau, List<OccasionList>, 
+        Marque, Categorie, Style, Model>
     {
-        private readonly IGenericRepositoryWrapper<Reservation, Client, Gamme, Marque, Taille, Model, Categorie, Style, Marque> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<Reservation, Client, Offre,
+            Gamme, Marque, Taille, Model, Categorie, Style, Marque, Niveau, 
+            List<OccasionList>, Marque, Categorie, Style, Model> repositoryWrapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUserRepository;
         private readonly IConfigSettings _settings;
         private readonly INotificationService notificationService;
@@ -29,10 +18,14 @@ namespace Controllers
         private readonly IGenericRepositoryWrapper<Num_Vente> num_vente_repository;
         private readonly IMapper _mapper;
 
-        public ClientReservationsController(IGenericRepositoryWrapper<Reservation, Client, Gamme,
-            Marque, Taille, Model, Categorie, Style, Marque> wrapper, INotificationService _notification,
-            IGenericRepositoryWrapper<EntrepriseUser> entrepriseUserRepository, IGenericRepositoryWrapper<Notification> _notifRepository,
-            IGenericRepositoryWrapper<PanierReservation> _panierRepository, IGenericRepositoryWrapper<Num_Vente> _num_vente_repository,
+        public ClientReservationsController(IGenericRepositoryWrapper<Reservation, Client, Offre,
+            Gamme, Marque, Taille, Model, Categorie, Style, Marque, Niveau, 
+            List<OccasionList>, Marque, Categorie, Style, Model> wrapper, 
+            INotificationService _notification,
+            IGenericRepositoryWrapper<EntrepriseUser> entrepriseUserRepository, 
+            IGenericRepositoryWrapper<Notification> _notifRepository,
+            IGenericRepositoryWrapper<PanierReservation> _panierRepository, 
+            IGenericRepositoryWrapper<Num_Vente> _num_vente_repository,
             IConfigSettings settings, IMapper mapper) : base(wrapper)
         {
             repositoryWrapper = wrapper;
@@ -90,7 +83,7 @@ namespace Controllers
         }
 
         [HttpPatch("{id:Guid}/{entrepriseId:Guid}")]
-        public async Task<ActionResult<Reservation>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromHeader] Guid id, Guid entrepriseId)
+        public async Task<ActionResult<Reservation>> PatchUpdateAsync([FromBody] JsonPatchDocument value, [FromRoute] Guid id, Guid entrepriseId)
         {
             try
             {
@@ -122,12 +115,20 @@ namespace Controllers
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x => 
                                 x.ClientId == identity.First().Id && x.Annulée == false,
+                                x => x.Offre,
                                 x => x.Gamme, 
-                                x => x.Gamme.Marque,
+                                x => x.Offre.Marque,
                                 x => x.Taille,
                                 x => x.Model,
-                                x => x.Gamme.Categorie, 
-                                x => x.Gamme.Style);
+                                x => x.Offre.Categorie, 
+                                x => x.Offre.Style, 
+                                x => x.Marque,
+                                x => x.Offre.Niveau,
+                                x => x.Offre.Occasionss, 
+                                x => x.Gamme.Marque,
+                                x => x.Gamme.Categorie,
+                                x => x.Gamme.Style, 
+                                x => x.Offre.Model);
 
                     return Ok(result.OrderByDescending(x => x.DateOfCreation));
                 }
@@ -157,12 +158,21 @@ namespace Controllers
                                 || x.Gamme.Marque.Name.Contains(search) 
                                 || x.Gamme.Style.Name.Contains(search)
                                 || x.Gamme.Categorie.Name.Contains(search)) 
-                                && x.Annulée == false, x => x.Gamme, 
-                                x => x.Gamme.Marque, 
-                                x => x.Taille, 
-                                x => x.Model, 
-                                x => x.Gamme.Categorie, 
-                                x => x.Gamme.Style);
+                                && x.Annulée == false,
+                                x => x.Offre,
+                                x => x.Gamme,
+                                x => x.Offre.Marque,
+                                x => x.Taille,
+                                x => x.Model,
+                                x => x.Offre.Categorie,
+                                x => x.Offre.Style,
+                                x => x.Marque,
+                                x => x.Offre.Niveau,
+                                x => x.Offre.Occasionss,
+                                x => x.Gamme.Marque,
+                                x => x.Gamme.Categorie,
+                                x => x.Gamme.Style,
+                                x => x.Offre.Model);
 
                     return Ok(result.OrderByDescending(x => x.DateOfCreation));
                 }
@@ -234,39 +244,43 @@ namespace Controllers
                         }
                     }
 
-                    if(value.Count == 1)
-                    {
-                        Notification notification = new Notification();
-                        notification.Title = "Nouvelle Commande";
-                        var marque = "";
-                        if (value.First().Gamme.Marque != null)
-                            marque = value.First().Gamme.Marque.Name;
-                        else marque = value.First().Marque.Name;
+                    //if(value.Count == 1)
+                    //{
+                    //    Notification notification = new Notification();
+                    //    notification.Title = "Nouvelle Commande";
+                    //    var marque = "";
+                    //    if (value.First().Gamme != null)
+                    //    {
+                    //        if (value.First().Gamme.Marque != null)
+                    //            marque = value.First().Gamme.Marque.Name;
+                    //        else mar
+                    //    }
+                    //    else marque = value.First().Marque.Name;
 
-                        notification.Message = $"{marque}-{value.First().Taille.Name}, {value.First().Model.Name}. Client(e): {identity.First().Prenom} {identity.First().Nom}";
-                        var notif = await notificationService.SendToTopic($"{value.First().EntrepriseId.ToString()}_vente", notification);
-                        notification.AuthorId = identity.First().Id;
-                        notification.SendDate = DateTime.Now;
-                        notification.Url = value.First().Gamme.Url;
-                        var result = await notifRepository.Item.AddAsync(notification);
-                        await notifRepository.SaveAsync();
-                    }else
-                    {
-                        Notification notification = new Notification();
-                        notification.Title = $"{value.Count} Nouvelles Commandes";
-                        var marque = "";
-                        if (value.First().Gamme.Marque != null)
-                            marque = value.First().Gamme.Marque.Name;
-                        else marque = value.First().Marque.Name;
+                    //    notification.Message = $"{marque}-{value.First().Taille.Name}, {value.First().Model.Name}. Client(e): {identity.First().Prenom} {identity.First().Nom}";
+                    //    var notif = await notificationService.SendToTopic($"{value.First().EntrepriseId.ToString()}_vente", notification);
+                    //    notification.AuthorId = identity.First().Id;
+                    //    notification.SendDate = DateTime.Now;
+                    //    notification.Url = value.First().Gamme.Url;
+                    //    var result = await notifRepository.Item.AddAsync(notification);
+                    //    await notifRepository.SaveAsync();
+                    //}else
+                    //{
+                    //    Notification notification = new Notification();
+                    //    notification.Title = $"{value.Count} Nouvelles Commandes";
+                    //    var marque = "";
+                    //    if (value.First().Gamme.Marque != null)
+                    //        marque = value.First().Gamme.Marque.Name;
+                    //    else marque = value.First().Marque.Name;
 
-                        notification.Message = $"Client(e): {identity.First().Prenom} {identity.First().Nom} Montant: {Convert.ToDecimal(value.Sum(x => x.Prix_Vente_Unité)).ToString("N0")}";
-                        var notif = await notificationService.SendToTopic($"{value.First().EntrepriseId.ToString()}_vente", notification);
-                        notification.AuthorId = identity.First().Id;
-                        notification.SendDate = DateTime.Now;
-                        notification.Url = value.First().Gamme.Url;
-                        var result = await notifRepository.Item.AddAsync(notification);
-                        await notifRepository.SaveAsync();
-                    }
+                    //    notification.Message = $"Client(e): {identity.First().Prenom} {identity.First().Nom} Montant: {Convert.ToDecimal(value.Sum(x => x.Prix_Vente_Unité)).ToString("N0")}";
+                    //    var notif = await notificationService.SendToTopic($"{value.First().EntrepriseId.ToString()}_vente", notification);
+                    //    notification.AuthorId = identity.First().Id;
+                    //    notification.SendDate = DateTime.Now;
+                    //    notification.Url = value.First().Gamme.Url;
+                    //    var result = await notifRepository.Item.AddAsync(notification);
+                    //    await notifRepository.SaveAsync();
+                    //}
                     return Ok(value);
                 }
                 else return NotFound("User not identified");
@@ -289,19 +303,25 @@ namespace Controllers
 
                 if (identity.Count() != 0)
                 {
-                    
                     var result = await repositoryWrapper.Item.GetByInclude(x =>
                                 x.DateOfCreation.Date >= start
                                 && x.DateOfCreation.Date <= end
                                 && x.EntrepriseId == entrepriseId 
                                 && x.ClientId == identity.First().Id && x.Annulée == false,
-                                x => x.Gamme, 
-                                x => x.Gamme.Marque, 
+                                x => x.Offre,
+                                x => x.Gamme,
+                                x => x.Offre.Marque,
                                 x => x.Taille,
-                                x => x.Model, 
-                                x => x.Gamme.Categorie, 
-                                x => x.Gamme.Style,
-                                x => x.Marque);
+                                x => x.Model,
+                                x => x.Offre.Categorie,
+                                x => x.Offre.Style,
+                                x => x.Marque,
+                                x => x.Offre.Niveau,
+                                x => x.Offre.Occasionss,
+                                x => x.Gamme.Marque,
+                                x => x.Gamme.Categorie,
+                                x => x.Gamme.Style, 
+                                x => x.Offre.Model);
                     return Ok(result.OrderByDescending(x => x.DateOfCreation));
                 }
                 else return NotFound("User not indentified");
@@ -369,13 +389,20 @@ namespace Controllers
                                 && x.Date_Livraison.Date >= start 
                                 && x.Date_Livraison.Date <= end 
                                 && x.Annulée == false,
-                                x => x.Gamme, 
-                                x => x.Gamme.Marque, 
+                                x => x.Offre,
+                                x => x.Gamme,
+                                x => x.Offre.Marque,
                                 x => x.Taille,
-                                x => x.Model, 
-                                x => x.Gamme.Categorie, 
-                                x => x.Gamme.Style,
-                                x => x.Marque);
+                                x => x.Model,
+                                x => x.Offre.Categorie,
+                                x => x.Offre.Style,
+                                x => x.Marque,
+                                x => x.Offre.Niveau,
+                                x => x.Offre.Occasionss,
+                                x => x.Gamme.Marque,
+                                x => x.Gamme.Categorie,
+                                x => x.Gamme.Style, 
+                                x => x.Offre.Model);
 
                     return Ok(result.OrderByDescending(x => x.Date_Livraison));
                 }

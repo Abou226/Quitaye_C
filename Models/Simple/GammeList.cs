@@ -11,10 +11,10 @@ namespace Models
         public Guid Id { get; set; }
         public int Heigth { get; set; }
         public int Width { get; set; } = 130;
-        public ObservableCollection<Gamme> Gammes { get; set; }
+        public ObservableCollection<Offre> Offres { get; set; }
         public GammeList()
         {
-            Gammes = new ObservableCollection<Gamme>();
+            Offres = new ObservableCollection<Offre>();
         }
     }
 }

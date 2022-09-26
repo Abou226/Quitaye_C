@@ -45,5 +45,8 @@ namespace Models
 
         [StringLength(15, ErrorMessage = "La taille du contact de livraison ne peut dépasser 15 characters")]
         public string Contact_Livraison { get; set; }
+
+        [NotMapped]
+        public bool Selected { get; set; }
     }
 }

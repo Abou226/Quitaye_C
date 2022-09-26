@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Models;
 using Plugin.Connectivity;
+using Quitaye.Services;
 using Quitaye.ViewModels;
 using Services;
 using System;
@@ -34,11 +35,12 @@ using Style = Models.Style;
 [assembly: Dependency(typeof(BaseViewModel))]
 [assembly: Dependency(typeof(InitialService))]
 
+
 namespace Quitaye
 {
     public class SettingViewModel : BaseVM.BaseViewModel
     {
-        
+        public ISessionService SessionService { get; }
         public IBaseViewModel BaseVM { get; }
         public IDataService<Test> Test { get; }
         public IInitialService Init { get; }
@@ -303,11 +305,11 @@ namespace Quitaye
             TailleService = DependencyService.Get<IDataService<Taille>>();
             Test = DependencyService.Get<IDataService<Test>>();
             MessageAlert = DependencyService.Get<IMessage>();
+            SessionService = DependencyService.Get<ISessionService>();
             Init = DependencyService.Get<IInitialService>();
             GetSections();
         }
 
-        
         private void OnSectionTappedCommand(object obj)
         {
             var value = (Section)obj;
@@ -621,11 +623,7 @@ namespace Quitaye
             Debug.WriteLine($"Echec operation: {ex.Message}");
             if (ex.Message.Contains("Unauthorize"))
             {
-                var result = await Init.Get(new LogInModel() { Token = await SecureStorage.GetAsync("Token"), Password = "d", Username = "d" });
-                await SecureStorage.SetAsync("Token", result.Token);
-                await SecureStorage.SetAsync("Prenom", result.Prenom);
-                await SecureStorage.SetAsync("Nom", result.Nom);
-                await SecureStorage.SetAsync("ProfilePic", result.ProfilePic);
+                await SessionService.GetNewToken(await SessionService.GetToken());
                 await action;
             }
             else if (ex.Message.Contains("host"))

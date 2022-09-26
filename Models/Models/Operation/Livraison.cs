@@ -17,5 +17,8 @@ namespace Models
         public bool Livré { get; set; }
         [StringLength(60, ErrorMessage ="La taille de raison ne peut dépasser 60 characters")]
         public string Raison { get; set; }
+
+        [NotMapped]
+        public bool Selected { get; set; }
     }
 }

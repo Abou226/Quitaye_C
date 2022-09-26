@@ -1,19 +1,4 @@
-﻿using Contracts;
-using Models;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Net;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.Google;
 
 namespace Quitaye.Server.Controllers
 {
@@ -21,7 +6,7 @@ namespace Quitaye.Server.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        const string Callback = "mahalfial";
+        const string Callback = "https://quitaye.mahalfial.com/signin-google";
         private readonly IGenericRepositoryWrapper<User> _userRepository;
         private readonly IGenericRepositoryWrapper<ExternalLogin> _externalLoginRepository;
         private readonly IConfigSettings _settings;
@@ -36,7 +21,19 @@ namespace Quitaye.Server.Controllers
             _userRepository = userRepository;
             _settings = settings;
             _facebook = facebook;
+            _externalLoginRepository = externalLoginRepository;
             _refreshTokenRepository = refreshTokenRepository;
+        }
+
+        [HttpGet("google-login")]
+        public async Task<ActionResult> Google()
+        {
+            var properties = new AuthenticationProperties
+            {
+                RedirectUri = "/"
+            };
+
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
         }
 
         [HttpPost("login")]
@@ -47,7 +44,6 @@ namespace Quitaye.Server.Controllers
                 if (logIn == null)
                     BadRequest("Invalid process");
 
-                
                 if(!string.IsNullOrWhiteSpace(logIn.Token))
                 {
                   var resultUser = await  RefreshToken(logIn);
@@ -63,6 +59,7 @@ namespace Quitaye.Server.Controllers
                             user.Username = result.First().Username;
                             user.ProfilePic = result.First().PhotoUrl;
                             user.Prenom = result.First().Prenom;
+                            user.TokenExpiry = token.DateOfExpiry;
                             user.Email = result.First().Email;
                             user.Nom = result.First().Nom;
                             user.Token = token.Token;
@@ -88,6 +85,7 @@ namespace Quitaye.Server.Controllers
                             user.Username = result.First().Username;
                             user.ProfilePic = result.First().PhotoUrl;
                             user.Email = result.First().Email;
+                            user.TokenExpiry = token.DateOfExpiry;
                             user.Prenom = result.First().Prenom;
                             user.Nom = result.First().Nom;
                             user.Token = token.Token;
@@ -119,6 +117,7 @@ namespace Quitaye.Server.Controllers
                 userWithToken.Email = user.Email;
                 userWithToken.Prenom = result.Prenom;
                 userWithToken.Nom = result.Nom;
+                userWithToken.TokenExpiry = result.DateOfExpiry;
                 userWithToken.ProfilePic = user.PhotoUrl;
                 userWithToken.Success = true;
                 return userWithToken;
@@ -126,20 +125,20 @@ namespace Quitaye.Server.Controllers
             return null;
         }
 
-        const string callbackScheme = "mahalfial";
+        const string callbackScheme = "com.quitaye.quitaye";
 
         [HttpGet("ExternalLogin/{scheme}")]
-        public async Task ExternalLogIn([FromRoute] string scheme)
+        public async Task GetExternalLogIn([FromRoute] string scheme)
         {
-            //NOTE: see https://docs.microsoft.com/en-us/xamarin/essentials/web-authenticator?tabs=android
             var auth = await Request.HttpContext.AuthenticateAsync(scheme);
 
-            if (!auth.Succeeded || auth?.Principal == null || !auth.Principal.Identities.Any(id => id.IsAuthenticated)
+            if (!auth.Succeeded
+                || auth?.Principal == null
+                || !auth.Principal.Identities.Any(id => id.IsAuthenticated)
                 || string.IsNullOrEmpty(auth.Properties.GetTokenValue("access_token")))
             {
                 // Not authenticated, challenge
                 await Request.HttpContext.ChallengeAsync(scheme);
-                //return null;
             }
             else
             {
@@ -156,7 +155,7 @@ namespace Quitaye.Server.Controllers
                 {
                     picture = await _facebook.GetFacebookProfilePicURL(auth.Properties.GetTokenValue("access_token"));
                 }
-                else if(scheme == "Google")
+                else if (scheme == "Google")
                     picture = claims?.FirstOrDefault(c => c.Type == "picture")?.Value;
 
                 var item = await _userRepository.Item.GetBy(x => x.Email == email);
@@ -164,59 +163,51 @@ namespace Quitaye.Server.Controllers
                 if (item.Count() != 0)
                 {
                     user = item.First();
+                }else
+                {
+                    user = await _userRepository.Item.AddAsync(new User()
+                    {
+                        Email = email,
+                        Prenom = givenName,
+                        Nom = surName,
+                        PhotoUrl = picture,
+                        Id = Guid.NewGuid(),
+                        DateOfCreation = DateTime.Now,
+                    });
+
+                    await _userRepository.SaveAsync();
                 }
-                user = await _userRepository.Item.AddAsync(new User()
-                {
-                    Email = email,
-                    Prenom = givenName,
-                    Nom = surName,
-                    PhotoUrl = picture,
-                    Id = Guid.NewGuid(),
-                    DateOfCreation = DateTime.Now,
-                });
-
-                await _externalLoginRepository.Item.AddAsync(new ExternalLogin()
-                {
-                    UserId = user.Id,
-                    DateOfLogin = DateTime.Now,
-                    Provider = scheme,
-                    Id = Guid.NewGuid()
-                });
                 
-                await _userRepository.SaveAsync();
-                var authToken = await GenerateAccessToken(user.Id);
-                //return new UserProfile()
+                //await _externalLoginRepository.Item.AddAsync(new ExternalLogin()
                 //{
-                //    Email = user.Email,
-                //    Prenom = user.Prenom,
-                //    Nom = user.Nom,
-                //    Url = user.Url,
-                //    Id = user.Id,
-                //    AwsAccessKey = _settings.AccessKey,
-                //    AwsSecretKey = _settings.SecretKey,
-                //    BucketName = _settings.BucketName,
-                //    Token = authToken
-                //};
-                //Get parameters to send back to the callback
+                //    UserId = user.Id,
+                //    Token = authToken.Token,
+                //    DateOfExpiry = authToken.DateOfExpiry,
+                //    DateOfLogin = DateTime.Now,
+                //    Provider = scheme,
+                //    Id = Guid.NewGuid()
+                //});
 
+                await _externalLoginRepository.SaveAsync();
+
+                // Get parameters to send back to the callback
                 var qs = new Dictionary<string, string>
                 {
-                    { "access_token", authToken.Token },
-                    {"dateofexpiry", authToken.DateOfExpiry.ToString() },
-                    { "refresh_token",  string.Empty },
+                    { "access_token", auth.Properties.GetTokenValue("access_token") },
+                    { "refresh_token", auth.Properties.GetTokenValue("refresh_token") ?? string.Empty },
                     { "email", email },
                     { "firstName", givenName },
-                    { "picture", picture },
+                    { "picture", picture ?? string.Empty },
                     { "secondName", surName },
                 };
 
-                //Build the result url
-                var url = Callback + "://#" + string.Join(
+                // Build the result url
+                var url = callbackScheme + "://#" + string.Join(
                     "&",
                     qs.Where(kvp => !string.IsNullOrEmpty(kvp.Value) && kvp.Value != "-1")
                     .Select(kvp => $"{WebUtility.UrlEncode(kvp.Key)}={WebUtility.UrlEncode(kvp.Value)}"));
 
-                //Redirect to final url
+                // Redirect to final url
                 Request.HttpContext.Response.Redirect(url);
             }
         }
@@ -324,6 +315,7 @@ namespace Quitaye.Server.Controllers
                         Email = email,
                         Prenom = token.Prenom,
                         Nom = token.Nom,
+                        TokenExpiry = token.DateOfExpiry,
                         ProfilePic = user.First().PhotoUrl,
                     };
                 }

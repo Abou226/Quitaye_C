@@ -137,4 +137,95 @@ namespace Contracts
         Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
         Task<ActionResult<A>> Delete(Guid id);
     }
+
+    public interface IGenericController<A, B, C, D, E, F, G, H, I, J, K, L, M> where A : class where B : class 
+        where C : class where D : class where E : class where F : class 
+        where G : class where H : class where I : class where J : class where K : class where L : class where M : class
+    {
+        Task<ActionResult<IEnumerable<A>>> GetAll();
+        Task<ActionResult<IEnumerable<A>>> GetBy(string search);
+        Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
+        Task<ActionResult<A>> UpdateAsync(A value);
+        Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
+        Task<ActionResult<A>> Delete(Guid id);
+    }
+
+    public interface IGenericController<A, B, C, D, E, F, G, H, I, J, K, L, M, N> 
+        where A : class where B : class
+        where C : class where D : class where E : class where F : class
+        where G : class where H : class where I : class where J : class 
+        where K : class where L : class where M : class where N : class
+    {
+        Task<ActionResult<IEnumerable<A>>> GetAll();
+        Task<ActionResult<IEnumerable<A>>> GetBy(string search);
+        Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
+        Task<ActionResult<A>> UpdateAsync(A value);
+        Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
+        Task<ActionResult<A>> Delete(Guid id);
+    }
+
+    public interface IGenericController<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O>
+        where A : class where B : class
+        where C : class where D : class where E : class where F : class
+        where G : class where H : class where I : class where J : class
+        where K : class where L : class where M : class where N : class where O : class
+    {
+        Task<ActionResult<IEnumerable<A>>> GetAll();
+        Task<ActionResult<IEnumerable<A>>> GetBy(string search);
+        Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
+        Task<ActionResult<A>> UpdateAsync(A value);
+        Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
+        Task<ActionResult<A>> Delete(Guid id);
+    }
+
+    public interface IGenericController<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>
+        where A : class where B : class
+        where C : class where D : class where E : class where F : class
+        where G : class where H : class where I : class where J : class
+        where K : class where L : class where M : class where N : class 
+        where O : class where P : class
+    {
+        Task<ActionResult<IEnumerable<A>>> GetAll();
+        Task<ActionResult<IEnumerable<A>>> GetBy(string search);
+        Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
+        Task<ActionResult<A>> UpdateAsync(A value);
+        Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
+        Task<ActionResult<A>> Delete(Guid id);
+    }
+
+    public interface IGenericController<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q>
+        where A : class where B : class
+        where C : class where D : class where E : class where F : class
+        where G : class where H : class where I : class where J : class
+        where K : class where L : class where M : class where N : class
+        where O : class where P : class where Q : class
+    {
+        Task<ActionResult<IEnumerable<A>>> GetAll();
+        Task<ActionResult<IEnumerable<A>>> GetBy(string search);
+        Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
+        Task<ActionResult<A>> UpdateAsync(A value);
+        Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
+        Task<ActionResult<A>> Delete(Guid id);
+    }
+
+    public interface IGenericController<A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R>
+        where A : class where B : class
+        where C : class where D : class where E : class where F : class
+        where G : class where H : class where I : class where J : class
+        where K : class where L : class where M : class where N : class
+        where O : class where P : class where Q : class where R : class
+    {
+        Task<ActionResult<IEnumerable<A>>> GetAll();
+        Task<ActionResult<IEnumerable<A>>> GetBy(string search);
+        Task<ActionResult<IEnumerable<A>>> GetBy(string search, DateTime start, DateTime end);
+        Task<ActionResult<IEnumerable<A>>> AddAsync(List<A> values);
+        Task<ActionResult<A>> UpdateAsync(A value);
+        Task<ActionResult<A>> PatchUpdateAsync(JsonPatchDocument value, Guid id);
+        Task<ActionResult<A>> Delete(Guid id);
+    }
 }

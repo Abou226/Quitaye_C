@@ -1,22 +1,4 @@
-﻿using AutoMapper;
-using Contracts;
-using Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-//using Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Repository;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
-namespace Quitaye.Server.Controllers
+﻿namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -217,6 +199,7 @@ namespace Quitaye.Server.Controllers
                     if (entreprise.Count() == 0)
                     {
                         value.Entreprise.Id = Guid.NewGuid();
+                        
                         await repositoryWrapper.ItemB.AddAsync(value.Entreprise);
                         await repositoryWrapper.SaveAsync();
                     }

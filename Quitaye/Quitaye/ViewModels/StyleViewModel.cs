@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Models;
 using Plugin.Connectivity;
+using Quitaye.Services;
 using Quitaye.Views.Settings;
 using Services;
 using System;
@@ -25,11 +26,13 @@ using Style = Models.Style;
 [assembly: Dependency(typeof(BaseViewModel))]
 [assembly: Dependency(typeof(InitialService))]
 
+
 namespace Quitaye.ViewModels
 {
     public class StyleViewModel : BaseViewModel
     {
         public ICommand AddImageCommand { get; }
+        public ISessionService SessionService { get; }
         public ICommand AddCommand { get; set; }
         public IDataService<Test> Test { get; }
         public Entreprise Entreprise { get; set; }
@@ -102,6 +105,7 @@ namespace Quitaye.ViewModels
             Items = new ObservableCollection<Style>();
             Init = DependencyService.Get<IInitialService>();
             MessageAlert = DependencyService.Get<IMessage>();
+            SessionService = DependencyService.Get<ISessionService>();
             AddImageCommand = new Command(OnAddImageCommand);
             AddCommand = new Command(OnAddCommand);
             BackCommand = new Command(OnBackCommand);
@@ -127,7 +131,7 @@ namespace Quitaye.ViewModels
                         IsNotBusy = false;
                         if(showDialog)
                         UserDialogs.Instance.ShowLoading("Chargement....");
-                        var items = await DataService.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Styles/"+Entreprise.Id.ToString());
+                        var items = await DataService.GetItemsAsync(await SessionService.GetToken(), "Styles/"+Entreprise.Id.ToString());
                         Items.Clear();
                         if (items.Count() != 0)
                         {
@@ -160,7 +164,7 @@ namespace Quitaye.ViewModels
                 {
                     try
                     {
-                        var result = await Test.GetItemsAsync(await SecureStorage.GetAsync("Token"), "Tests");
+                        var result = await Test.GetItemsAsync(await SessionService.GetToken(), "Tests");
                         //if(result == null)
                         {
                             BaseVM.IsInternetOn = true;
@@ -187,11 +191,7 @@ namespace Quitaye.ViewModels
             Debug.WriteLine($"Echec operation: {ex.Message}");
             if (ex.Message.Contains("Unauthorize"))
             {
-                var result = await Init.Get(new LogInModel() { Token = await SecureStorage.GetAsync("Token"), Password = "d", Username = "d" });
-                await SecureStorage.SetAsync("Token", result.Token);
-                await SecureStorage.SetAsync("Prenom", result.Prenom);
-                await SecureStorage.SetAsync("Nom", result.Nom);
-                await SecureStorage.SetAsync("ProfilePic", result.ProfilePic);
+                await SessionService.GetNewToken(await SessionService.GetToken());
                 await action;
             }
             else if (ex.Message.Contains("host"))
@@ -268,7 +268,7 @@ namespace Quitaye.ViewModels
                     else Image = null;
 
                     
-                    var result = await DataService.AddFormDataAsync(new Models.Style()
+                    var result = await DataService.AddFormDataAsync(new Style()
                     {
                         Name = Nom,
                         EntrepriseId = Entreprise.Id,
@@ -322,7 +322,7 @@ namespace Quitaye.ViewModels
                 if (result)
                 {
                     var data = (Style)obj;
-                    var item = await DataService.DeleteAsync(await SecureStorage.GetAsync("Token"), (Style)obj, "Styles/"+data.Id.ToString());
+                    var item = await DataService.DeleteAsync(await SessionService.GetToken(), (Style)obj, "Styles/"+data.Id.ToString());
                     if (item != null)
                     {
                         DependencyService.Get<IMessage>().LongAlert("Element supprimer avec succès.");

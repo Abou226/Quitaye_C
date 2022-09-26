@@ -15,11 +15,16 @@
     <PackageReference Include="FirebaseAdmin" Version="2.2.0" />
     <PackageReference Include="Microcharts" Version="0.9.5.9" />
     <PackageReference Include="Microcharts.Forms" Version="0.9.5.9" />
+    <PackageReference Include="Plugin.FacebookClient" Version="4.0.1" />
     <PackageReference Include="Plugin.FirebasePushNotification" Version="3.3.10" />
-    <PackageReference Include="Plugin.LocalNotification" Version="9.0.1" />
+    <PackageReference Include="Plugin.GoogleClient" Version="2.1.12" />
+    <PackageReference Include="Plugin.LocalNotification" Version="9.1.0" />
     <PackageReference Include="Plugin.StoreReview" Version="3.1.0" />
+    <PackageReference Include="Refit" Version="6.1.15" />
     <PackageReference Include="SkiaSharp" Version="2.80.3" />
     <PackageReference Include="SkiaSharp.Views.Forms" Version="2.80.3" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
+    <PackageReference Include="System.Runtime.Numerics" Version="4.3.0" />
     <PackageReference Include="Xam.Plugin.Connectivity" Version="3.2.0" />
     <PackageReference Include="Xam.Plugins.Forms.ProgressRing" Version="0.1.2" />
     <PackageReference Include="Xamarin.Forms" Version="5.0.0.2244" />
@@ -113,6 +118,9 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\Settings\Styles.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\SocialLoginPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Views\UsersPage.xaml">

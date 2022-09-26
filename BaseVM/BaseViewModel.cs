@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Models;
+using System;
 using System.ComponentModel;
 using System.Net;
 using System.Net.Http;
@@ -13,6 +14,113 @@ namespace BaseVM
 
         public HttpClient httpClient;
         public HttpClient Client => httpClient ?? (httpClient = new HttpClient());
+
+        private string emptyTitle;
+
+        public string EmptyTitle
+        {
+            get { return emptyTitle; }
+            set 
+            {
+                if (emptyTitle == value)
+                    return;
+
+                emptyTitle = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string startName;
+
+        public string StartTitle
+        {
+            get { return startName; }
+            set 
+            {
+                if (startName == value)
+                    return;
+
+                startName = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string endTitle;
+
+        public string EndTitle
+        {
+            get { return endTitle; }
+            set 
+            {
+                if (endTitle == value)
+                    return;
+
+                endTitle = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string emptyDescription;
+
+        public string EmptyDescription
+        {
+            get { return emptyDescription; }
+            set 
+            {
+                if (emptyDescription == value)
+                    return;
+
+                emptyDescription = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string entrepriseName;
+
+        public string EntrepriseName
+        {
+            get { return entrepriseName; }
+            set 
+            {
+                if (entrepriseName == value)
+                    return;
+
+                entrepriseName = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool loginSucceeded;
+
+        public bool LoginSucceeded
+        {
+            get { return loginSucceeded; }
+            set 
+            {
+                if (loginSucceeded == value)
+                    return;
+
+                loginSucceeded = value;
+                OnPropertyChanged();
+            }
+        }
+
+
+
+        private Entreprise entreprise;
+
+        public Entreprise Entreprise
+        {
+            get { return entreprise; }
+            set 
+            {
+                if (entreprise == value)
+                    return;
+
+                entreprise = value;
+                OnPropertyChanged();
+            }
+        }
 
         public BaseViewModel()
         {
@@ -75,6 +183,21 @@ namespace BaseVM
                     return;
 
                 _internetCheckTime = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool firstLunch;
+
+        public bool FirstLunch
+        {
+            get { return firstLunch; }
+            set 
+            {
+                if (firstLunch == value)
+                    return;
+
+                firstLunch = value;
                 OnPropertyChanged();
             }
         }

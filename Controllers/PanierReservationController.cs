@@ -1,31 +1,22 @@
-﻿using AutoMapper;
-using Contracts;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.Mvc;
-using Models;
-using Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Controllers
+﻿namespace Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class PanierReservationsController : GenericController<PanierReservation, User, Gamme, Marque, Style, Categorie, Taille, Model>
+    public class PanierReservationsController : GenericController<PanierReservation,
+        User, Offre, Gamme, Marque, Taille, Model, Categorie, Style, Niveau,
+        List<OccasionList>, Marque, Categorie, Style, Model, Client>
     {
-        private readonly IGenericRepositoryWrapper<PanierReservation, User, Gamme, Marque, Style, Categorie, Taille, Model> repositoryWrapper;
+        private readonly IGenericRepositoryWrapper<PanierReservation,
+        User, Offre, Gamme, Marque, Taille, Model, Categorie, Style, Niveau,
+        List<OccasionList>, Marque, Categorie, Style, Model, Client> repositoryWrapper;
         private readonly IConfigSettings _settings;
         private readonly IMapper _mapper;
         private readonly IGenericRepositoryWrapper<EntrepriseUser> _entrepriseUser;
 
-        public PanierReservationsController(IGenericRepositoryWrapper<PanierReservation, User, Gamme, Marque, Style, Categorie, Taille, Model> wrapper,
+        public PanierReservationsController(IGenericRepositoryWrapper<PanierReservation,
+        User, Offre, Gamme, Marque, Taille, Model, Categorie, Style, Niveau,
+        List<OccasionList>, Marque, Categorie, Style, Model, Client> wrapper,
             IConfigSettings settings, IGenericRepositoryWrapper<EntrepriseUser> entrepriseUser,
             IMapper mapper) : base(wrapper)
         {
@@ -136,13 +127,22 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x =>
-                    (x.EntrepriseId.ToString() == search) && (x.Gamme.Categorie.Name.Contains(search)),
-                    x => x.Gamme, 
-                    x => x.Gamme.Marque, 
-                    x => x.Gamme.Style,
-                    x => x.Gamme.Categorie, 
-                    x => x.Taille, 
-                    x => x.Model);
+                                (x.EntrepriseId.ToString() == search && x.UserId == identity.First().Id) 
+                                || x.Gamme.Categorie.Name.Contains(search),
+                                x => x.Offre,
+                                x => x.Gamme,
+                                x => x.Offre.Marque,
+                                x => x.Taille,
+                                x => x.Model,
+                                x => x.Offre.Categorie,
+                                x => x.Offre.Style,
+                                x => x.Offre.Niveau,
+                                x => x.Offre.Occasionss,
+                                x => x.Gamme.Marque,
+                                x => x.Gamme.Categorie,
+                                x => x.Gamme.Style,
+                                x => x.Offre.Model,
+                                x => x.Client);
 
                     return Ok(result);
                 }
@@ -155,7 +155,7 @@ namespace Controllers
         }
 
         [HttpGet("id:Guid")]
-        public async Task<ActionResult<IEnumerable<Panier>>> GetBy([FromRoute] Guid id)
+        public async Task<ActionResult<IEnumerable<PanierReservation>>> GetBy([FromRoute] Guid id)
         {
             try
             {
@@ -169,12 +169,20 @@ namespace Controllers
                     if (entreprise.Count() != 0)
                     {
                         var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId == id),
-                            x => x.Gamme, 
-                            x => x.Gamme.Marque, 
-                            x => x.Gamme.Style,
-                            x => x.Gamme.Categorie, 
-                            x => x.Taille, 
-                            x => x.Model);
+                                    x => x.Offre,
+                                    x => x.Gamme,
+                                    x => x.Offre.Marque,
+                                    x => x.Taille,
+                                    x => x.Model,
+                                    x => x.Offre.Categorie,
+                                    x => x.Offre.Style,
+                                    x => x.Offre.Niveau,
+                                    x => x.Offre.Occasionss,
+                                    x => x.Gamme.Marque,
+                                    x => x.Gamme.Categorie,
+                                    x => x.Gamme.Style,
+                                    x => x.Offre.Model,
+                                    x => x.Client);
                         return Ok(result);
                     }
                     else return NotFound("Non membre de cette entreprise");
@@ -232,14 +240,22 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x => (x.EntrepriseId.ToString() == search) &&
-                    (x.Gamme.Marque.Name.Contains(search) 
-                    && x.DateOfCreation.Date >= start && x.DateOfCreation.Date <= end),
-                    x => x.Gamme, 
-                    x => x.Gamme.Marque, 
-                    x => x.Gamme.Style,
-                    x => x.Gamme.Categorie, 
-                    x => x.Taille, 
-                    x => x.Model);
+                                (x.Gamme.Marque.Name.Contains(search) 
+                                && x.DateOfCreation.Date >= start && x.DateOfCreation.Date <= end),
+                                x => x.Offre,
+                                x => x.Gamme,
+                                x => x.Offre.Marque,
+                                x => x.Taille,
+                                x => x.Model,
+                                x => x.Offre.Categorie,
+                                x => x.Offre.Style,
+                                x => x.Offre.Niveau,
+                                x => x.Offre.Occasionss,
+                                x => x.Gamme.Marque,
+                                x => x.Gamme.Categorie,
+                                x => x.Gamme.Style,
+                                x => x.Offre.Model,
+                                x => x.Client);
 
                     return Ok(result);
                 }
@@ -264,13 +280,21 @@ namespace Controllers
                 if (identity.Count() != 0)
                 {
                     var result = await repositoryWrapper.Item.GetByInclude(x => x.EntrepriseId == entrepriseId &&
-                    x.DateOfCreation >= start && x.DateOfCreation <= end,
-                    x => x.Gamme, 
-                    x => x.Gamme.Marque, 
-                    x => x.Gamme.Style,
-                    x => x.Gamme.Categorie,
-                    x => x.Taille, 
-                    x => x.Model);
+                                x.DateOfCreation >= start && x.DateOfCreation <= end,
+                                x => x.Offre,
+                                x => x.Gamme,
+                                x => x.Offre.Marque,
+                                x => x.Taille,
+                                x => x.Model,
+                                x => x.Offre.Categorie,
+                                x => x.Offre.Style,
+                                x => x.Offre.Niveau,
+                                x => x.Offre.Occasionss,
+                                x => x.Gamme.Marque,
+                                x => x.Gamme.Categorie,
+                                x => x.Gamme.Style,
+                                x => x.Offre.Model,
+                                x => x.Client);
 
                     return Ok(result);
                 }
@@ -284,7 +308,7 @@ namespace Controllers
 
         [HttpGet("{start:DateTime}/{end:DateTime}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<Panier>>> GetBy([FromRoute] DateTime start, DateTime end)
+        public async Task<ActionResult<IEnumerable<PanierReservation>>> GetBy([FromRoute] DateTime start, DateTime end)
         {
             try
             {
